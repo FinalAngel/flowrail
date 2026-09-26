@@ -1,0 +1,40 @@
+name: Red line recipe
+description: Propose a red line that other people could use.
+labels: [red-line-recipe]
+body:
+  - type: input
+    id: rule
+    attributes:
+      label: The rule, in plain words
+      placeholder: Never run migrations against production without asking
+    validations:
+      required: true
+  - type: textarea
+    id: entry
+    attributes:
+      label: The red-lines.json entry
+      description: See docs/red-lines.md for the schema. Write `hook.match` against the normalized command.
+      render: json
+    validations:
+      required: true
+  - type: textarea
+    id: held
+    attributes:
+      label: Commands it must hold
+      description: One per line, including the variants people actually type.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: allowed
+    attributes:
+      label: Commands it must let through
+      description: One per line. False positives are how red lines get switched off.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: bypass
+    attributes:
+      label: Known ways around it
+      description: Every red line has some. Naming them helps readers decide whether to add a check as well.

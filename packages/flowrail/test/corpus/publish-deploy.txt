@@ -1,0 +1,59 @@
+# builtin: publish-deploy (publishing, releasing, merging and deploying from the shell)
+HOLD npm publish
+HOLD npm publish --access public
+HOLD pnpm publish
+HOLD yarn publish
+HOLD bun publish
+HOLD npm run deploy
+HOLD pnpm run release
+HOLD gh pr merge 1 --admin
+HOLD gh pr merge --squash --delete-branch
+HOLD gh release create v1.0.0
+HOLD gh release delete v1.0.0
+HOLD gh repo delete me/app --yes
+HOLD gh workflow run deploy.yml
+HOLD cargo publish
+HOLD twine upload dist/*
+HOLD gem push app.gem
+HOLD docker push me/app:latest
+HOLD vercel --prod
+HOLD vercel deploy --prod
+HOLD netlify deploy --prod
+HOLD fly deploy
+HOLD flyctl deploy --remote-only
+HOLD wrangler deploy
+HOLD firebase deploy
+HOLD kubectl apply -f k8s/
+HOLD terraform apply -auto-approve
+HOLD helm upgrade app ./chart
+HOLD gcloud run deploy api --source .
+HOLD sudo npm publish
+HOLD bash -c 'npm publish'
+ALLOW npm pack
+ALLOW npm run build
+ALLOW gh pr view 1
+ALLOW gh pr create --fill
+ALLOW gh release list
+ALLOW vercel
+ALLOW netlify deploy
+ALLOW terraform plan
+ALLOW kubectl get pods
+ALLOW docker build .
+ALLOW echo "npm publish"
+# known gaps: deploys through scripts of your own or CI
+GAP ./deploy.sh
+HOLD make release
+# merges through the GitHub REST API, and yarn 2+ publishing
+HOLD gh api -X PUT repos/o/r/pulls/1/merge
+HOLD gh api repos/o/r/pulls/1/merge --method PUT
+HOLD gh api repos/o/r/pulls/1/merge -f merge_method=squash
+HOLD curl -X PUT -H "Authorization: token x" https://api.github.com/repos/o/r/pulls/1/merge
+HOLD curl -X POST https://api.github.com/repos/o/r/merges -d '{"base":"main","head":"x"}'
+HOLD yarn npm publish
+HOLD yarn npm publish --access public
+ALLOW gh api repos/o/r/pulls/1/merge
+ALLOW curl https://api.github.com/repos/o/r/pulls/1/merge
+ALLOW gh api repos/o/r/pulls/1
+ALLOW yarn npm info left-pad
+# known gap: a merge through a GitHub API client of your own or GraphQL
+GAP gh api graphql -f query='mutation { mergePullRequest(input: {pullRequestId: "x"}) { clientMutationId } }'

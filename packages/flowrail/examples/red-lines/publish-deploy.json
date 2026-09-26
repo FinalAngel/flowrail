@@ -1,0 +1,10 @@
+{
+  "id": "publish-deploy",
+  "title": "Ask before publishing, merging or deploying",
+  "why": "Releases, merged pull requests and deploys reach users. A human presses the button.",
+  "severity": "ask",
+  "hook": {
+    "tool": "Bash",
+    "builtin": "publish-deploy"
+  }
+}

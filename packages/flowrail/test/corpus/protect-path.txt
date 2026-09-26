@@ -1,0 +1,63 @@
+# builtin: protect-path (deleting, moving or overwriting files under a glob; probes use content/**)
+HOLD rm content/post.md
+HOLD rm -rf content
+HOLD rm -rf content/
+HOLD rm -rf ./content/blog
+HOLD cd content && rm post.md
+HOLD rm -rf .
+HOLD mv content/post.md /tmp/
+HOLD mv content archive
+HOLD git rm -r content/blog
+HOLD git mv content/a.md b.md
+HOLD git clean -fd content
+HOLD git clean -fdx
+HOLD find content -name '*.md' -delete
+HOLD find . -delete
+HOLD unlink content/a.md
+HOLD truncate -s 0 content/a.md
+HOLD rsync -a --delete build/ content/
+HOLD mcp__filesystem__delete_file {"path":"content/a.md"}
+HOLD mcp__filesystem__move_file {"source":"content/a.md","destination":"b.md"}
+HOLD sudo rm content/a.md
+ALLOW rm src/a.js
+ALLOW rm -rf build
+ALLOW mv src/a.js src/b.js
+ALLOW cat content/post.md
+ALLOW cp content/post.md /tmp/
+ALLOW echo x >> content/new.md
+ALLOW git clean -n
+ALLOW Write {"file_path":"content/new.md","content":"hi"}
+ALLOW mcp__filesystem__write_file {"path":"content/new.md","content":"hi"}
+ALLOW find src -name '*.tmp' -delete
+# known gaps: writes that replace a file's content in place
+GAP Write {"file_path":"content/post.md","content":""}
+GAP python3 -c "import shutil; shutil.rmtree('content')"
+# "Don't touch / never modify <path>": params.edits holds changes in place too (init writes it
+# for a rule that says touch, edit, modify or change)
+#! params {"glob":"config/prod.yaml","edits":true}
+HOLD Edit {"file_path":"config/prod.yaml","old_string":"a","new_string":"b"}
+HOLD Write {"file_path":"config/prod.yaml","content":"x"}
+HOLD MultiEdit {"file_path":"config/prod.yaml","edits":[]}
+HOLD sed -i 's/a/b/' config/prod.yaml
+HOLD sed -i.bak -e 's/a/b/' config/prod.yaml
+HOLD perl -pi -e 's/a/b/' config/prod.yaml
+HOLD ruby -i -pe 'x' config/prod.yaml
+HOLD echo x >> config/prod.yaml
+HOLD echo x > config/prod.yaml
+HOLD echo x | tee -a config/prod.yaml
+HOLD echo x | tee config/prod.yaml
+HOLD truncate -s 0 config/prod.yaml
+HOLD cp /tmp/x.yaml config/prod.yaml
+HOLD mv /tmp/x.yaml config/prod.yaml
+HOLD dd if=/dev/zero of=config/prod.yaml
+HOLD rm config/prod.yaml
+HOLD cd config && sed -i 's/a/b/' prod.yaml
+HOLD mcp__filesystem__edit_file {"path":"config/prod.yaml","edits":[]}
+HOLD mcp__filesystem__write_file {"path":"config/prod.yaml","content":"x"}
+ALLOW cat config/prod.yaml
+ALLOW sed -n 1p config/prod.yaml
+ALLOW cp config/prod.yaml /tmp/prod.yaml
+ALLOW Edit {"file_path":"config/dev.yaml","old_string":"a","new_string":"b"}
+ALLOW sed -i 's/a/b/' config/dev.yaml
+ALLOW echo x >> config/dev.yaml
+ALLOW grep -r prod config

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 264 80" width="264" height="80" role="img" aria-label="flowrail">
+  <title>flowrail</title>
+  <g transform="translate(4 19) scale(1.75)" fill="none" stroke="#3DD6AC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 3v18M20 3v18"/>
+    <path d="M4 7h6a4 4 0 0 1 4 4v2a4 4 0 0 0 4 4h2"/>
+  </g>
+  <text x="60" y="56" fill="#ECEEEF" font-size="48" letter-spacing="-0.48"><tspan font-family="'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="500">flow</tspan><tspan font-family="Geist, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-weight="600">rail</tspan></text>
+</svg>

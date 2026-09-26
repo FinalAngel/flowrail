@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dependency audit</title>
+<style>
+  :root { --bg:#F7F7F5; --surface:#FFFFFF; --tray:#EFEFEC; --hairline:rgb(20 22 20/.09); --text:#16181A; --text-2:#5A5F63; --text-3:#6E7377; --accent:#0E7C66; --accent-soft:#E3F2EE; --warn:#9A5B00; --warn-soft:#FBF0DC; --danger:#B42318; --danger-soft:#FDECEA; --mono:ui-monospace,Menlo,monospace; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0F1113; --surface:#16191C; --tray:#1C2024; --hairline:rgb(255 255 255/.08); --text:#ECEEEF; --text-2:#A3A9AE; --text-3:#8A9095; --accent:#3DD6AC; --accent-soft:rgb(61 214 172/.12); --warn:#F2B35B; --warn-soft:rgb(242 179 91/.12); --danger:#FF7A6E; --danger-soft:rgb(255 122 110/.12); } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:14px/1.55 system-ui,sans-serif; padding:40px 16px 64px; }
+  main { max-width:760px; margin:0 auto; }
+  .eyebrow { font:500 12px/1 var(--mono); color:var(--text-3); letter-spacing:.04em; text-transform:uppercase; }
+  h1 { font-size:28px; line-height:1.2; margin:10px 0 6px; text-wrap:balance; font-weight:600; }
+  h2 { font-size:16px; margin:32px 0 12px; font-weight:600; }
+  p.lead { color:var(--text-2); margin:0 0 24px; font-size:15px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .stat { background:var(--surface); border:1px solid var(--hairline); border-radius:10px; padding:16px; }
+  .stat b { display:block; font-size:28px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .stat span { color:var(--text-2); font-size:13px; }
+  .card { background:var(--surface); border:1px solid var(--hairline); border-radius:10px; overflow:hidden; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--hairline); vertical-align:top; }
+  th { font-weight:500; color:var(--text-3); font-size:12px; text-transform:uppercase; letter-spacing:.04em; background:var(--tray); }
+  tr:last-child td { border-bottom:0; }
+  code, .mono { font:12.5px var(--mono); }
+  .chip { display:inline-block; font:500 12px/1 var(--mono); padding:4px 8px; border-radius:999px; background:var(--tray); color:var(--text-2); }
+  .ok { background:var(--accent-soft); color:var(--accent); }
+  .warn { background:var(--warn-soft); color:var(--warn); }
+  .bad { background:var(--danger-soft); color:var(--danger); }
+  ul { padding-left:18px; margin:0; } li { margin:6px 0; }
+  .muted { color:var(--text-3); font-size:13px; }
+  .bar { height:8px; border-radius:999px; background:var(--tray); overflow:hidden; }
+  .bar i { display:block; height:100%; background:var(--accent); border-radius:999px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">Dependency audit · 9 packages</div>
+  <h1>One advisory, one upgrade worth doing now</h1>
+  <p class="lead">The Markdown parser has a published advisory for a slow regular expression on crafted input. The fixed version is a patch release with no API changes. Everything else is current or one minor behind.</p>
+  <div class="card">
+    <table>
+      <tr><th>Package</th><th>Pinned</th><th>Latest</th><th>Status</th></tr>
+      <tr><td class="mono">markdown-parser</td><td class="mono">4.2.1</td><td class="mono">4.2.3</td><td><span class="chip bad">advisory</span></td></tr>
+      <tr><td class="mono">fs-watcher</td><td class="mono">2.0.0</td><td class="mono">2.1.0</td><td><span class="chip warn">minor behind</span></td></tr>
+      <tr><td class="mono">vector-clock</td><td class="mono">1.3.0</td><td class="mono">1.3.0</td><td><span class="chip ok">current</span></td></tr>
+      <tr><td class="mono">fuzzy-search</td><td class="mono">0.9.4</td><td class="mono">0.9.4</td><td><span class="chip ok">current</span></td></tr>
+      <tr><td class="mono">zip-writer</td><td class="mono">3.1.0</td><td class="mono">3.1.0</td><td><span class="chip ok">current</span></td></tr>
+      <tr><td class="mono">test-runner</td><td class="mono">5.0.2</td><td class="mono">5.0.2</td><td><span class="chip ok">current</span></td></tr>
+    </table>
+  </div>
+  <h2>Suggested next step</h2>
+  <p>Bump <code>markdown-parser</code> to <code>4.2.3</code>, run the rendering tests, and ship it in 0.9. Filed as <code>T-0013</code> in the backlog.</p>
+  <p class="muted" style="margin-top:32px">Generated from package.json and the public advisory database. No package was installed or changed.</p>
+</main>
+</body>
+</html>

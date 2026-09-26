@@ -1,0 +1,32 @@
+# builtin: command (one command a rule quotes, matched on its argv: program, subcommand words,
+# every flag in any order, long or short, bundled or not)
+#! params {"argv":["git","commit"],"flags":["--no-verify"]}
+HOLD git commit --no-verify
+HOLD git commit -m fix --no-verify
+HOLD git commit --no-verify -m fix
+HOLD git commit -nm fix
+HOLD git commit -n -m fix
+HOLD git commit -am fix -n
+HOLD git commit --no-verif -m fix
+HOLD git -C . commit -m fix --no-verify
+HOLD sudo git commit --no-verify
+HOLD bash -c 'git commit -n -m x'
+HOLD cd sub && git commit --no-verify
+ALLOW git commit -m fix
+ALLOW git commit -m "--no-verify is banned"
+ALLOW git commit --amend
+ALLOW git log --no-verify
+ALLOW echo git commit --no-verify
+#! params {"argv":["docker","system","prune"],"flags":["-a","-f"]}
+HOLD docker system prune -af
+HOLD docker system prune -fa
+HOLD docker system prune --all --force
+HOLD docker system prune -a --force
+ALLOW docker system prune
+ALLOW docker system prune -f
+ALLOW docker image prune -af
+#! params {"argv":["npm","run","db:migrate:prod"]}
+HOLD npm run db:migrate:prod
+HOLD npm run --silent db:migrate:prod
+ALLOW npm run db:migrate
+ALLOW npm run test

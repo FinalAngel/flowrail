@@ -1,0 +1,11 @@
+{
+  "id": "no-prod-db",
+  "title": "Ask before touching the production database",
+  "why": "Production data belongs to users.",
+  "severity": "ask",
+  "hook": {
+    "tool": "Bash",
+    "match": "^(psql|mysql|mongosh|mongo|redis-cli|pg_dump|pg_restore)\\b.*(prod|production)",
+    "flags": "i"
+  }
+}

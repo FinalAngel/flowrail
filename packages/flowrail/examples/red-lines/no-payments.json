@@ -1,0 +1,10 @@
+{
+  "id": "no-payments",
+  "title": "Never move money without a human",
+  "why": "Charges, refunds and payouts reach real people's accounts.",
+  "severity": "block",
+  "hook": {
+    "tool": "*",
+    "builtin": "payments"
+  }
+}

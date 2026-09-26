@@ -1,0 +1,10 @@
+{
+  "id": "no-publish-without-asking",
+  "title": "Ask before publishing a package or release",
+  "why": "A published version cannot be taken back.",
+  "severity": "ask",
+  "hook": {
+    "tool": "Bash",
+    "builtin": "publish-deploy"
+  }
+}

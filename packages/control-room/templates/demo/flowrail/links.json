@@ -1,0 +1,15 @@
+[
+  {
+    "category": "Project",
+    "items": [
+      { "title": "Roadmap", "url": "docs/roadmap.md", "description": "What ships next" },
+      { "title": "Architecture", "url": "docs/architecture.md", "description": "Editor, store, sync" }
+    ]
+  },
+  {
+    "category": "flowrail",
+    "items": [
+      { "title": "Documentation", "url": "https://github.com/FinalAngel/flowrail/tree/main/docs", "description": "Concepts, red lines, CLI and API" }
+    ]
+  }
+]

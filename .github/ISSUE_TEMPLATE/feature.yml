@@ -1,0 +1,27 @@
+name: Feature request
+description: Suggest a change or a new capability.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: job
+    attributes:
+      label: The job
+      description: What are you trying to get done, and where does flowrail get in the way today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you propose
+      description: Describe the change. Mention which files in `flowrail/` it would read or write.
+    validations:
+      required: true
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Constraints
+      description: flowrail keeps a few promises. Tick the ones your proposal keeps.
+      options:
+        - label: Adds no runtime dependency
+        - label: Keeps state in plain files in the repo (no database, no cloud)
+        - label: Sends nothing over the network

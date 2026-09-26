@@ -1,0 +1,23 @@
+[
+  {
+    "id": "morning-brief",
+    "title": "Morning brief",
+    "schedule": { "every": "weekday", "at": "08:00" },
+    "run": { "type": "claude", "prompt": "Read flowrail/board.json and the git log since yesterday. Summarize what moved, what is blocked and what needs a human decision today." },
+    "report": true
+  },
+  {
+    "id": "weekly-digest",
+    "title": "Weekly digest",
+    "schedule": { "every": "monday", "at": "07:00" },
+    "run": { "type": "claude", "prompt": "Write the week in review: shipped, in review, held red lines and open questions." },
+    "report": true
+  },
+  {
+    "id": "stale-branches",
+    "title": "Stale branches",
+    "schedule": { "every": "day", "at": "18:00" },
+    "run": { "type": "command", "cmd": ["git", "branch", "--merged"] },
+    "report": false
+  }
+]

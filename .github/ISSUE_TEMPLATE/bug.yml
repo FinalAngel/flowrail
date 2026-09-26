@@ -1,0 +1,40 @@
+name: Bug report
+description: Something in flowrail does not work as documented.
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what flowrail did instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: The smallest sequence of commands that shows the problem. `npx @flowrail/control-room demo` is a good clean starting point.
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Output of `npx flowrail doctor`
+      description: Remove anything private before pasting.
+      render: text
+    validations:
+      required: true
+  - type: input
+    id: os
+    attributes:
+      label: Operating system
+      placeholder: macOS 15, Ubuntu 24.04, Windows 11
+    validations:
+      required: true
+  - type: textarea
+    id: hook
+    attributes:
+      label: Hook input and output (for red line bugs)
+      description: If a red line held something it should not have, or missed something it should have held, paste the command and the output of `npx flowrail redlines test "<command>"`.
+      render: text

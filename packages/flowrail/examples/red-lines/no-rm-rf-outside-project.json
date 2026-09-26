@@ -1,0 +1,10 @@
+{
+  "id": "no-rm-rf-outside-project",
+  "title": "No recursive deletes outside the project",
+  "why": "One typo away from an empty disk.",
+  "severity": "block",
+  "hook": {
+    "tool": "Bash",
+    "builtin": "rm-dangerous"
+  }
+}

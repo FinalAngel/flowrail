@@ -1,0 +1,141 @@
+# builtin: git-destructive (force pushes block, remote deletes ask)
+HOLD git push --force
+HOLD git push -f
+HOLD git push --force origin main
+HOLD git push origin main --force
+HOLD git push --force-with-lease
+HOLD git push --force-with-lease=main:abc123
+HOLD git push --force-if-includes
+HOLD git push -uf origin main
+HOLD git push -fu origin main
+HOLD git push origin +main
+HOLD git push origin +HEAD:main
+HOLD git push --mirror
+HOLD git push origin --delete feature
+HOLD git push -d origin feature
+HOLD git push origin :feature
+HOLD git push --prune origin
+HOLD sudo git -C repo push -f
+HOLD bash -c 'git push --force'
+HOLD git reset --hard
+HOLD git reset --hard HEAD~3
+HOLD git reset --merge
+HOLD git reset HEAD~1 --hard
+HOLD git clean -f
+HOLD git clean -fd
+HOLD git clean -fdx
+HOLD git clean -d -f
+HOLD git clean --force
+HOLD git clean --force -d
+HOLD git clean -xdf
+HOLD git branch -D feature
+HOLD git branch -d -f feature
+HOLD git branch -df feature
+HOLD git branch --delete --force feature
+HOLD git branch --force --delete feature
+HOLD git checkout -f
+HOLD git checkout -f main
+HOLD git checkout --force main
+HOLD git checkout -- .
+HOLD git checkout .
+HOLD git checkout HEAD -- .
+HOLD git restore .
+HOLD git restore --worktree .
+HOLD git restore -SW .
+HOLD git restore :/
+HOLD git switch -f main
+HOLD git switch --discard-changes main
+HOLD git stash drop
+HOLD git stash drop stash@{1}
+HOLD git stash clear
+HOLD git update-ref -d refs/heads/main
+HOLD git filter-branch --tree-filter 'rm x' HEAD
+HOLD git filter-repo --path secret --invert-paths
+HOLD git reflog expire --expire=now --all
+HOLD git reflog delete HEAD@{1}
+HOLD git gc --prune=now
+HOLD git gc --prune=all --aggressive
+HOLD \git reset --ha\rd
+HOLD git -c core.x=y clean -ffd
+ALLOW git push
+ALLOW git push origin main
+ALLOW git push --follow-tags
+ALLOW git push -u origin feature
+ALLOW git reset HEAD~1
+ALLOW git reset --soft HEAD~1
+ALLOW git reset --mixed
+ALLOW git clean -n
+ALLOW git clean -nf
+ALLOW git clean -fn
+ALLOW git clean --dry-run --force
+ALLOW git clean -nd
+ALLOW git branch -d feature
+ALLOW git branch --delete merged-feature
+ALLOW git branch feature
+ALLOW git branch -m old new
+ALLOW git checkout main
+ALLOW git checkout -b feature
+ALLOW git checkout -- src/app.js
+ALLOW git restore src/app.js
+ALLOW git restore --staged .
+ALLOW git switch main
+ALLOW git stash
+ALLOW git stash pop
+ALLOW git stash list
+ALLOW git update-ref refs/heads/x HEAD
+ALLOW git reflog
+ALLOW git gc
+ALLOW git commit -m "never reset --hard"
+ALLOW echo "git push --force"
+# more: aliases, inline scripts, globs, shorthands
+HOLD git worktree remove --force ../wt
+HOLD git -c alias.nuke='reset --hard' nuke
+# known gaps: not held, documented in docs/red-lines.md
+GAP ./scripts/reset-everything.sh
+GAP git nuke
+# --keep is safe (it refuses to drop uncommitted changes); unknown subcommands from a pipe ask
+ALLOW git reset --keep HEAD~1
+HOLD printf 'reset --hard' | xargs git
+HOLD echo reset --hard | xargs -I{} git {}
+HOLD x=reset; git $x --hard
+# a forced dry run sends nothing
+ALLOW git push --force --dry-run
+HOLD git${IFS}reset --hard
+# abbreviated long options (git takes any unambiguous prefix), more wrappers, gh api on refs
+HOLD git reset --har HEAD~1
+HOLD git reset --ha
+HOLD git clean --forc -d
+HOLD git branch --del --forc x
+HOLD git push --forc
+HOLD git push --for origin main
+HOLD git checkout --forc main
+HOLD git switch --discard main
+HOLD xcrun git push -f
+HOLD arch -arm64 git push -f
+HOLD arch -x86_64 git reset --hard
+HOLD script -q /dev/null git push -f
+HOLD script -c 'git push -f' /dev/null
+HOLD bash <(echo git push -f)
+HOLD source <(printf 'git reset --hard')
+HOLD caffeinate -i git push -f
+HOLD chronic git push -f
+HOLD stdbuf -o0 git push -f
+HOLD unbuffer git push -f
+HOLD gh api -X DELETE repos/o/r/git/refs/heads/main
+HOLD gh api --method DELETE repos/o/r/git/refs/heads/main
+HOLD gh api -X PATCH repos/o/r/git/refs/heads/main -f sha=abc -F force=true
+HOLD gh api -XPATCH repos/o/r/git/refs/heads/main --field force=true
+ALLOW gh api repos/o/r/git/refs/heads/main
+ALLOW gh api -X PATCH repos/o/r/git/refs/heads/main -f sha=abc
+ALLOW git push --follow-tags
+ALLOW git reset --soft HEAD~1
+ALLOW git reset --keep HEAD~1
+ALLOW git clean --dry-run -f
+ALLOW diff <(git show HEAD:a) a
+# git branch -f moves an existing branch: its newer commits drop off it (asks)
+HOLD git branch -f main HEAD~5
+HOLD git branch --force main origin/main
+ALLOW git branch new-feature
+ALLOW git branch -f
+# reset --keep refuses to drop uncommitted changes; the commits stay in the reflog, like --soft
+ALLOW git reset --keep HEAD~3

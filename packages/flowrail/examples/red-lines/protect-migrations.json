@@ -1,0 +1,10 @@
+{
+  "id": "protect-migrations",
+  "title": "Ask before editing existing migrations",
+  "why": "Migrations that already ran elsewhere must not change. Write a new one.",
+  "severity": "ask",
+  "hook": {
+    "tool": "Write|Edit|MultiEdit",
+    "match": "(^|/)(migrations?|db/migrate)/"
+  }
+}

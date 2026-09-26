@@ -1,0 +1,43 @@
+{
+  "name": "@flowrail/control-room",
+  "version": "0.1.0",
+  "description": "A local dashboard for flowrail: red lines, audit, comments your agent acts on, and an optional board. Zero third-party deps, no cloud, MIT.",
+  "type": "module",
+  "bin": {
+    "flowrail-room": "bin/flowrail-room.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "flowrail": "0.1.0"
+  },
+  "files": [
+    "bin",
+    "src",
+    "ui",
+    "templates",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "start": "node bin/flowrail-room.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "claude-code",
+    "dashboard",
+    "local-first",
+    "flowrail"
+  ],
+  "homepage": "https://github.com/FinalAngel/flowrail#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FinalAngel/flowrail.git",
+    "directory": "packages/control-room"
+  },
+  "bugs": {
+    "url": "https://github.com/FinalAngel/flowrail/issues"
+  },
+  "license": "MIT"
+}

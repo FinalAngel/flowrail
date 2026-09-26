@@ -1,0 +1,10 @@
+{
+  "id": "no-emails-without-signoff",
+  "title": "Never send email without sign-off",
+  "why": "Email cannot be unsent. Drafts are fine; sending needs a human.",
+  "severity": "block",
+  "hook": {
+    "tool": "*",
+    "builtin": "email-send"
+  }
+}

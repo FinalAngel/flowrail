@@ -1,0 +1,13 @@
+{
+  "id": "protect-path",
+  "title": "Ask before deleting, moving or overwriting files in content/",
+  "why": "These files are the product. Deleting or replacing them is a human decision.",
+  "severity": "ask",
+  "hook": {
+    "tool": "*",
+    "builtin": "protect-path",
+    "params": {
+      "glob": "content/**"
+    }
+  }
+}

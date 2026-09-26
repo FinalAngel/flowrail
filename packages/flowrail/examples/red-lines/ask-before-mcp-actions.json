@@ -1,0 +1,10 @@
+{
+  "id": "ask-before-mcp-actions",
+  "title": "Ask before MCP tools send, publish, merge or delete",
+  "why": "An MCP tool that sends an email, merges a pull request or deletes a record acts in the world. A human says yes first.",
+  "severity": "ask",
+  "hook": {
+    "tool": "mcp__*",
+    "builtin": "mcp-actions"
+  }
+}

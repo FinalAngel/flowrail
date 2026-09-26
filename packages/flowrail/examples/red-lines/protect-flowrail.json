@@ -1,0 +1,10 @@
+{
+  "id": "protect-flowrail",
+  "title": "Ask before changing the guardrails",
+  "why": "Red lines, flowrail settings and the Claude Code hooks are the human's to change. An agent that edits them has switched off its own seatbelt.",
+  "severity": "ask",
+  "hook": {
+    "tool": "*",
+    "builtin": "flowrail-tamper"
+  }
+}

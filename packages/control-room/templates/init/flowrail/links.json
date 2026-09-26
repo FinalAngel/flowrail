@@ -1,0 +1,9 @@
+[
+  {
+    "category": "flowrail",
+    "items": [
+      { "title": "Documentation", "url": "https://github.com/FinalAngel/flowrail/tree/main/docs", "description": "Concepts, red lines, CLI and API" },
+      { "title": "Red-line recipes", "url": "https://github.com/FinalAngel/flowrail/tree/main/examples/red-lines", "description": "Ready-made rules to copy" }
+    ]
+  }
+]

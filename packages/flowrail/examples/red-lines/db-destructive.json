@@ -1,0 +1,10 @@
+{
+  "id": "db-destructive",
+  "title": "Ask before destroying data",
+  "why": "DROP, TRUNCATE and a DELETE without WHERE remove rows no one gets back without a backup.",
+  "severity": "ask",
+  "hook": {
+    "tool": "Bash",
+    "builtin": "db-destructive"
+  }
+}

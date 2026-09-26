@@ -1,0 +1,35 @@
+# builtin: infra-destructive (deleting clusters, stacks, buckets and volumes)
+HOLD kubectl delete namespace prod
+HOLD kubectl --context prod delete pod api-1
+HOLD kubectl -n prod delete deployment api
+HOLD kubectl drain node-1
+HOLD terraform destroy
+HOLD terraform apply -auto-approve
+HOLD terraform -chdir=infra apply -auto-approve
+HOLD tofu destroy -auto-approve
+HOLD terraform state rm aws_db_instance.main
+HOLD aws s3 rm s3://prod-bucket --recursive
+HOLD aws --profile prod s3 rm s3://prod-bucket --recursive
+HOLD aws s3 rb s3://prod-bucket --force
+HOLD aws ec2 terminate-instances --instance-ids i-123
+HOLD aws rds delete-db-instance --db-instance-identifier prod
+HOLD aws cloudformation delete-stack --stack-name prod
+HOLD gcloud compute instances delete vm-1
+HOLD gcloud sql instances delete prod
+HOLD az group delete -n prod
+HOLD helm uninstall api
+HOLD pulumi destroy --yes
+HOLD docker volume rm pgdata
+HOLD fly apps destroy myapp
+HOLD sh -c 'kubectl delete ns prod'
+ALLOW kubectl get pods
+ALLOW kubectl describe pod delete-me
+ALLOW kubectl apply -f k8s/
+ALLOW terraform plan
+ALLOW terraform apply
+ALLOW aws s3 ls s3://prod-bucket
+ALLOW aws s3 rm s3://bucket/one-file.txt
+ALLOW gcloud compute instances list
+ALLOW helm list
+ALLOW docker volume ls
+ALLOW grep -r "kubectl delete" docs/

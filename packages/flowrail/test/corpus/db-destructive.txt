@@ -1,0 +1,28 @@
+# builtin: db-destructive (DROP, TRUNCATE, DELETE without WHERE, resets)
+HOLD psql -c "DROP TABLE users"
+HOLD psql "DROP TABLE users"
+HOLD psql $DATABASE_URL -c 'TRUNCATE orders'
+HOLD psql -c "DELETE FROM users"
+HOLD psql -c "delete from users;"
+HOLD mysql -e "drop database app"
+HOLD sqlite3 app.db "DELETE FROM sessions;"
+HOLD echo "DROP TABLE users;" | psql
+HOLD psql <<EOF
+|DROP SCHEMA public CASCADE;
+|EOF
+HOLD mongosh --eval "db.dropDatabase()"
+HOLD redis-cli flushall
+HOLD npx prisma migrate reset --force
+HOLD prisma db push --force-reset
+HOLD rails db:drop
+HOLD bin/rails db:reset
+HOLD dropdb app_production
+HOLD python manage.py flush --noinput
+ALLOW psql -c "SELECT * FROM users"
+ALLOW psql -c "DELETE FROM users WHERE id = 3"
+ALLOW prisma migrate dev
+ALLOW rails db:migrate
+ALLOW grep -r "DROP TABLE" migrations/
+ALLOW git commit -m "drop table users in the next release"
+ALLOW redis-cli get session:1
+ALLOW mysql -e "show tables"

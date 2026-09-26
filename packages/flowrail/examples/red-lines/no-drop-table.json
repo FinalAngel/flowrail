@@ -1,0 +1,12 @@
+{
+  "id": "no-drop-table",
+  "title": "Never drop tables or databases",
+  "why": "Dropped data is gone unless a backup is fresh and tested.",
+  "severity": "block",
+  "hook": {
+    "tool": "Bash",
+    "match": "\\bdrop\\s+(table|database|schema)\\b",
+    "flags": "i",
+    "raw": true
+  }
+}

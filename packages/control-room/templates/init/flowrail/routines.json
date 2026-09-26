@@ -1,0 +1,13 @@
+[
+  {
+    "id": "morning-brief",
+    "title": "Morning brief",
+    "enabled": false,
+    "schedule": { "every": "weekday", "at": "08:00" },
+    "run": {
+      "type": "claude",
+      "prompt": "Read flowrail/board.json and the git log since yesterday. Summarize what moved, what is blocked and what needs a human decision today. Keep it under 200 words."
+    },
+    "report": true
+  }
+]

@@ -1,0 +1,135 @@
+# builtin: rm-dangerous (recursive deletes of /, home, everything, or outside the project)
+HOLD rm -rf /
+HOLD rm -rf /*
+HOLD rm -rf ~
+HOLD rm -rf ~/
+HOLD rm -rf ~/*
+HOLD rm -rf ~/Documents
+HOLD rm -rf $HOME
+HOLD rm -rf ${HOME}
+HOLD rm -rf "$HOME"
+HOLD rm -rf $HOME/
+HOLD rm -rf *
+HOLD rm -fr *
+HOLD rm -rf .
+HOLD rm -rf ./
+HOLD rm -rf ./*
+HOLD rm -rf .*
+HOLD rm -rf ..
+HOLD rm -rf ../
+HOLD rm -rf ../..
+HOLD rm -rf ../other-project
+HOLD rm -rf /Users
+HOLD rm -rf /home
+HOLD rm -rf /etc
+HOLD rm -rf /var
+HOLD rm -rf /usr/local
+HOLD rm -rf / /tmp
+HOLD rm -rf /tmp
+HOLD rm -rf /tmp/*
+HOLD rm -rf /work
+HOLD rm -rf /work/project
+HOLD rm -rf dist /
+HOLD rm -r -f /
+HOLD rm -f -r /
+HOLD rm -R -f /
+HOLD rm --recursive --force /
+HOLD rm --force --recursive ~
+HOLD rm -r ~
+HOLD rm -rf -- /
+HOLD rm -rf --no-preserve-root /
+HOLD sudo rm -rf /
+HOLD /bin/rm -rf /
+HOLD \rm -rf ~
+HOLD command rm -rf ~
+HOLD bash -c "rm -rf ~"
+HOLD cd / && rm -rf *
+HOLD cd .. && rm -rf project
+HOLD cd ~ && rm -rf .
+HOLD find / -delete
+HOLD find ~ -name '*.log' -delete
+HOLD find / -exec rm -rf {} \;
+HOLD find .. -type f -delete
+HOLD sudo find /var -delete
+HOLD rm -rf $SOME_DIR
+HOLD rm -rf "$(pwd)/.."
+HOLD find . -type f | xargs rm -rf
+ALLOW rm -rf dist
+ALLOW rm -rf ./build
+ALLOW rm -rf node_modules
+ALLOW rm -rf node_modules/.cache/*
+ALLOW rm -rf content/
+ALLOW rm -rf src/generated coverage
+ALLOW rm -f /tmp/x.log
+ALLOW rm -r dist
+ALLOW rm -rf /tmp/flowrail-test-123
+ALLOW rm -rf /tmp/build/*
+ALLOW rm file.txt
+ALLOW rm -f *.log
+ALLOW cd dist && rm -rf *.map
+ALLOW find . -name '*.pyc' -delete
+ALLOW find dist -type f -delete
+ALLOW find / -name foo
+ALLOW echo "rm -rf /"
+ALLOW git rm -r --cached dist
+# more: aliases, inline scripts, globs, shorthands
+HOLD rm -rf .git
+HOLD rm -rf ./.git/
+HOLD find . -delete
+HOLD find . -exec rm -rf {} +
+HOLD find . -mindepth 1 -delete
+HOLD rsync -a --delete empty/ ~/
+HOLD rm -rf $HOME/..
+HOLD rm -rf /.
+HOLD rm -rf ~root
+HOLD python3 -c "import os; os.system('rm -rf ~')"
+ALLOW rsync -a --delete src/ dist/
+ALLOW find . -name node_modules -prune -o -name '*.tmp' -delete
+# known gaps: not held, documented in docs/red-lines.md
+HOLD perl -e 'use File::Path; rmtree(glob("~"))'
+GAP python3 cleanup.py
+# moving home away and wiping disks
+HOLD mv ~ /dev/null
+HOLD mv $HOME /tmp/gone
+HOLD mv src /dev/null
+HOLD dd if=/dev/zero of=/dev/disk0
+HOLD dd if=/dev/zero of=/dev/sda bs=1M
+HOLD sudo dd if=/dev/urandom of=/dev/rdisk2
+HOLD mkfs.ext4 /dev/sdb1
+HOLD diskutil eraseDisk JHFS+ Blank disk2
+HOLD cat /dev/zero > /dev/sda
+HOLD wipefs -a /dev/sdb
+ALLOW mv build dist
+ALLOW dd if=/dev/zero of=disk.img bs=1M count=10
+ALLOW diskutil list
+# node deleters are rm -rf
+HOLD npx rimraf ~
+HOLD npx -y del-cli ~
+HOLD npx rimraf@5 /
+HOLD pnpm dlx rimraf ~
+HOLD bunx rimraf ~/
+ALLOW npx rimraf dist
+ALLOW npx del-cli 'build/**'
+# eval of a command substitution: the command is only known when it runs (asks)
+HOLD eval "$(printf 'rm -rf ~')"
+HOLD eval `echo rm -rf ~`
+ALLOW echo "$(date)"
+ALLOW $(npm bin)/eslint .
+# a container with the home folder or / mounted, running a delete (asks)
+HOLD docker run -v ~:/h alpine rm -rf /h
+HOLD docker run --rm -v "$HOME:/h" alpine sh -c "rm -rf /h/*"
+HOLD podman run -v /:/host alpine find /host -delete
+HOLD docker run --mount type=bind,source=/,target=/host alpine rm -rf /host
+ALLOW docker run -v ~:/h alpine ls /h
+ALLOW docker run -v "$(pwd)":/app node rm -rf /app/dist
+# a script that deletes the home folder or / by name
+HOLD ruby -e 'FileUtils.rm_rf(Dir.home)'
+HOLD node -e "require('fs').rmSync(require('os').homedir(), {recursive: true})"
+HOLD python3 -c "import shutil, os; shutil.rmtree(os.path.expanduser('~'))"
+HOLD perl -MFile::Path -e 'remove_tree($ENV{HOME})'
+HOLD python3 -c "import shutil; shutil.rmtree('/')"
+ALLOW ruby -e 'FileUtils.rm_rf("tmp/cache")'
+ALLOW node -e "require('fs').rmSync('dist', {recursive: true})"
+ALLOW python3 -c "import shutil, os; shutil.rmtree(os.path.expanduser('~/proj/tmp'))"
+# known gap: a script whose target is computed
+GAP ruby -e 'd = ENV.fetch("H"); FileUtils.rm_rf(d)'

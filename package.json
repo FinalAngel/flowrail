@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "name": "flowrail-monorepo",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "npm test --workspaces",
+    "check": "node packages/flowrail/bin/flowrail.js check"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

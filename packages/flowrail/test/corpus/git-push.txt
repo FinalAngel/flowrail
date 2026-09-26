@@ -1,0 +1,141 @@
+# builtin: git-push (any push to a remote)
+HOLD git push
+HOLD git push origin main
+HOLD git push --tags
+HOLD git push -u origin feature
+HOLD git -C . push
+HOLD /usr/bin/git push
+HOLD command git push
+HOLD git -c core.x=y push
+HOLD cd x && git push
+HOLD sh -c "git push"
+HOLD bash -lc 'git push --tags'
+HOLD FOO=1 git push
+HOLD sudo git push
+HOLD sudo -u deploy git push
+HOLD env -i A=b git --no-pager push
+HOLD git --git-dir=.git push
+HOLD git --work-tree=. push
+HOLD true; git push
+HOLD ls | git push
+HOLD echo $(git push)
+HOLD echo `git push`
+HOLD echo "$(git push)"
+HOLD timeout 10 git push
+HOLD nohup git push &
+HOLD eval "git push"
+HOLD (git push)
+HOLD { git push; }
+HOLD if true; then git push; fi
+HOLD for r in a b; do git push $r; done
+HOLD git\
+| push
+HOLD exec git push
+HOLD xargs git push
+HOLD \git push
+HOLD git pu\sh
+HOLD g''it push
+HOLD "git" "push"
+HOLD git "pu"sh
+HOLD $'git' push
+HOLD $'\x67it' push
+HOLD git send-pack origin main
+HOLD hub push
+HOLD gh repo sync
+HOLD git subtree push --prefix docs origin gh-pages
+HOLD jj git push
+HOLD /usr/libexec/git-core/git-push origin
+HOLD echo 'git push' | sh
+HOLD printf 'git push\n' | bash
+HOLD cat <<EOF | sh
+|git push
+|EOF
+HOLD bash <<'EOF'
+|git push origin main
+|EOF
+HOLD bash <<< 'git push'
+HOLD git commit -m "$(cat <<'EOF'
+|don't forget
+|EOF
+|)" && git push
+HOLD find . -maxdepth 0 -exec git push \;
+HOLD watch -n 5 git push
+HOLD su -c "git push" deploy
+HOLD git commit -am wip && git push --force-with-lease
+HOLD git push 2>&1 | tail -5
+ALLOW git status
+ALLOW git commit -m "push the fix"
+ALLOW git log --grep push
+ALLOW grep -r "git push" docs
+ALLOW echo "do not git push"
+ALLOW npm run push-docs
+ALLOW git push-to-checkout
+ALLOW git push-docs
+ALLOW git stash push -m wip
+ALLOW git pull
+ALLOW git fetch origin
+ALLOW git commit -F- <<'EOF'
+|Never git push without asking
+|EOF
+ALLOW cat > notes.md <<'EOF'
+|Remember: git push after review
+|EOF
+ALLOW git commit -m "$(cat <<'EOF'
+|Explain why we git push later
+|EOF
+|)"
+ALLOW docker push registry.example/app
+# more: aliases, inline scripts, globs, shorthands
+HOLD git -c alias.p=push p origin
+HOLD git config alias.p push
+HOLD $(which git) push
+HOLD python3 -c "import subprocess; subprocess.run(['git', 'push'])"
+HOLD node -e "require('child_process').execSync('git push')"
+HOLD git -c alias.x='!git push' x
+# known gaps: not held, documented in docs/red-lines.md
+GAP ./release.sh
+GAP make push
+GAP npm run ship
+HOLD GIT=git; $GIT push
+HOLD $(printf git) push
+GAP echo Z2l0IHB1c2g= | base64 -d | sh
+GAP git p
+GAP python3 release.py
+# git with its subcommand from a pipe or a variable asks
+HOLD printf push | xargs git
+HOLD echo push | xargs git
+HOLD echo push | xargs -I{} git {}
+HOLD x=push; git $x
+HOLD $(echo git) push
+HOLD `echo git` push origin main
+ALLOW echo main | xargs git checkout
+ALLOW git ls-files | xargs git add
+ALLOW xargs -n1 echo push
+# IFS splitting, perl q(), awk and ruby system(), and dry runs
+HOLD git${IFS}push origin main
+HOLD perl -e "system q(git push)"
+HOLD perl -e 'system qq{git push --force}'
+HOLD awk 'BEGIN{system("git push")}'
+HOLD ruby -e 'system("git push")'
+ALLOW git push --dry-run
+ALLOW git push -n origin main
+# gh api writes to refs, wrappers, and repository writes through a git host's MCP server
+HOLD gh api -X PATCH repos/o/r/git/refs/heads/main -f sha=abc
+HOLD gh api -X POST repos/o/r/git/refs -f ref=refs/heads/x -f sha=abc
+HOLD gh api repos/o/r/git/refs -f ref=refs/heads/x -f sha=abc
+HOLD xcrun git push
+HOLD arch -arm64 git push
+HOLD script -q /dev/null git push
+HOLD bash <(echo git push)
+HOLD mcp__github__create_or_update_file {"path":"a.md","content":"x"}
+HOLD mcp__github__push_files {"files":[]}
+HOLD mcp__github__delete_file {"path":"a"}
+HOLD mcp__github__create_branch {"branch":"x"}
+HOLD mcp__github__merge_pull_request {"pullNumber":1}
+HOLD mcp__github__update_pull_request_branch {"pullNumber":1}
+HOLD mcp__gitlab__create_or_update_file {"path":"a"}
+ALLOW mcp__github__get_file_contents {"path":"a"}
+ALLOW mcp__github__get_merge_status {}
+ALLOW mcp__github__list_branches {}
+ALLOW mcp__github__create_pull_request {"title":"x"}
+ALLOW gh api repos/o/r/git/refs/heads/main

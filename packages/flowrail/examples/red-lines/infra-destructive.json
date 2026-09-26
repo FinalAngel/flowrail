@@ -1,0 +1,10 @@
+{
+  "id": "infra-destructive",
+  "title": "Ask before destroying infrastructure",
+  "why": "Deleted clusters, stacks and buckets take production with them.",
+  "severity": "ask",
+  "hook": {
+    "tool": "Bash",
+    "builtin": "infra-destructive"
+  }
+}

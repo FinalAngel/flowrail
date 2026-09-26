@@ -1,0 +1,114 @@
+[
+  {
+    "id": "no-push-without-asking",
+    "title": "Never push without asking",
+    "why": "Pushing publishes work. A human decides when.",
+    "severity": "ask",
+    "hook": {
+      "tool": "Bash",
+      "builtin": "git-push"
+    }
+  },
+  {
+    "id": "no-destructive-git",
+    "title": "No destructive git commands",
+    "why": "Force pushes, hard resets, forced cleans and branch deletes lose work that may not exist anywhere else.",
+    "severity": "block",
+    "hook": {
+      "tool": "Bash",
+      "builtin": "git-destructive"
+    }
+  },
+  {
+    "id": "no-secrets-in-repo",
+    "title": "Keep secrets out of the repo and out of the chat",
+    "why": "Committed secrets leak through history even after they are deleted.",
+    "severity": "block",
+    "hook": {
+      "tool": "*",
+      "builtin": "secret-files"
+    },
+    "check": {
+      "glob": "**/*",
+      "pattern": "-----BEGIN [A-Z ]*PRIVATE KEY-----",
+      "message": "Private key committed to the repo"
+    }
+  },
+  {
+    "id": "no-rm-rf-outside-project",
+    "title": "No recursive deletes outside the project",
+    "why": "One typo away from an empty disk.",
+    "severity": "block",
+    "hook": {
+      "tool": "Bash",
+      "builtin": "rm-dangerous"
+    }
+  },
+  {
+    "id": "protect-flowrail",
+    "title": "Ask before changing the guardrails",
+    "why": "Red lines, flowrail settings and the Claude Code hooks are the human's to change. An agent that edits them has switched off its own seatbelt.",
+    "severity": "ask",
+    "hook": {
+      "tool": "*",
+      "builtin": "flowrail-tamper"
+    }
+  },
+  {
+    "id": "no-publish-without-asking",
+    "title": "Ask before publishing a package or release",
+    "why": "A published version cannot be taken back. Releases follow flowrail/workflows/release.md.",
+    "severity": "ask",
+    "hook": {
+      "tool": "Bash",
+      "match": "^((npm|pnpm|yarn|bun) publish\\b|gh release create\\b)"
+    }
+  },
+  {
+    "id": "no-emails-without-signoff",
+    "title": "Never send email without sign-off",
+    "why": "Email to a customer cannot be unsent. Drafts are fine; sending needs a human.",
+    "severity": "block",
+    "hook": {
+      "tool": "*",
+      "builtin": "email-send"
+    }
+  },
+  {
+    "id": "no-payments",
+    "title": "Never move money without a human",
+    "why": "Refunds and charges reach real people's accounts. Support drafts the refund; a human issues it.",
+    "severity": "block",
+    "hook": {
+      "tool": "*",
+      "builtin": "payments"
+    }
+  },
+  {
+    "id": "ask-before-mcp-actions",
+    "title": "Ask before MCP tools send, invite, merge or delete",
+    "why": "A calendar invite or a deleted record acts in the world. A human says yes first.",
+    "severity": "ask",
+    "hook": {
+      "tool": "mcp__*",
+      "builtin": "mcp-actions"
+    }
+  },
+  {
+    "id": "no-draft-markers-in-docs",
+    "title": "Never ship docs with draft markers",
+    "why": "A draft note in a released doc reads as an unfinished product.",
+    "severity": "warn",
+    "check": {
+      "glob": "docs/**/*.md",
+      "pattern": "<!-- draft:",
+      "message": "Draft marker left in the docs"
+    }
+  },
+  {
+    "id": "sync-format-needs-a-decision",
+    "title": "Never change the sync wire format without a decision record",
+    "why": "Old and new clients must keep talking. Write docs/decisions/NNNN-*.md first.",
+    "severity": "ask"
+  }
+]

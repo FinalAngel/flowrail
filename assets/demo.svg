@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 370" width="920" height="370" role="img" aria-label="flowrail in a terminal: npx flowrail init sets up and verifies the guard; in a Claude Code session, git push --force origin main and rm -rf ~ are held by the hook with the reason; npx flowrail audit --demo replays fictional sessions and lists what would have been held or asked.">
+<style>
+text{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:13px;white-space:pre}
+@keyframes l0{0%,1.400%{opacity:0}1.500%,28.000%{opacity:1}29.250%,100%{opacity:0}}#l0{animation:l0 20s linear infinite}
+@keyframes cl0{0%,1.500%{transform:translateX(0)}7.000%,100%{transform:translateX(195.8px)}}#cl0{animation:cl0 20s steps(25) infinite}
+@keyframes l1{0%,8.900%{opacity:0}9.000%,28.000%{opacity:1}29.250%,100%{opacity:0}}#l1{animation:l1 20s linear infinite}
+@keyframes l2{0%,10.400%{opacity:0}10.500%,28.000%{opacity:1}29.250%,100%{opacity:0}}#l2{animation:l2 20s linear infinite}
+@keyframes l3{0%,11.400%{opacity:0}11.500%,28.000%{opacity:1}29.250%,100%{opacity:0}}#l3{animation:l3 20s linear infinite}
+@keyframes l4{0%,13.900%{opacity:0}14.000%,28.000%{opacity:1}29.250%,100%{opacity:0}}#l4{animation:l4 20s linear infinite}
+@keyframes l5{0%,16.400%{opacity:0}16.500%,28.000%{opacity:1}29.250%,100%{opacity:0}}#l5{animation:l5 20s linear infinite}
+@keyframes l6{0%,17.150%{opacity:0}17.250%,28.000%{opacity:1}29.250%,100%{opacity:0}}#l6{animation:l6 20s linear infinite}
+@keyframes l7{0%,17.900%{opacity:0}18.000%,28.000%{opacity:1}29.250%,100%{opacity:0}}#l7{animation:l7 20s linear infinite}
+@keyframes l8{0%,19.400%{opacity:0}19.500%,28.000%{opacity:1}29.250%,100%{opacity:0}}#l8{animation:l8 20s linear infinite}
+@keyframes l9{0%,19.400%{opacity:0}19.500%,28.000%{opacity:1}29.250%,100%{opacity:0}}#l9{animation:l9 20s linear infinite}
+@keyframes l10{0%,19.400%{opacity:0}19.500%,28.000%{opacity:1}29.250%,100%{opacity:0}}#l10{animation:l10 20s linear infinite}
+@keyframes l11{0%,29.400%{opacity:0}29.500%,63.000%{opacity:1}64.250%,100%{opacity:0}}#l11{animation:l11 20s linear infinite}
+@keyframes l12{0%,31.400%{opacity:0}31.500%,63.000%{opacity:1}64.250%,100%{opacity:0}}#l12{animation:l12 20s linear infinite}
+@keyframes cl12{0%,31.500%{transform:translateX(0)}36.000%,100%{transform:translateX(281.9px)}}#cl12{animation:cl12 20s steps(36) infinite}
+@keyframes l13{0%,37.900%{opacity:0}38.000%,63.000%{opacity:1}64.250%,100%{opacity:0}}#l13{animation:l13 20s linear infinite}
+@keyframes l14{0%,38.900%{opacity:0}39.000%,63.000%{opacity:1}64.250%,100%{opacity:0}}#l14{animation:l14 20s linear infinite}
+@keyframes l15{0%,38.900%{opacity:0}39.000%,63.000%{opacity:1}64.250%,100%{opacity:0}}#l15{animation:l15 20s linear infinite}
+@keyframes l16{0%,46.400%{opacity:0}46.500%,63.000%{opacity:1}64.250%,100%{opacity:0}}#l16{animation:l16 20s linear infinite}
+@keyframes cl16{0%,46.500%{transform:translateX(0)}49.000%,100%{transform:translateX(125.3px)}}#cl16{animation:cl16 20s steps(16) infinite}
+@keyframes l17{0%,50.900%{opacity:0}51.000%,63.000%{opacity:1}64.250%,100%{opacity:0}}#l17{animation:l17 20s linear infinite}
+@keyframes l18{0%,51.900%{opacity:0}52.000%,63.000%{opacity:1}64.250%,100%{opacity:0}}#l18{animation:l18 20s linear infinite}
+@keyframes l19{0%,51.900%{opacity:0}52.000%,63.000%{opacity:1}64.250%,100%{opacity:0}}#l19{animation:l19 20s linear infinite}
+@keyframes l20{0%,64.400%{opacity:0}64.500%,99.000%{opacity:1}100.250%,100%{opacity:0}}#l20{animation:l20 20s linear infinite}
+@keyframes cl20{0%,64.500%{transform:translateX(0)}69.500%,100%{transform:translateX(211.4px)}}#cl20{animation:cl20 20s steps(27) infinite}
+@keyframes l21{0%,71.400%{opacity:0}71.500%,99.000%{opacity:1}100.250%,100%{opacity:0}}#l21{animation:l21 20s linear infinite}
+@keyframes l22{0%,71.400%{opacity:0}71.500%,99.000%{opacity:1}100.250%,100%{opacity:0}}#l22{animation:l22 20s linear infinite}
+@keyframes l23{0%,72.900%{opacity:0}73.000%,99.000%{opacity:1}100.250%,100%{opacity:0}}#l23{animation:l23 20s linear infinite}
+@keyframes l24{0%,73.900%{opacity:0}74.000%,99.000%{opacity:1}100.250%,100%{opacity:0}}#l24{animation:l24 20s linear infinite}
+@keyframes l25{0%,73.900%{opacity:0}74.000%,99.000%{opacity:1}100.250%,100%{opacity:0}}#l25{animation:l25 20s linear infinite}
+@keyframes l26{0%,75.400%{opacity:0}75.500%,99.000%{opacity:1}100.250%,100%{opacity:0}}#l26{animation:l26 20s linear infinite}
+@keyframes l27{0%,77.900%{opacity:0}78.000%,99.000%{opacity:1}100.250%,100%{opacity:0}}#l27{animation:l27 20s linear infinite}
+@keyframes l28{0%,79.150%{opacity:0}79.250%,99.000%{opacity:1}100.250%,100%{opacity:0}}#l28{animation:l28 20s linear infinite}
+@keyframes l29{0%,80.400%{opacity:0}80.500%,99.000%{opacity:1}100.250%,100%{opacity:0}}#l29{animation:l29 20s linear infinite}
+@keyframes l30{0%,81.650%{opacity:0}81.750%,99.000%{opacity:1}100.250%,100%{opacity:0}}#l30{animation:l30 20s linear infinite}
+@keyframes l31{0%,82.900%{opacity:0}83.000%,99.000%{opacity:1}100.250%,100%{opacity:0}}#l31{animation:l31 20s linear infinite}
+@keyframes l32{0%,84.150%{opacity:0}84.250%,99.000%{opacity:1}100.250%,100%{opacity:0}}#l32{animation:l32 20s linear infinite}
+
+</style>
+<rect width="920" height="370" rx="10" fill="#0d1117"/>
+<rect x="0.5" y="0.5" width="919" height="369" rx="10" fill="none" stroke="#30363d"/>
+<circle cx="20" cy="18" r="6" fill="#ff5f57"/><circle cx="40" cy="18" r="6" fill="#febc2e"/><circle cx="60" cy="18" r="6" fill="#28c840"/>
+<text x="460" y="22" text-anchor="middle" fill="#8b949e" style="font-size:12px">acme-shop</text>
+<line x1="0" y1="36" x2="920" y2="36" stroke="#30363d"/>
+<g id="l0"><text x="22" y="62" xml:space="preserve"><tspan fill="#5eead4">$</tspan><tspan fill="#e6edf3"> npx flowrail init --yes</tspan></text><rect id="cl0" x="37.66" y="47" width="197.8" height="20" fill="#0d1117"/></g>
+<g id="l1"><text x="22" y="82" xml:space="preserve"><tspan fill="#e6edf3">Found  git repo (main), CLAUDE.md with 2 rules</tspan></text></g>
+<g id="l2"><text x="22" y="102" xml:space="preserve"><tspan fill="#e6edf3">  </tspan><tspan fill="#3fb950">covered</tspan><tspan fill="#e6edf3">      "Never push to main without asking"  CLAUDE.md</tspan></text></g>
+<g id="l3"><text x="22" y="122" xml:space="preserve"><tspan fill="#e6edf3">  </tspan><tspan fill="#3fb950">covered</tspan><tspan fill="#e6edf3">      "Do not delete anything in content/"  CLAUDE.md</tspan></text></g>
+<g id="l4"><text x="22" y="142" xml:space="preserve"><tspan fill="#3fb950">✓ The guard is set up. Red lines: 7 armed; protect-flowrail is built in and always on.</tspan></text></g>
+<g id="l5"><text x="22" y="162" xml:space="preserve"><tspan fill="#8b949e">  ✓ no-destructive-git        held 4/4   allowed 3/3</tspan></text></g>
+<g id="l6"><text x="22" y="182" xml:space="preserve"><tspan fill="#8b949e">  ✓ no-rm-rf-outside-project  held 4/4   allowed 2/2</tspan></text></g>
+<g id="l7"><text x="22" y="202" xml:space="preserve"><tspan fill="#8b949e">  ✓ protect-path-content      held 6/6   allowed 3/3</tspan></text></g>
+<g id="l8"><text x="22" y="222" xml:space="preserve"><tspan fill="#3fb950">✓ Verified: 7 rules, 29 probes held, 19 allowed as expected.</tspan></text></g>
+<g id="l9"><text x="22" y="242" xml:space="preserve"><tspan fill="#8b949e">held = dangerous examples stopped; allowed = harmless examples let through; block = never runs; ask = Claude</tspan></text></g>
+<g id="l10"><text x="22" y="262" xml:space="preserve"><tspan fill="#8b949e">Code asks you first</tspan></text></g>
+<g id="l11"><text x="22" y="62" xml:space="preserve"><tspan fill="#8b949e"># later, in a Claude Code session in the same repo</tspan></text></g>
+<g id="l12"><text x="22" y="82" xml:space="preserve"><tspan fill="#e6edf3">● Bash(git push --force origin main)</tspan></text><rect id="cl12" x="37.66" y="67" width="283.9" height="20" fill="#0d1117"/></g>
+<g id="l13"><text x="22" y="102" xml:space="preserve"><tspan fill="#ff7b72">  ⎿  held (block)</tspan></text></g>
+<g id="l14"><text x="22" y="122" xml:space="preserve"><tspan fill="#e6edf3">     flowrail red line no-destructive-git: No destructive git commands (force push). Force pushes, hard</tspan></text></g>
+<g id="l15"><text x="22" y="142" xml:space="preserve"><tspan fill="#e6edf3">     resets, forced cleans and branch deletes lose work that may not exist anywhere else.</tspan></text></g>
+<g id="l16"><text x="22" y="182" xml:space="preserve"><tspan fill="#e6edf3">● Bash(rm -rf ~)</tspan></text><rect id="cl16" x="37.66" y="167" width="127.3" height="20" fill="#0d1117"/></g>
+<g id="l17"><text x="22" y="202" xml:space="preserve"><tspan fill="#ff7b72">  ⎿  held (block)</tspan></text></g>
+<g id="l18"><text x="22" y="222" xml:space="preserve"><tspan fill="#e6edf3">     flowrail red line no-rm-rf-outside-project: No recursive deletes outside the project (rm -r ~).</tspan></text></g>
+<g id="l19"><text x="22" y="242" xml:space="preserve"><tspan fill="#e6edf3">     One typo away from an empty disk.</tspan></text></g>
+<g id="l20"><text x="22" y="62" xml:space="preserve"><tspan fill="#5eead4">$</tspan><tspan fill="#e6edf3"> npx flowrail audit --demo</tspan></text><rect id="cl20" x="37.66" y="47" width="213.4" height="20" fill="#0d1117"/></g>
+<g id="l21"><text x="22" y="82" xml:space="preserve"><tspan fill="#8b949e">Demo: fictional transcripts bundled with flowrail (a made-up project, /work/acme-shop, whose settings.json</tspan></text></g>
+<g id="l22"><text x="22" y="102" xml:space="preserve"><tspan fill="#8b949e">denies git push --force and asks before git push), replayed through the starter red lines.</tspan></text></g>
+<g id="l23"><text x="22" y="142" xml:space="preserve"><tspan fill="#e6edf3">Last 30 days: 20 tool calls in 3 sessions.</tspan></text></g>
+<g id="l24"><text x="22" y="162" xml:space="preserve"><tspan fill="#e6edf3">flowrail would have held 3 (2 no-destructive-git, 1 no-rm-rf-outside-project) and asked first on 5 (2</tspan></text></g>
+<g id="l25"><text x="22" y="182" xml:space="preserve"><tspan fill="#e6edf3">no-push-without-asking, 1 ask-before-mcp-actions, 1 no-secrets-in-repo, 1 protect-flowrail).</tspan></text></g>
+<g id="l26"><text x="22" y="202" xml:space="preserve"><tspan fill="#5eead4">Your settings.json permissions (2 deny/ask rules) would have caught 2; flowrail adds 6:</tspan></text></g>
+<g id="l27"><text x="22" y="242" xml:space="preserve"><tspan fill="#e6edf3">  </tspan><tspan fill="#ff7b72">held </tspan><tspan fill="#e6edf3">  Jun 8, 10:10    no-destructive-git        git reset --hard origin/main</tspan></text></g>
+<g id="l28"><text x="22" y="262" xml:space="preserve"><tspan fill="#e6edf3">  </tspan><tspan fill="#e3b341">asked</tspan><tspan fill="#e6edf3">  Jun 8, 10:06    no-push-without-asking    mcp__github__merge_pull_request {"pullNumber":42}</tspan></text></g>
+<g id="l29"><text x="22" y="282" xml:space="preserve"><tspan fill="#e6edf3">  </tspan><tspan fill="#e3b341">asked</tspan><tspan fill="#e6edf3">  Jun 8, 10:04    ask-before-mcp-actions    mcp__gmail__send_email {"to":"customer@example.com",...</tspan></text></g>
+<g id="l30"><text x="22" y="302" xml:space="preserve"><tspan fill="#e6edf3">  </tspan><tspan fill="#ff7b72">held </tspan><tspan fill="#e6edf3">  Jun 4, 14:22    no-rm-rf-outside-project  rm -rf ../acme-shop-old</tspan></text></g>
+<g id="l31"><text x="22" y="322" xml:space="preserve"><tspan fill="#e6edf3">  </tspan><tspan fill="#e3b341">asked</tspan><tspan fill="#e6edf3">  Jun 4, 14:20    protect-flowrail          Write .claude/settings.json</tspan></text></g>
+<g id="l32"><text x="22" y="342" xml:space="preserve"><tspan fill="#e6edf3">  </tspan><tspan fill="#e3b341">asked</tspan><tspan fill="#e6edf3">  Jun 2, 09:25    no-secrets-in-repo        cat .env</tspan></text></g>
+</svg>

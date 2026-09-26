@@ -1,0 +1,10 @@
+{
+  "id": "prefer-pnpm",
+  "title": "Use pnpm, not npm or yarn",
+  "why": "This project uses pnpm. npm or yarn would write a second lockfile.",
+  "severity": "ask",
+  "hook": {
+    "tool": "Bash",
+    "match": "^(npm (install|i|ci|add|update|uninstall|remove)\\b|yarn(\\s|$))"
+  }
+}

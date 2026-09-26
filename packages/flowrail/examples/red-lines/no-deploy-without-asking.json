@@ -1,0 +1,10 @@
+{
+  "id": "no-deploy-without-asking",
+  "title": "Ask before deploying",
+  "why": "Deploys change what users see. A human presses the button.",
+  "severity": "ask",
+  "hook": {
+    "tool": "Bash",
+    "builtin": "publish-deploy"
+  }
+}

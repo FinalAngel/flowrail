@@ -1,0 +1,41 @@
+# builtin: payments (money-moving tools on payment MCP servers, the Stripe CLI and API)
+HOLD mcp__stripe__create_refund {"charge":"ch_1"}
+HOLD mcp__stripe__create_payout {"amount":100}
+HOLD mcp__stripe__createCharge {"amount":100}
+HOLD mcp__stripe__create_transfer {"amount":100}
+HOLD mcp__stripe__capture_payment_intent {"id":"pi_1"}
+HOLD mcp__paypal__create_payout {"amount":"1.00"}
+HOLD mcp__paypal__refund_capture {"id":"1"}
+HOLD mcp__stripe__send_invoice {"id":"in_1"}
+HOLD stripe refunds create --charge ch_1
+HOLD stripe payouts create --amount 100
+HOLD curl https://api.stripe.com/v1/refunds -u sk_test_x: -d charge=ch_1
+HOLD mcp__stripe__finalize_invoice {"invoice":"in_1"}
+HOLD mcp__stripe__pay_invoice {"invoice":"in_1"}
+HOLD mcp__stripe__void_invoice {"invoice":"in_1"}
+HOLD mcp__stripe__update_subscription {"id":"sub_1"}
+HOLD mcp__stripe__cancel_subscription {"id":"sub_1"}
+HOLD mcp__stripe__create_subscription {"customer":"cus_1"}
+HOLD mcp__paypal__refund_payment {"id":"1"}
+ALLOW mcp__stripe__list_charges {}
+ALLOW mcp__stripe__retrieve_balance {}
+ALLOW mcp__stripe__search_customers {"query":"email:'a@example.com'"}
+ALLOW mcp__stripe__create_customer {"email":"a@example.com"}
+ALLOW mcp__github__create_issue {"title":"refund bug"}
+ALLOW stripe charges list
+ALLOW curl https://api.stripe.com/v1/charges -u sk_test_x:
+ALLOW mcp__stripe__create_invoice {"customer":"cus_1"}
+ALLOW mcp__stripe__list_subscriptions {}
+ALLOW mcp__stripe__retrieve_invoice {"id":"in_1"}
+# billing changes: what customers are charged from now on (coupons, prices, plans, disputes)
+HOLD mcp__stripe__create_coupon {"percent_off":100,"duration":"forever"}
+HOLD mcp__stripe__create_price {"unit_amount":1,"product":"prod_1"}
+HOLD mcp__stripe__update_price {"price":"price_1","active":false}
+HOLD mcp__stripe__update_dispute {"dispute":"dp_1","submit":true}
+HOLD mcp__stripe__create_promotion_code {"coupon":"c_1"}
+HOLD mcp__stripe__close_dispute {"dispute":"dp_1"}
+# records and drafts stay allowed: customers, products, draft invoices
+ALLOW mcp__stripe__create_product {"name":"x"}
+ALLOW mcp__stripe__list_disputes {}
+ALLOW mcp__stripe__list_prices {}
+ALLOW mcp__stripe__list_coupons {}

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Questions and ideas
+    url: https://github.com/FinalAngel/flowrail/discussions
+    about: Ask how to do something, or share a setup.
+  - name: Security report
+    url: https://github.com/FinalAngel/flowrail/security/advisories/new
+    about: Report a vulnerability privately. Please do not open a public issue.

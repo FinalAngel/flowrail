@@ -1,0 +1,10 @@
+{
+  "id": "no-push-without-asking",
+  "title": "Never push without asking",
+  "why": "Pushing publishes work. A human decides when.",
+  "severity": "ask",
+  "hook": {
+    "tool": "Bash|mcp__*",
+    "builtin": "git-push"
+  }
+}

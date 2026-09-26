@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Week in review</title>
+<style>
+  :root { --bg:#F7F7F5; --surface:#FFFFFF; --tray:#EFEFEC; --hairline:rgb(20 22 20/.09); --text:#16181A; --text-2:#5A5F63; --text-3:#6E7377; --accent:#0E7C66; --accent-soft:#E3F2EE; --warn:#9A5B00; --warn-soft:#FBF0DC; --danger:#B42318; --danger-soft:#FDECEA; --mono:ui-monospace,Menlo,monospace; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0F1113; --surface:#16191C; --tray:#1C2024; --hairline:rgb(255 255 255/.08); --text:#ECEEEF; --text-2:#A3A9AE; --text-3:#8A9095; --accent:#3DD6AC; --accent-soft:rgb(61 214 172/.12); --warn:#F2B35B; --warn-soft:rgb(242 179 91/.12); --danger:#FF7A6E; --danger-soft:rgb(255 122 110/.12); } }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:14px/1.55 system-ui,sans-serif; padding:40px 16px 64px; }
+  main { max-width:760px; margin:0 auto; }
+  .eyebrow { font:500 12px/1 var(--mono); color:var(--text-3); letter-spacing:.04em; text-transform:uppercase; }
+  h1 { font-size:28px; line-height:1.2; margin:10px 0 6px; text-wrap:balance; font-weight:600; }
+  h2 { font-size:16px; margin:32px 0 12px; font-weight:600; }
+  p.lead { color:var(--text-2); margin:0 0 24px; font-size:15px; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; }
+  .stat { background:var(--surface); border:1px solid var(--hairline); border-radius:10px; padding:16px; }
+  .stat b { display:block; font-size:28px; font-weight:600; font-variant-numeric:tabular-nums; }
+  .stat span { color:var(--text-2); font-size:13px; }
+  .card { background:var(--surface); border:1px solid var(--hairline); border-radius:10px; overflow:hidden; }
+  table { width:100%; border-collapse:collapse; }
+  th, td { text-align:left; padding:10px 14px; border-bottom:1px solid var(--hairline); vertical-align:top; }
+  th { font-weight:500; color:var(--text-3); font-size:12px; text-transform:uppercase; letter-spacing:.04em; background:var(--tray); }
+  tr:last-child td { border-bottom:0; }
+  code, .mono { font:12.5px var(--mono); }
+  .chip { display:inline-block; font:500 12px/1 var(--mono); padding:4px 8px; border-radius:999px; background:var(--tray); color:var(--text-2); }
+  .ok { background:var(--accent-soft); color:var(--accent); }
+  .warn { background:var(--warn-soft); color:var(--warn); }
+  .bad { background:var(--danger-soft); color:var(--danger); }
+  ul { padding-left:18px; margin:0; } li { margin:6px 0; }
+  .muted { color:var(--text-3); font-size:13px; }
+  .bar { height:8px; border-radius:999px; background:var(--tray); overflow:hidden; }
+  .bar i { display:block; height:100%; background:var(--accent); border-radius:999px; }
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">Weekly digest · Paper Plane</div>
+  <h1>Search got fast, sync got honest</h1>
+  <p class="lead">Five tasks moved to Done. The incremental search index landed and cut typing latency on large notebooks. Two red lines held this week, both pushes the agent asked about instead.</p>
+  <div class="grid">
+    <div class="stat"><b>5</b><span>tasks done</span></div>
+    <div class="stat"><b>2</b><span>waiting for review</span></div>
+    <div class="stat"><b>11 ms</b><span>typing latency, was 140 ms</span></div>
+    <div class="stat"><b>2</b><span>red lines held</span></div>
+  </div>
+  <h2>Sprint progress</h2>
+  <div class="card" style="padding:16px">
+    <div style="display:flex;justify-content:space-between;margin-bottom:8px"><span>Sprint 3</span><span class="mono">4 of 11</span></div>
+    <div class="bar"><i style="width:36%"></i></div>
+  </div>
+  <h2>Shipped</h2>
+  <div class="card">
+    <table>
+      <tr><th style="width:90px">Task</th><th>What changed</th></tr>
+      <tr><td class="mono">T-0005</td><td>Search index updates incrementally instead of rebuilding on every keystroke.</td></tr>
+      <tr><td class="mono">T-0004</td><td>New note shortcut: Cmd/Ctrl+N from anywhere in the app.</td></tr>
+      <tr><td class="mono">T-0010</td><td>Settings screen follows the system dark mode.</td></tr>
+    </table>
+  </div>
+  <h2>Needs a decision</h2>
+  <ul>
+    <li><b>Encryption at rest</b> (T-0006). Readers keep asking. Moving it into 0.9 pushes the release by about a week.</li>
+    <li><b>Flaky merge test</b> (T-0007). Quarantined per the team rule; a fix is in progress.</li>
+  </ul>
+  <p class="muted" style="margin-top:32px">Written by the weekly-digest routine. Read-only run: it could read the repo and write this file, nothing else.</p>
+</main>
+</body>
+</html>

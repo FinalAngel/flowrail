@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 640" width="1280" height="640" role="img" aria-label="flowrail: Guardrails for Claude Code that hold.">
+  <title>flowrail</title>
+  <rect width="1280" height="640" fill="#0F1113"/>
+  <!-- the two rails, quiet -->
+  <path d="M96 0v640M1184 0v640" stroke="rgb(255 255 255 / .06)" stroke-width="2"/>
+  <g transform="translate(160 150) scale(4)" fill="none" stroke="#3DD6AC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4 3v18M20 3v18"/>
+    <path d="M4 7h6a4 4 0 0 1 4 4v2a4 4 0 0 0 4 4h2"/>
+  </g>
+  <text x="280" y="232" fill="#ECEEEF" font-size="96" letter-spacing="-0.96"><tspan font-family="'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-weight="500">flow</tspan><tspan font-family="Geist, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-weight="600">rail</tspan></text>
+  <text font-family="Geist, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="500" fill="#ECEEEF" letter-spacing="-0.44">
+    <tspan x="160" y="356">Guardrails for Claude Code</tspan>
+    <tspan x="160" y="414" fill="#A3A9AE">that hold.</tspan>
+  </text>
+  <!-- Rule -> Check -> Hook chain -->
+  <g font-family="'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="24" fill="#ECEEEF">
+    <path d="M300 506h60M512 506h60" stroke="#3DD6AC" stroke-width="2"/>
+    <rect x="160" y="482" width="140" height="48" rx="10" fill="#1C2024" stroke="rgb(255 255 255 / .08)"/>
+    <text x="230" y="514" text-anchor="middle">rule</text>
+    <rect x="360" y="482" width="152" height="48" rx="10" fill="#1C2024" stroke="rgb(255 255 255 / .08)"/>
+    <text x="436" y="514" text-anchor="middle">check</text>
+    <rect x="572" y="482" width="140" height="48" rx="10" fill="rgb(61 214 172 / .12)" stroke="#3DD6AC"/>
+    <text x="642" y="514" text-anchor="middle" fill="#3DD6AC">hook</text>
+  </g>
+  <g font-family="'Geist Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" font-size="26">
+    <rect x="728" y="478" width="432" height="56" rx="28" fill="#16191C" stroke="rgb(255 255 255 / .08)"/>
+    <text x="944" y="515" text-anchor="middle" fill="#ECEEEF"><tspan fill="#8A9095">$ </tspan>npx flowrail guard init</text>
+  </g>
+</svg>

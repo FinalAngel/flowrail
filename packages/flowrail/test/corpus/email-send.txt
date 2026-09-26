@@ -1,0 +1,23 @@
+# builtin: email-send (shell mail, mail APIs, send/forward/reply tools on mail MCP servers)
+HOLD sendmail bob@example.com < mail.txt
+HOLD mutt -s "hi" bob@example.com < body.txt
+HOLD swaks --to bob@example.com --body hi
+HOLD echo hi | mail -s test bob@example.com
+HOLD curl -X POST https://api.sendgrid.com/v3/mail/send -d @mail.json
+HOLD curl https://api.resend.com/emails -d '{"to":"a@example.com"}'
+HOLD aws ses send-email --destination ToAddresses=a@example.com
+HOLD mcp__gmail__send_email {"to":"a@example.com","body":"hi"}
+HOLD mcp__claude_ai_Gmail__send_message {"to":"a@example.com"}
+HOLD mcp__claude_ai_Gmail__forward {"id":"1","to":"a@example.com"}
+HOLD mcp__claude_ai_Gmail__reply {"id":"1","body":"ok"}
+HOLD mcp__outlook__sendMail {"to":"a@example.com"}
+HOLD mcp__resend__send-email {"to":"a@example.com"}
+HOLD mcp__crm__send_email {"to":"a@example.com"}
+ALLOW mcp__claude_ai_Gmail__create_draft {"to":"a@example.com"}
+ALLOW mcp__gmail__search_threads {"q":"from:bob"}
+ALLOW mcp__claude_ai_Gmail__get_thread {"id":"1"}
+ALLOW mcp__slack__send_message {"text":"hi"}
+ALLOW grep -r sendmail src/
+ALLOW echo "mail me the report"
+ALLOW git commit -m "send email on signup"
+ALLOW curl https://api.sendgrid.com/v3/templates

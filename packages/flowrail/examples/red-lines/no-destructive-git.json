@@ -1,0 +1,10 @@
+{
+  "id": "no-destructive-git",
+  "title": "No destructive git commands",
+  "why": "Force pushes, hard resets, forced cleans and branch deletes lose work that may not exist anywhere else.",
+  "severity": "block",
+  "hook": {
+    "tool": "Bash",
+    "builtin": "git-destructive"
+  }
+}

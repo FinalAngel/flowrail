@@ -1,0 +1,71 @@
+# builtin: mcp-actions (MCP tools that send, post, publish, push, merge, delete, deploy, pay or share)
+HOLD mcp__github__push_files {"owner":"a","repo":"b","branch":"main","files":[]}
+HOLD mcp__github__merge_pull_request {"owner":"a","repo":"b","pull_number":1}
+HOLD mcp__github__delete_file {"path":"README.md"}
+HOLD mcp__github__create_release {"tag":"v1"}
+HOLD mcp__claude_ai_Gmail__send_message {"to":"x@example.invalid"}
+HOLD mcp__gmail__send_email {"to":"x@example.invalid"}
+HOLD mcp__claude_ai_Gmail__reply {"threadId":"1"}
+HOLD mcp__claude_ai_Gmail__forward {"messageId":"1"}
+HOLD mcp__claude_ai_Gmail__trash_thread {"threadId":"1"}
+HOLD mcp__slack__slack_post_message {"channel":"C1","text":"hi"}
+HOLD mcp__slack__postMessage {"channel":"C1"}
+HOLD mcp__stripe__create_refund {"charge":"ch_1"}
+HOLD mcp__stripe__refund_payment {"id":"1"}
+HOLD mcp__vercel__deploy_project {"id":"p"}
+HOLD mcp__drive__share_file {"id":"1"}
+HOLD mcp__linear__delete_issue {"id":"1"}
+HOLD mcp__plugin_x_db__drop_table {"name":"users"}
+HOLD mcp__notion__notion-move-pages {"ids":[]}
+ALLOW mcp__github__get_pull_request {"pull_number":1}
+ALLOW mcp__github__list_commits {}
+ALLOW mcp__github__search_code {"q":"push"}
+ALLOW mcp__github__get_merge_status {}
+ALLOW mcp__github__create_pull_request {"title":"x"}
+ALLOW mcp__claude_ai_Gmail__create_draft {"to":"x"}
+ALLOW mcp__claude_ai_Gmail__list_drafts {}
+ALLOW mcp__slack__read_channel {"channel":"C1"}
+ALLOW mcp__filesystem__read_file {"path":"a"}
+ALLOW Bash {"command":"git push"}
+# repository writes, and changes other people see: invites, shared docs, permissions, comments
+HOLD mcp__github__create_or_update_file {"path":"a.md","content":"x"}
+HOLD mcp__github__create_branch {"branch":"x"}
+HOLD mcp__Google_Calendar__create_event {"summary":"x"}
+HOLD mcp__claude_ai_Google_Calendar__update_event {"id":"1"}
+HOLD mcp__google_calendar__delete_event {"id":"1"}
+HOLD mcp__calendar__respond_to_event {"id":"1"}
+HOLD mcp__notion__notion-update-page {"id":"1"}
+HOLD mcp__notion__notion-create-pages {"pages":[]}
+HOLD mcp__confluence__update_page {"id":"1"}
+HOLD mcp__Google_Drive__update_file {"id":"1"}
+HOLD mcp__Google_Drive__share_file {"id":"1"}
+HOLD mcp__drive__create_permission {"role":"writer"}
+HOLD mcp__github__add_issue_comment {"body":"x"}
+HOLD mcp__slack__slack_send_message {"channel":"C1"}
+ALLOW mcp__Google_Calendar__list_events {}
+ALLOW mcp__Google_Calendar__suggest_time {}
+ALLOW mcp__notion__notion-fetch {"id":"1"}
+ALLOW mcp__notion__notion-search {"query":"x"}
+ALLOW mcp__claude_ai_Gmail__update_draft {"id":"1"}
+ALLOW mcp__Google_Drive__read_file_content {"id":"1"}
+# known gaps: tools whose name says nothing about what they do
+GAP mcp__custom__run {"script":"deploy.sh"}
+GAP mcp__db__execute_sql {"sql":"DELETE FROM users"}
+GAP mcp__linear__create_issue {"title":"x"}
+HOLD mcp__claude_ai_Notion__notion-move-pages {"page_or_database_ids":["1"],"new_parent":{}}
+HOLD mcp__notion__notion-delete-pages {"ids":["1"]}
+# local filesystem MCP servers: writes outside the project (Claude Code asks before Write there,
+# not before an MCP server's writes); the temp folders are fine
+HOLD mcp__filesystem__write_file {"path":"/etc/hosts","content":"127.0.0.1 x"}
+HOLD mcp__filesystem__edit_file {"path":"/etc/hosts","edits":[]}
+HOLD mcp__filesystem__create_directory {"path":"/usr/local/evil"}
+HOLD mcp__filesystem__move_file {"source":"a.txt","destination":"/etc/cron.d/x"}
+HOLD mcp__filesystem__write_file {"path":"../other-project/a.js","content":"x"}
+HOLD mcp__filesystem__write_file {"path":"~/.zshrc","content":"x"}
+HOLD mcp__desktop-commander__write_file {"path":"/etc/hosts","content":"x"}
+ALLOW mcp__filesystem__write_file {"path":"src/a.js","content":"x"}
+ALLOW mcp__filesystem__write_file {"path":"/work/project/src/a.js","content":"x"}
+ALLOW mcp__filesystem__create_directory {"path":"/tmp/scratch"}
+ALLOW mcp__filesystem__read_file {"path":"/etc/hosts"}
+ALLOW mcp__filesystem__list_directory {"path":"/"}
+ALLOW mcp__s3__put_object {"bucket":"b","path":"/reports/x.csv"}
