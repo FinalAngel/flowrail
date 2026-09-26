@@ -212,7 +212,7 @@ textarea.input { resize: vertical; line-height: 1.55; }
 .notice.danger > .icon { color: var(--danger); margin-top: 2px; }
 .notice.ok { background: var(--accent-soft); }
 .notice.ok > .icon { color: var(--accent); margin-top: 2px; }
-.notice .body { flex: 1; min-width: 0; display: grid; gap: 8px; }
+.notice .body { flex: 1; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 8px; }
 
 .skeleton { display: grid; gap: 10px; padding: 4px 0; }
 .sk-row { height: 38px; width: var(--w); border-radius: var(--r-ctl); background: var(--tray); animation: pulse 1.6s var(--ease) infinite; }
@@ -636,3 +636,10 @@ table.probes .bad, table.probes tr.fail td:first-child { color: var(--danger); f
 .tcard.issue:hover { box-shadow: var(--shadow-1); }
 .tcard.issue:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .tcard.issue .title::after { content: none; }
+
+/* Workflows: one file with several actions or sub-commands */
+.wf-group { border-top: 1px solid var(--hairline); padding: 10px 0 2px; }
+.wf-group:first-of-type { border-top: 0; }
+.wf-group > summary { display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 500; list-style: none; min-height: 32px; }
+.wf-group > summary::-webkit-details-marker { display: none; }
+.wf-group[open] > summary { margin-bottom: 12px; }

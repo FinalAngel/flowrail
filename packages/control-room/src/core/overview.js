@@ -95,6 +95,7 @@ export function overview(p) {
       redlinesStates: stateCounts(lines, hooks.healthy),
       redlinesTotal: lines.length,
       routinesFailed: failed.length,
+      runsFailedDay: runs.list(p, 50).filter((r) => r.status === 'failed' && Date.now() - Date.parse(r.endedAt || r.startedAt) < 86400000).length,
       memories: memory.list(p).length,
     },
     sprint: { ...b.config.current, total: current.length, done: current.filter((t) => t.status === 'Done').length, inProgress: current.filter((t) => t.status === 'In Progress').length, review: current.filter((t) => t.status === 'Review').length },

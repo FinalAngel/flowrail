@@ -12,11 +12,11 @@ export async function routines_(pos, flags) {
     if (!list.length) return out('No routines. Add one to flowrail/routines.json.');
     for (const r of list) {
       const last = r.lastRun ? (r.lastRun.exit === 0 ? c.green(`ok ${ago(r.lastRun.at)}`) : c.yellow(`failed ${ago(r.lastRun.at)}`)) : c.dim('never ran');
-      const inst = !r.enabled ? c.dim('disabled') : r.installed ? c.green('scheduled') : c.dim('not scheduled');
+      const inst = !r.enabled ? c.dim('disabled') : r.installed === null ? c.dim('event') : r.installed ? c.green('scheduled') : c.dim('not scheduled');
       out(`  ${c.bold(r.id.padEnd(20))} ${r.scheduleText.padEnd(22)} ${inst.padEnd(22)} ${last}${r.next && r.installed ? c.dim(`  next ${when(r.next)}`) : ''}`);
       if (r.lastRun && r.lastRun.exit !== 0 && r.lastRun.firstLine) out(`  ${' '.repeat(20)} ${c.dim(r.lastRun.firstLine)}`);
     }
-    if (list.some((r) => r.enabled && !r.installed)) out(c.dim('\nSchedule them: npx @finalangel/flowrail-room routines install'));
+    if (list.some((r) => r.enabled && r.installed === false)) out(c.dim('\nSchedule them: npx @finalangel/flowrail-room routines install'));
     return;
   }
   if (sub === 'install') {

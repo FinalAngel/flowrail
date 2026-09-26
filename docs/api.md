@@ -183,11 +183,13 @@ Areas come from `areas: [{ "name": "Sales", "router": "SALES.md" }]` in `flowrai
 
 ### Workflows
 
-`GET /api/workflows` returns `[{ file, title, description, steps: [{ n, title, gate, body }] }]`.
+`GET /api/workflows` returns `[{ file, title, description, steps: [{ n, title, gate, body }], groups: [{ kind, title, steps }] }]` for every Markdown file with steps in `flowrail/workflows/`, or in the folder `workflowsDir` in `config.json` names (inside the repo). A `## Action: …` or `## Sub-command: …` heading opens a group (`kind` is `action` or `sub-command`) and the steps under it (`##` or `###`) belong to it. A step whose heading says GATE, SIGN-OFF or MANDATORY has `gate: true`.
 
 ### Routines
 
 `GET /api/routines` returns each routine from `routines.json` with `enabled`, `scheduleText` (for example "Mondays 07:00"), `installed`, `lastRun: { at, exit, run, firstLine? } | null` and `next`.
+
+An **event routine** has `on` instead of `schedule`: `{ "event": "github-actions", "repo": "owner/name", "workflow": "ci.yml" }` for a GitHub Actions workflow, or `{ "event": "hook" }` for one something else runs (its runs are the lines in `.flowrail/runs/routines.log` with its id). It is never scheduled (`installed` and `next` are `null`), and `run` refuses it with `409` unless it also has a `run`. A GitHub Actions routine also carries `github: { runs: [{ status, conclusion, at, title, branch, url }], at } | { error: "GitHub unavailable", at }`, read with `gh run list` (read-only, 8 s timeout) and cached for five minutes in `.flowrail/github-runs.json`. `url` is kept only when it is a `https://github.com/` link.
 
 `POST /api/routines`:
 
@@ -221,6 +223,17 @@ Areas come from `areas: [{ "name": "Sales", "router": "SALES.md" }]` in `flowrai
 | GET | `/api/runs` | Recent runs: `[{ id, kind, routine?, title, startedAt, endedAt, exit, status }]`. |
 | GET | `/api/runs/<id>` | One run, with its output in `log`. |
 | POST | `/api/run` | `{ prompt }` starts a headless Claude run, if `claude` is installed, and returns the run record. One at a time. The dashboard does not call this; it is there for scripts. |
+| GET | `/api/automation` | The Runs page in one call: `{ runs, headless: { permissionMode, allowed, disallowed }, apps, appsError }`. |
+
+### Apps
+
+Local programs listed in `flowrail/config.json` as `"apps": [{ "id", "name", "cmd": [argv], "cwd"?, "url"? }]` (`cwd` is a folder inside the repo, `url` is http or https). The list is file-only: `POST /api/config` ignores `apps`, and no endpoint adds one or changes what it runs.
+
+| Method | Path | Does |
+|---|---|---|
+| GET | `/api/automation` | `apps: [{ id, name, cmd, cwd, url, running, pid, reachable }]`. `reachable` is probed only for a loopback `url` of a running app, else `null`. An invalid `apps` list comes back as `appsError`. |
+| POST | `/api/apps` | `{ _action: "start" \| "stop", id }`. Start runs `cmd` detached, without a shell, in its own process group, output to `.flowrail/apps/<id>.log` (`409` if it is already running, `404` for an id that is not in `config.json`). Stop sends `SIGTERM` to the process group. |
+| GET | `/api/apps/log?id=<id>` | `{ id, log }`: the last 20 KB of the app's output. |
 
 ### Search, events, doctor
 

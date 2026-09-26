@@ -10,6 +10,14 @@ All notable changes to flowrail are recorded here. The format follows [Keep a Ch
 - Buttons wait on their own work: Run now, Verify, Run checks, Save and the other buttons that start something show a ring and take no second press until it finishes; Run now holds until the routine's run record stops saying running (two minutes at most).
 - Filters remember their state per browser: the board's assignee, "Filed by agent" and GitHub switches, the memory type, the audit period and the tool in "Try a command". Search boxes are never kept.
 - The Graph page has three views, switched in the header and remembered per browser (`#/knowledge?view=graph|rings|tree`). **Rings** draws the repo around `CLAUDE.md` on one rhythm: skills and commands, area markers, documents grouped by area (a folder with many documents is one star with its count), routines and red lines, artifacts. **Tree** is the folder hierarchy with counts and area chips, navigable with the arrow keys. Areas come from `areas` in `flowrail/config.json` or a router table in `CLAUDE.md`; `GET /api/graph` now returns `areas`, and `ring` and `area` on each node.
+## Unreleased
+
+### Added
+
+- Runs page in the control room: every headless run with who started it (a routine or Run now), how long it took, its result and its output, plus what an unattended run may do (the allowed and refused tools). The sidebar counts runs that failed in the last day.
+- Apps: local programs in `flowrail/config.json` (`"apps"`) that the Runs page starts and stops (detached, no shell, output in `.flowrail/apps/`). File-only, like command routines.
+- Event routines: `"on": { "event": "github-actions", "repo", "workflow" }` shows a GitHub Actions workflow's last runs on the Routines page through `gh` (read-only, cached five minutes); `"on": { "event": "hook" }` lists a routine something else runs. Neither is ever scheduled.
+- Workflows: `workflowsDir` in `config.json` points the Workflows page at a folder of your own, and `## Action:` / `## Sub-command:` headings group the steps of a file with several routines in it. MANDATORY in a step heading marks a gate too.
 
 ## [0.1.0] (unreleased)
 
