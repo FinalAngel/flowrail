@@ -1,0 +1,16 @@
+# builtin: file-field (a script held by what the file it is pointed at says in its frontmatter).
+# The corpus project has no files, so every matched command holds as "cannot tell" (ask); the
+# blocks on a real field value are in test/file-field.test.js, which writes the files.
+#! params {"scripts":["scripts/send.ts"],"commands":[["npm","run","send"]],"flag":"--lead","field":"region","values":["germany"]}
+HOLD npx tsx scripts/send.ts --lead leads/de.md
+HOLD tsx ./scripts/send.ts --lead=leads/de.md
+HOLD node /work/project/scripts/send.ts --lead leads/de.md
+HOLD npm run send -- --lead leads/de.md
+HOLD npx tsx scripts/send.ts --to someone@example.com
+HOLD npx tsx scripts/send.ts --lead $LEAD
+HOLD bash -c 'npx tsx scripts/send.ts --lead x.md'
+HOLD cd scripts && npx tsx send.ts --lead ../leads/de.md
+ALLOW npx tsx scripts/other.ts --lead leads/de.md
+ALLOW cat scripts/send.ts
+ALLOW grep region leads/de.md
+ALLOW npm run build

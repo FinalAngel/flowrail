@@ -34,8 +34,8 @@ A red line is a seatbelt, not a jail. It holds the ordinary, direct form of an a
 | `why` | no | One or two sentences. Claude sees this when the hook fires, which is often enough for it to choose a different approach on its own. For a regex line it is also the plain-English summary on the dashboard. |
 | `severity` | yes | `block`, `ask` or `warn`. See below. |
 | `hook` | no | Enforcement before a tool call: a `builtin` or a `match`. |
-| `hook.builtin` | one of the two | A built-in matcher: `git-push`, `git-destructive`, `rm-dangerous`, `secret-files`, `flowrail-tamper`, `mcp-actions`, `email-send`, `payments`, `publish-deploy`, `infra-destructive`, `db-destructive`, `protect-path` or `command`. See [Built-in matchers](#built-in-matchers). |
-| `hook.params` | for `protect-path` and `command` | Parameters for a builtin: `protect-path` takes `{ "glob": "content/**" }` (add `"edits": true` to hold changes in place too); `command` takes `{ "argv": ["git", "commit"], "flags": ["--no-verify"] }`. |
+| `hook.builtin` | one of the two | A built-in matcher: `git-push`, `git-destructive`, `rm-dangerous`, `secret-files`, `flowrail-tamper`, `mcp-actions`, `email-send`, `payments`, `publish-deploy`, `infra-destructive`, `db-destructive`, `protect-path`, `command` or `file-field`. See [Built-in matchers](#built-in-matchers). |
+| `hook.params` | for `protect-path`, `command` and `file-field` | Parameters for a builtin: `protect-path` takes `{ "glob": "content/**" }` (add `"edits": true` to hold changes in place too); `command` takes `{ "argv": ["git", "commit"], "flags": ["--no-verify"] }`; `file-field` is described [below](#file-field). |
 | `hook.match` | one of the two | A JavaScript regular expression tested against the tool's subject. |
 | `hook.tool` | yes for `match`; defaults to `*` for `builtin` | `*`, one tool name (`Bash`), or several joined with `\|` (`Write\|Edit`). A builtin only looks at the tools it knows, so `*` is fine. |
 | `hook.flags` | no | Regular expression flags for `match`, for example `"i"`. |
@@ -78,7 +78,7 @@ When several red lines match one tool call, the most severe wins: `block` over `
 
 A builtin can ask for less than its line's severity: `git-destructive` blocks a force push but only asks before deleting a remote branch. A line's severity is a ceiling, so a `git-destructive` line with severity `ask` asks for everything and never blocks.
 
-What `ask` does when Claude Code runs with permissions bypassed depends on the Claude Code version. If a rule must hold in every mode, make it `block`.
+What `ask` does depends on how Claude Code runs: with permissions bypassed it depends on the version, and in auto mode Claude Code's own classifier answers the ask, not you. If a rule must hold in every mode, make it `block`.
 
 ## When something is wrong: fail closed
 
@@ -224,6 +224,25 @@ Paths are compared with symlinks resolved, for the project too: a link into the 
 ### `command`
 
 One command a rule quotes, matched on its argv instead of a prefix regex: `"hook": { "tool": "Bash", "builtin": "command", "params": { "argv": ["git", "commit"], "flags": ["--no-verify"] } }`. The program must match, the subcommand words must follow in order (a global option or two may sit in front), and every flag must be there, in any order, long or short, bundled or not: `git commit -m fix --no-verify`, `git commit -nm fix`, `git commit --no-verif`, `sudo git commit --no-verify` and `bash -c 'git commit -n -m x'` are all held; `git commit -m "--no-verify is banned"` is not. Short forms come from a small table (`--force`/`-f`, `--recursive`/`-r`, `--all`/`-a`, `--yes`/`-y`, and per command, like `git commit --no-verify`/`-n`); a flag without one matches in its long form. `flowrail init` writes this for a command a rule quotes (`` Never use `git commit --no-verify` ``), and `flowrail redlines verify` probes it with variants (flags reordered, the short form bundled, `sudo` in front) so it is never called covered unless they hold. A quoted command with shell syntax in it (`|`, `$`, quotes) falls back to a prefix regex.
+
+### `file-field`
+
+For a rule that depends on a record rather than on the command: hold a script when the file it is pointed at says so in its frontmatter.
+
+```json
+{
+  "id": "no-cold-outreach-de-at",
+  "title": "No first contact to leads in Germany or Austria",
+  "severity": "block",
+  "hook": { "tool": "Bash", "builtin": "file-field", "params": {
+    "scripts": ["scripts/send-email.ts"], "commands": [["npm", "run", "send-email"]],
+    "flag": "--lead", "field": "region", "values": ["germany", "austria"],
+    "except": { "status": ["responded"] }
+  } }
+}
+```
+
+A command matches when it runs one of `scripts`, as the program itself or as the first word after a runner (`npx tsx scripts/send-email.ts`, `node ./scripts/send-email.ts`, an absolute path; `cat scripts/send-email.ts` does not run it), or when it runs one of `commands` (matched like the `command` builtin). The guard then reads the first 64 KB of every file given to `flag` (`--lead a.md` or `--lead=a.md`), inside the project and not a secret file, and blocks when the frontmatter line `field:` starts with one of `values` (case-insensitive, quotes ignored). A file whose frontmatter matches `except` is let through. When no file is named, the value is a variable, or the file cannot be read, it holds at `missing` (default `ask`), since it cannot tell.
 
 ## What the hook tests
 

@@ -27,7 +27,7 @@ export const RECIPES = [
       + 'anywhere else.',
     severity: 'block',
     hook: { tool: 'Bash', builtin: 'git-destructive' },
-    detect: /force[- ]push|--force|reset --hard|destructive git|branch -D|rewrite (git )?history/i,
+    detect: /force[- ]push|\b(git|push)\b[^.;]*--force|reset --hard|destructive git|branch -D|rewrite (git )?history/i,
     starter: true,
   },
   {
@@ -102,7 +102,10 @@ export const RECIPES = [
     why: 'Email cannot be unsent. Drafts are fine; sending needs a human.',
     severity: 'block',
     hook: { tool: '*', builtin: 'email-send' },
-    detect: gate(String.raw`e-?mails?\b|newsletters?\b`),
+    // the rule gates sending ("never send an email", "no emails go out"), not every sentence with
+    // the word in it ("no dashes in the subject of an email").
+    detect: gate(String.raw`send\w*\b[^.;]*?\b(e-?mails?|mails?|newsletters?|batch(es)?|campaigns?)\b`
+      + String.raw`|e-?mails?\b[^.;]*?\b(sent|go(es)? out)\b|newsletters?\b`),
     gaps: 'email sent from a script of your own is not held',
   },
   {
@@ -230,6 +233,36 @@ const isPath = (w) => !/\s/.test(w) && !/^[a-z]+:\/\//i.test(w)
   && (w.includes('/') || /^\.?[\w-]*\.[a-z0-9]{1,6}$/i.test(w)) && !/^[\d./]+$/.test(w);
 const isCommand = (w) => /\s/.test(w) && /^[\w./-]+\s/.test(w) && !/^(the|a|an|to|and|or|not)\s/i.test(w);
 
+const CLI = /^(git|npm|npx|pnpm|yarn|bun|docker|kubectl|helm|terraform|aws|gcloud|gh|rm|curl|psql|mysql|make|cargo|pip3?|python3?|node|sudo)\s/;
+
+/**
+ * The part of a rule that forbids something: citations in parentheses dropped ("(`company/x.md`,
+ * bottom)" says where the rule lives), and of each clause only what follows its "never", "no" or
+ * "don't". "Run `npm run lint` before sending" and "`scripts/check.ts` enforces it" name what to do
+ * or what enforces the rule; "never touch `config/prod.yml`" names what is forbidden.
+ */
+function forbidden(rule) {
+  const code = [];
+  let t = String(rule).replace(/`[^`]*`/g, (m) => `\u0000${code.push(m) - 1}\u0000`);
+  // In parentheses a command is an example of what is forbidden; a path is where the rule lives.
+  const examples = (group) => (group.match(/\u0000\d+\u0000/g) || [])
+    .filter((ph) => {
+      const c = code[Number(ph.slice(1, -1))].slice(1, -1).trim();
+      return !isPath(c) && isCommand(c);
+    })
+    .join(' ');
+  for (let prev; prev !== t;) {
+    prev = t;
+    t = t.replace(/\([^()]*\)/g, (g) => ` ${examples(g)} `);
+  }
+  const neg = new RegExp(String.raw`\b${NEG}\b`, 'i');
+  const kept = t.split(/(?<=[.;:!?])\s+/).map((clause) => {
+    const m = neg.exec(clause);
+    return m ? clause.slice(m.index) : '';
+  });
+  return kept.join(' ').replace(/\u0000(\d+)\u0000/g, (_, i) => code[Number(i)]);
+}
+
 /**
  * What a rule names literally: quoted commands ("`npm run db:migrate:prod`") and paths (quoted,
  * or unquoted folders like infra/terraform/ and files like config/prod.yml). These are the
@@ -239,13 +272,14 @@ const isCommand = (w) => /\s/.test(w) && /^[\w./-]+\s/.test(w) && !/^(the|a|an|t
 export function literals(rule) {
   const commands = [];
   const paths = [];
-  const text = String(rule);
   // "Always run `pnpm test`", "Only use `src/`": a positive rule names what to do, not what to hold.
-  if (isPositive(text)) return { commands, paths };
+  if (isPositive(String(rule))) return { commands, paths };
+  const text = forbidden(rule);
   for (const m of text.matchAll(/`([^`]+)`|"([^"]+)"|'([^'\s][^']*)'/g)) {
     const q = (m[1] ?? m[2] ?? m[3]).trim();
     if (isPath(q)) paths.push(cleanDir(q));
-    else if (isCommand(q)) commands.push(q);
+    // Backticks mark code; prose in quotes ("quick time to certification") is a phrase, not a command.
+    else if (isCommand(q) && (m[1] !== undefined || CLI.test(q))) commands.push(q);
   }
   const bare = text.replace(/`[^`]*`|"[^"]*"/g, ' ');
   for (const m of bare.matchAll(/(?:^|[\s(])(\.{0,2}\/?[\w.-]+(?:\/[\w.*-]+)*\/)(?=[\s.,;:)!?]|$)/g)) {

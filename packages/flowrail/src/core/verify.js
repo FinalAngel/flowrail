@@ -90,12 +90,31 @@ function protectPathProbes(glob, edits) {
   };
 }
 
+/**
+ * file-field: run the script at a record that has the value (held), at one that does not and at
+ * one the exception lets through (allowed), and with no record at all (held: it cannot tell).
+ */
+function fileFieldProbes(p) {
+  const run = p.scripts?.[0] ? `node ${p.scripts[0]}` : p.commands?.[0] ? `${p.commands[0].join(' ')} --` : null;
+  if (!run || !p.flag || !p.field || !p.values?.length) return null;
+  const rec = (name, fields) => ({ path: `.flowrail-probe/${name}.md`, text: `---\n${Object.entries(fields).map(([k, v]) => `${k}: ${v}`).join('\n')}\n---\n` });
+  const files = [rec('held', { [p.field]: p.values[0] }), rec('other', { [p.field]: 'none-of-these' })];
+  const [key, vals] = Object.entries(p.except || {})[0] || [];
+  if (key && vals?.length) files.push(rec('except', { [p.field]: p.values[0], [key]: vals[0] }));
+  return {
+    hold: [`${run} ${p.flag} ${files[0].path}`, `${run} ${p.flag}=${files[0].path}`, run],
+    allow: files.slice(1).map((f) => `${run} ${p.flag} ${f.path}`),
+    files,
+  };
+}
+
 /** flowrail's probes for one red line, or null when it has none (a regex of your own). */
 function ownProbes(line) {
   const b = line.hook && line.hook.builtin;
   const params = line.hook.params || {};
   if (b === 'protect-path') return params.glob ? protectPathProbes(params.glob, !!params.edits) : null;
   if (b === 'command') return Array.isArray(params.argv) && params.argv.length ? commandVariants(params) : null;
+  if (b === 'file-field') return fileFieldProbes(params);
   if (b) return BUILTIN_PROBES[b] || null;
   const base = String(line.id).replace(/^protect-path-.*/, 'protect-path');
   return RECIPE_PROBES[base] || null;
@@ -156,12 +175,13 @@ export function verifyRedlines(rootOrPaths, opts = {}) {
       }
       const probes = probesFor(line);
       if (!probes) {
-        out.skipped.push({ id: line.id, why: 'a regex of your own: no built-in probes' });
+        out.skipped.push({ id: line.id, why: line.hook.builtin ? `${line.hook.builtin} has no built-in probes; add "probes" to the line` : 'a regex of your own: no built-in probes' });
         continue;
       }
       for (const f of probes.files || []) {
-        fs.mkdirSync(path.join(sandbox, path.dirname(f)), { recursive: true });
-        if (!fs.existsSync(path.join(sandbox, f))) fs.writeFileSync(path.join(sandbox, f), 'a\n');
+        const [rel, text] = typeof f === 'string' ? [f, 'a\n'] : [f.path, f.text];
+        fs.mkdirSync(path.join(sandbox, path.dirname(rel)), { recursive: true });
+        if (!fs.existsSync(path.join(sandbox, rel))) fs.writeFileSync(path.join(sandbox, rel), text);
       }
       const run = (probe) => {
         const { tool, input } = asCall(probe);

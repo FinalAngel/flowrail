@@ -12,7 +12,7 @@ import { hooksStatus } from '../src/core/hooks.js';
 import { driftStatus, logChange, loadLines } from '../src/core/redlines.js';
 import { verifyRedlines } from '../src/core/verify.js';
 import { verifyJournal } from '../src/core/journal.js';
-import { recipeFor, pathRule } from '../src/core/recipes.js';
+import { recipeFor, pathRule, literals } from '../src/core/recipes.js';
 import { run as doctor } from '../src/core/doctor.js';
 import { stateDir, acceptRules } from '../src/guard/state.js';
 import { decide } from '../src/guard/rules.js';
@@ -231,4 +231,39 @@ test('payments: billing changes ask even on a block line; moving money blocks', 
   for (const t of ['create_coupon', 'create_price', 'update_price', 'update_dispute', 'create_promotion_code', 'create_payment_link']) assert.equal(d(t), 'ask', t);
   for (const t of ['create_refund', 'create_payout', 'update_subscription', 'finalize_invoice']) assert.equal(d(t), 'deny', t);
   for (const t of ['create_customer', 'create_product', 'create_invoice', 'list_prices']) assert.equal(d(t), 'allow', t);
+});
+
+test('a rule\'s citations and the commands it says to run are not turned into blocks', () => {
+  const root = tmpdir();
+  fs.writeFileSync(path.join(root, 'CLAUDE.md'), [
+    '- Never use banned claims (`docs/strategy.md`, bottom): no "instant results".',
+    '- No spaced dashes in anything a customer reads: subject and body of every email. Run `npm run lint:copy` before sending; `scripts/send.md` step 2 gates it.',
+    '- Before any release: run `npm run check` and ask me. Never skip it.',
+    '- Save a memory with `npm run brain -- store "fact"`; it refuses to overwrite without `--force`.',
+    '- Never run migrations against prod (`npm run db:migrate:prod`).',
+  ].join('\n') + '\n');
+  const plan = planInit(root, { accept: [] });
+  const ids = plan.report.map((r) => r.lineId).join(' ');
+  assert.doesNotMatch(ids, /cmd-npm-run-lint-copy|cmd-npm-run-check|cmd-npm-run-brain|cmd-instant-results/, 'commands to run and prose quotes are not forbidden');
+  assert.doesNotMatch(ids, /protect-path-docs-strategy|protect-path-scripts-send/, 'a cited file is not a protected file');
+  assert.doesNotMatch(ids, /no-emails-without-signoff/, 'a rule about email copy is not a rule about sending email');
+  const force = plan.report.find((r) => r.quote.startsWith('Save a memory'));
+  assert.doesNotMatch(force?.lineId || '', /no-destructive-git/, '--force on a non-git command is not destructive git');
+  assert.deepEqual(literals('Never run migrations against prod (`npm run db:migrate:prod`).').commands, ['npm run db:migrate:prod'], 'a command given as an example of what is forbidden still is');
+  assert.deepEqual(literals('Never use banned claims (`docs/strategy.md`, bottom).'), { commands: [], paths: [] });
+});
+
+test('init on an existing red-lines.json adds nothing a line of yours already holds, and no stubs', () => {
+  const root = tmpdir();
+  fs.writeFileSync(path.join(root, 'CLAUDE.md'), '- Never send a batch of emails I have not signed off.\n- Always write tests.\n- Never merge on Fridays.\n');
+  fs.mkdirSync(path.join(root, 'flowrail'));
+  const mine = [{ id: 'mail-asks', title: 'Ask before mail', severity: 'ask', hook: { tool: '*', builtin: 'email-send' } }];
+  fs.writeFileSync(path.join(root, 'flowrail', 'red-lines.json'), JSON.stringify(mine));
+  const plan = planInit(root, { accept: ['no-emails-without-signoff'] });
+  const change = plan.changes.find((c) => c.path === 'flowrail/red-lines.json');
+  const ids = change ? JSON.parse(change.after).map((l) => l.id) : ['mail-asks'];
+  assert.ok(!ids.includes('no-emails-without-signoff'), 'your ask line is not joined by a block line on the same builtin');
+  assert.ok(!ids.some((id) => id.startsWith('rule-')), 'no declared-only stubs in a file you keep');
+  const row = plan.report.find((r) => r.quote.startsWith('Never send a batch'));
+  assert.match(row.lineId, /mail-asks/, 'the report points at your line');
 });

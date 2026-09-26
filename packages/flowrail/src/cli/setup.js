@@ -109,8 +109,15 @@ export async function init(_pos, flags, room) {
 
   const accept = [];
   let existing = new Set();
-  try { existing = new Set(loadLines(paths(root)).map((l) => l.id)); } catch { /* invalid JSON is reported by the plan */ }
-  const props = proposals(found).filter((pr) => !pr.starter && !existing.has(pr.recipe.id));
+  let yourBuiltins = new Set();
+  try {
+    const mine = loadLines(paths(root));
+    existing = new Set(mine.map((l) => l.id));
+    yourBuiltins = new Set(mine.map((l) => l.hook?.builtin).filter(Boolean));
+  } catch { /* invalid JSON is reported by the plan */ }
+  // A recipe whose builtin a line of yours already runs is not offered: your line and its severity win.
+  const props = proposals(found).filter((pr) => !pr.starter && !existing.has(pr.recipe.id)
+    && !yourBuiltins.has(pr.recipe.hook?.builtin));
   if (props.length) out(`\n${c.bold('Recipes that match your rules')}`);
   for (const pr of props) {
     const q = `  You wrote "${pr.quote}". Enforce it as ${c.cyan(pr.recipe.id)} (${recipeSeverity(pr.recipe, pr.rule || pr.quote)})?`;

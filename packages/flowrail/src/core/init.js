@@ -333,8 +333,28 @@ export function planInit(root, opts = {}) {
   if (!exists(p.redlines)) {
     add('flowrail/red-lines.json', JSON.stringify(wanted, null, 2) + '\n');
   } else if (Array.isArray(current)) {
+    // A file you already keep is yours: nothing is added that a line of yours already holds (same
+    // hook), and no declared-only stubs for rules you chose not to write a line for.
+    const what = (l) => (l && l.hook && l.hook.builtin ? JSON.stringify([l.hook.builtin, l.hook.params || null]) : null);
+    const held = new Map(current.filter(what).map((l) => [what(l), l.id]));
     const generated = new Set(report.flatMap((x) => (x.lines || []).map((l) => l.id)));
-    const extra = wanted.filter((l) => !existing.has(l.id) && (accept.includes(l.id) || l.id.startsWith('rule-') || generated.has(l.id)));
+    const yours = {};
+    const extra = wanted.filter((l) => {
+      if (existing.has(l.id) || !(accept.includes(l.id) || generated.has(l.id))) return false;
+      if (held.has(what(l))) { yours[l.id] = held.get(what(l)); return false; }
+      return true;
+    });
+    for (const row of report) {
+      const ids = row.lineId.split(' + ');
+      if (!ids.some((id) => yours[id])) continue;
+      row.lineId = ids.map((id) => yours[id] || id).join(' + ');
+      const line = current.find((l) => l.id === yours[ids.find((id) => yours[id])]);
+      row.detail = `your line ${line.id} (${line.severity}) runs the same matcher`
+        + (row.detail.includes('Not held:') ? `. ${row.detail.slice(row.detail.indexOf('Not held:'))}` : '');
+    }
+    for (const row of report) {
+      if (row.stub) row.detail = row.detail.replace(/; kept as a declared-only red line.*$/, '; not added, since red-lines.json is yours');
+    }
     if (extra.length) changes.push({ path: 'flowrail/red-lines.json', kind: 'change', internal: true, before: readText(p.redlines), after: JSON.stringify([...current, ...extra], null, 2) + '\n' });
   }
 
@@ -375,6 +395,9 @@ const RANK = { warn: 1, ask: 2, block: 3 };
  * severity. Lines already in red-lines.json (`existing`) are never merged away.
  * @returns {{lines: object[], merged: Object<string,string>}} merged: dropped id -> kept id
  */
+const hookKey = (l) => (l && l.hook && l.hook.builtin
+  ? JSON.stringify([l.hook.tool, l.hook.builtin, l.hook.params || null]) : null);
+
 function dedupe(lines, existing = new Set()) {
   const seen = new Set();
   const byHook = new Map();
@@ -383,7 +406,7 @@ function dedupe(lines, existing = new Set()) {
   for (const l of lines) {
     if (seen.has(l.id)) continue;
     seen.add(l.id);
-    const key = l.hook && l.hook.builtin ? JSON.stringify([l.hook.tool, l.hook.builtin, l.hook.params || null]) : null;
+    const key = hookKey(l);
     const first = key && byHook.get(key);
     if (first && !existing.has(l.id)) {
       if (RANK[l.severity] > RANK[first.severity]) first.severity = l.severity;

@@ -19,6 +19,7 @@ import { mcpActions, emailSend, payments } from './builtins/actions.js';
 import { publishDeploy, infraDestructive, dbDestructive } from './builtins/deploy.js';
 import { protectPath } from './builtins/protect-path.js';
 import { quotedCommand } from './builtins/command.js';
+import { fileField } from './builtins/file-field.js';
 
 export { toPosix, resolveWord, realish, mcpName, globToRegex } from './builtins/common.js';
 export { isSecretName, findSecret, SECRET_PATTERNS } from './builtins/secrets.js';
@@ -107,6 +108,27 @@ export const BUILTINS = {
     },
     summary: (s, p = {}) => `${VERB[s]} ${[...(p.argv || []), ...(p.flags || [])].join(' ')}`
       + ((p.flags || []).length ? ' (its flags in any order, long or short, bundled or not)' : ''),
+  },
+  'file-field': {
+    check: fileField,
+    params: (p) => {
+      const strings = (v) => Array.isArray(v) && v.every((w) => typeof w === 'string');
+      const cmds = p.commands === undefined
+        || (Array.isArray(p.commands) && p.commands.every(strings));
+      const ok = (strings(p.scripts) || Array.isArray(p.commands)) && cmds
+        && (p.scripts === undefined || strings(p.scripts))
+        && typeof p.flag === 'string' && p.flag.startsWith('-') && typeof p.field === 'string'
+        && strings(p.values) && p.values.length
+        && (p.missing === undefined || ['block', 'ask', 'warn'].includes(p.missing))
+        && (p.except === undefined || Object.values(p.except).every(strings));
+      return ok ? null : 'file-field needs "params": { "scripts": ["scripts/send.ts"], '
+        + '"flag": "--lead", "field": "region", "values": ["Germany"] }';
+    },
+    summary: (s, p = {}) => {
+      const runs = [...(p.scripts || []), ...(p.commands || []).map((c) => c.join(' '))];
+      return `${VERB[s]} ${runs.join(', ') || '(no command set)'} when the file after ${p.flag} `
+        + `has ${p.field}: ${(p.values || []).join(' or ')}; asks when there is no such file`;
+    },
   },
   'protect-path': {
     check: protectPath,
