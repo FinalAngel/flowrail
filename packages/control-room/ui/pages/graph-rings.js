@@ -223,7 +223,12 @@ export function rings(el, ctx) {
     if (t === 1) {
       const hubLabel = items[0].label;
       c.font = '600 12px Geist, system-ui, sans-serif'; c.fillStyle = colors.text; c.textAlign = 'center'; c.textBaseline = 'top';
-      c.fillText(hubLabel, cx, cy + size(items[0]) + 6);
+      // A backing in the page colour keeps the name readable over the skills ring.
+      const ly = cy + size(items[0]) + 6, lw = c.measureText(hubLabel).width + 12;
+      c.globalAlpha = 0.85; c.fillStyle = colors.surface;
+      c.beginPath(); c.roundRect(cx - lw / 2, ly - 3, lw, 20, 10); c.fill();
+      c.globalAlpha = 1; c.fillStyle = colors.text;
+      c.fillText(hubLabel, cx, ly);
     }
     if (hot) { c.strokeStyle = colors.text; c.lineWidth = 1.5; const [px, py] = xy(hot); c.beginPath(); c.arc(px, py, size(hot) + 4, 0, 7); c.stroke(); }
   }
