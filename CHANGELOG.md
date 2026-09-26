@@ -2,6 +2,12 @@
 
 All notable changes to flowrail are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/). Before 1.0, minor versions may change file formats and the HTTP API; any such change is listed here with what to do about it.
 
+## [Unreleased]
+
+### Added
+
+- The Graph page has three views, switched in the header and remembered per browser (`#/knowledge?view=graph|rings|tree`). **Rings** draws the repo around `CLAUDE.md` on one rhythm: skills and commands, area markers, documents grouped by area (a folder with many documents is one star with its count), routines and red lines, artifacts. **Tree** is the folder hierarchy with counts and area chips, navigable with the arrow keys. Areas come from `areas` in `flowrail/config.json` or a router table in `CLAUDE.md`; `GET /api/graph` now returns `areas`, and `ring` and `area` on each node.
+
 ## [0.1.0] (unreleased)
 
 First public release. Not yet on npm. Two packages: `flowrail`, the guard and its CLI, and `@finalangel/flowrail-room` (command `flowrail-room`), the optional dashboard.

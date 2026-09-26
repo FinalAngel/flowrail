@@ -1,4 +1,6 @@
 import { h, icon, clear, skeleton, errorBox, empty } from '../lib/dom.js';
+import { rings } from './graph-rings.js';
+import { tree } from './graph-tree.js';
 
 const KINDS = [
   ['doc', 'Docs'], ['folder', 'Folders'], ['memory', 'Memories'], ['skill', 'Skills'],
@@ -19,7 +21,43 @@ function shapeSvg(kind) {
   return el;
 }
 
+const VIEWS = [['graph', 'Graph', 'Docs, memories and automation, linked by Markdown links, [[wikilinks]] and folders.'],
+  ['rings', 'Rings', 'The repo in rings: skills, areas, documents, routines and artifacts around CLAUDE.md.'],
+  ['tree', 'Tree', 'Every folder and document, with the area it belongs to.']];
+const PREF = 'flowrail-map-view';
+const known = (v) => VIEWS.some(([k]) => k === v);
+
+// Graph | Rings | Tree. The view is in the address (#/knowledge?view=rings) and remembered per browser.
 export function mount(el, ctx) {
+  const pick = (params) => {
+    const v = params.get('view');
+    if (known(v)) return v;
+    try { const s = localStorage.getItem(PREF); if (known(s)) return s; } catch { /* private mode */ }
+    return 'graph';
+  };
+  let view = pick(ctx.params), child = null;
+  const sub = h('p.sub');
+  const seg = h('div.seg', { role: 'group', 'aria-label': 'View' });
+  const host = h('div');
+  el.append(h('header.page-head', h('div', h('h1', 'Graph'), sub), h('div.actions', seg)), host);
+  const show = (params) => {
+    try { child?.(); } catch (e) { console.error(e); }
+    try { localStorage.setItem(PREF, view); } catch { /* private mode */ }
+    sub.textContent = VIEWS.find(([k]) => k === view)[2];
+    clear(seg).append(...VIEWS.map(([k, label]) => h('button', { type: 'button', 'aria-pressed': String(k === view), onclick: () => ctx.navigate(`#/knowledge?view=${k}`) }, label)));
+    clear(host);
+    child = ({ graph: force, rings, tree })[view](host, { ...ctx, params });
+  };
+  show(ctx.params);
+  const unmount = () => child?.();
+  unmount.update = (params) => {
+    const v = pick(params);
+    if (v !== view) { view = v; show(params); } else child?.update?.(params);
+  };
+  return unmount;
+}
+
+function force(el, ctx) {
   let graph = null, byId = new Map(), adj = new Map();
   const on = new Set(KINDS.map(([k]) => k));
   let showAll = false, focusId = null, selected = null, hover = null;
@@ -27,9 +65,8 @@ export function mount(el, ctx) {
   let vis = [], visLinks = [], alpha = 0, raf = 0, colors = {};
   const view = { x: 0, y: 0, k: 1 };
 
-  const head = h('header.page-head', h('div', h('h1', 'Graph'), h('p.sub', 'Docs, memories and automation, linked by Markdown links, [[wikilinks]] and folders.')));
   const body = h('div');
-  el.append(head, body);
+  el.append(body);
 
   const canvas = h('canvas', { tabindex: '0', role: 'img', 'aria-label': 'Knowledge graph. Use the search field or the detail panel to move between nodes. Arrow keys pan, plus and minus zoom.' });
   const status = h('div.canvas-status', { 'aria-live': 'polite' });
@@ -290,6 +327,7 @@ export function mount(el, ctx) {
     if (n.kind === 'memory') return '#/memory?q=' + encodeURIComponent(n.label);
     if (n.kind === 'redline') return '#/redlines';
     if (n.kind === 'routine') return '#/routines';
+    if (n.kind === 'artifact') return '#/artifacts';
     if (n.kind === 'folder' || n.kind === 'hub') return null;
     return n.path ? '#/docs?path=' + encodeURIComponent(n.path) : null;
   };

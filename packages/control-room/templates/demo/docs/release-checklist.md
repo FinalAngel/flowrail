@@ -8,3 +8,5 @@ The short version. The full procedure with the sign-off gate is `flowrail/workfl
 - [ ] Version bumped in `package.json`
 - [ ] Human sign-off on the release notes
 - [ ] Tag pushed and package published by a human
+
+The playbooks are in `flowrail/workflows/`; the reports agents file for you land in `flowrail/artifacts/`.

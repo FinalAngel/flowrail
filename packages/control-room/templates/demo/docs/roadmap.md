@@ -25,4 +25,6 @@ What we plan to ship, in order. Dates are targets, not promises.
 - A hosted cloud. Sync stays peer to peer or through a folder you choose.
 - Real-time collaborative editing. Paper Plane is a personal notebook.
 
+Decisions are recorded in `docs/decisions/`, and what the team learned along the way in `flowrail/memory/`.
+
 See [architecture](architecture.md) for how sync works today, and [[sync-merges-per-paragraph]] for the reasoning.
