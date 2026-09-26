@@ -1,5 +1,5 @@
 {
-  "name": "@flowrail/control-room",
+  "name": "@finalangel/flowrail-room",
   "version": "0.1.0",
   "description": "A local dashboard for flowrail: red lines, audit, comments your agent acts on, and an optional board. Zero third-party deps, no cloud, MIT.",
   "type": "module",
@@ -39,5 +39,8 @@
   "bugs": {
     "url": "https://github.com/FinalAngel/flowrail/issues"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
 }

@@ -149,7 +149,7 @@ function setupCard(setup, reload, ctx) {
           !s.done && i === firstOpen && s.hint && hint(s.hint, ctx)))))));
 }
 
-/** A hint may end in a command ("…, then: npx @flowrail/control-room routines install"): show the prose, then a copyable block. */
+/** A hint may end in a command ("…, then: npx @finalangel/flowrail-room routines install"): show the prose, then a copyable block. */
 function hint(text, ctx) {
   const m = /(?:^|:\s*)((?:npx|flowrail|claude|git)\s.+)$/.exec(text);
   if (!m) return h('p.meta', text);

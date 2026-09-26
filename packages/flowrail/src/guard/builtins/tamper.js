@@ -358,7 +358,7 @@ function copiesTree(bin, args, sources, dest, cwd, kind) {
 
 /** The arguments after a flowrail binary, however it is invoked; null when this is not flowrail. */
 export function flowrailArgs(argv) {
-  const isPkg = (w) => /^(flowrail|@flowrail\/control-room)(@[\w.^~<>=*-]+)?$/.test(w)
+  const isPkg = (w) => /^(flowrail|@finalangel\/flowrail-room)(@[\w.^~<>=*-]+)?$/.test(w)
     || /(^|\/)flowrail-[\w.-]*\.tgz$/.test(w);
   const afterPkg = (list) => {
     for (let i = 0; i < list.length; i++) {
@@ -393,7 +393,7 @@ export function flowrailArgs(argv) {
 function tamperCli(argv) {
   const [bin, sub, ...more] = argv;
   const removes = ['uninstall', 'remove', 'rm', 'un', 'r', 'unlink'].includes(sub);
-  const ours = more.some((a) => /^(flowrail|@flowrail\/control-room)(@.*)?$/.test(a));
+  const ours = more.some((a) => /^(flowrail|@finalangel\/flowrail-room)(@.*)?$/.test(a));
   if (['npm', 'pnpm', 'yarn', 'bun'].includes(bin) && removes && ours) {
     return 'uninstalling flowrail';
   }

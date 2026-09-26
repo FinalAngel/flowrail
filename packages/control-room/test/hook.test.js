@@ -18,7 +18,7 @@ test('session-start lists open comments and stays silent in bypass modes', () =>
   comments.add(p, { path: 'flowrail/WELCOME.md', quote: 'line', body: 'Please fix the intro' });
   const out = run('session-start', { cwd: p.root }).stdout;
   assert.match(out, /1 open comment[\s\S]*Please fix the intro/);
-  assert.match(out, /npx @flowrail\/control-room resolve/);
+  assert.match(out, /npx @finalangel\/flowrail-room resolve/);
   assert.equal(run('session-start', { cwd: p.root, permission_mode: 'bypassPermissions' }).stdout, '');
 });
 

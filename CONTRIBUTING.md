@@ -24,7 +24,7 @@ node packages/control-room/bin/flowrail-room.js demo   # dashboard on a seeded e
 npm run check                # the repo's own red lines
 ```
 
-Two packages: `packages/flowrail` (the guard, published as `flowrail`) and `packages/control-room` (the dashboard, published as `@flowrail/control-room`).
+Two packages: `packages/flowrail` (the guard, published as `flowrail`) and `packages/control-room` (the dashboard, published as `@finalangel/flowrail-room`).
 
 ## Contributing a red line
 

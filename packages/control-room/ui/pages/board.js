@@ -106,7 +106,7 @@ export function mount(el, ctx) {
     data = d;
     if (!data.tasks.length) {
       root.append(h('header.page-head', h('div', h('h1', 'Board')), h('div.actions', h('button.btn.primary', { type: 'button', onclick: () => create('Todo') }, icon('plus'), 'New task'))),
-        empty('The board is flowrail/board.json. You and your agents file tasks into it.', 'npx @flowrail/control-room task "Write the first test" --priority P2', ctx));
+        empty('The board is flowrail/board.json. You and your agents file tasks into it.', 'npx @finalangel/flowrail-room task "Write the first test" --priority P2', ctx));
       return;
     }
     const people = [...new Set(data.tasks.map((t) => t.assignee).filter(Boolean))].sort();

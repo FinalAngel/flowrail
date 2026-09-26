@@ -56,7 +56,7 @@ A tool that sits in front of every command your agent runs should be small enoug
 
 ## Will it mess up my repo?
 
-`flowrail init` shows every change before making it and asks. It adds the guard in `.claude/flowrail/guard/`, `flowrail/config.json`, `flowrail/red-lines.json`, a `.flowrail/` line in `.gitignore` and hook entries in `.claude/settings.json`. It does not touch `package.json` and installs nothing with npm. `flowrail-room init` (the optional `@flowrail/control-room` package) adds the control room on top: the rest of `flowrail/` and a two-line marked block in `CLAUDE.md`. Both keep your existing hooks and never overwrite an existing file.
+`flowrail init` shows every change before making it and asks. It adds the guard in `.claude/flowrail/guard/`, `flowrail/config.json`, `flowrail/red-lines.json`, a `.flowrail/` line in `.gitignore` and hook entries in `.claude/settings.json`. It does not touch `package.json` and installs nothing with npm. `flowrail-room init` (the optional `@finalangel/flowrail-room` package) adds the control room on top: the rest of `flowrail/` and a two-line marked block in `CLAUDE.md`. Both keep your existing hooks and never overwrite an existing file.
 
 `flowrail uninstall` removes the guard, its hooks and the `CLAUDE.md` block, again with a preview. It leaves `flowrail/` in place, because those are your tasks, memories and rules; delete the folder yourself if you want them gone.
 

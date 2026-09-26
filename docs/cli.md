@@ -3,7 +3,7 @@
 flowrail ships two command-line tools:
 
 - `flowrail` (the `flowrail` package) is the guard: setup, red lines, checks and the audit. Run it as `npx flowrail <command>`.
-- `flowrail-room` (the optional `@flowrail/control-room` package) is the control room: the dashboard, board, comments, memory and routines. Run it as `npx @flowrail/control-room <command>`, or `flowrail-room <command>` once it is installed. It also runs every guard command. `flowrail <command>` hands a control room command to `flowrail-room` when it is installed, and otherwise prints how to start it.
+- `flowrail-room` (the optional `@finalangel/flowrail-room` package) is the control room: the dashboard, board, comments, memory and routines. Run it as `npx @finalangel/flowrail-room <command>`, or `flowrail-room <command>` once it is installed. It also runs every guard command. `flowrail <command>` hands a control room command to `flowrail-room` when it is installed, and otherwise prints how to start it.
 
 Only people run these: the guard that enforces red lines is copied into the repo and runs with plain `node`, so nothing security-relevant depends on the npm packages. Commands find the workspace by walking up from the current directory until they reach `flowrail/config.json`.
 
@@ -125,7 +125,7 @@ Removes the guard, its hooks and, if the control room added them, the `CLAUDE.md
 
 ## Status
 
-These and the sections down to Memory, plus Routines, are control room commands: `npx @flowrail/control-room <command>` or `flowrail-room <command>`.
+These and the sections down to Memory, plus Routines, are control room commands: `npx @finalangel/flowrail-room <command>` or `flowrail-room <command>`.
 
 ### `flowrail-room status`
 
@@ -308,7 +308,7 @@ With no subcommand: the pre-tool-use hook run from the installed package, for a 
 
 ### `flowrail room [args]`
 
-Runs `flowrail-room` with the given arguments if `@flowrail/control-room` is installed (in the project's `node_modules`, next to `flowrail`, or on the PATH); otherwise prints one line with the `npx @flowrail/control-room …` command and exits 1. The control room's own commands (`flowrail start`, `demo`, `today`, `task`, `tasks`, `comments`, `resolve`, `remember`, `recall`, `routines`) are handed over the same way.
+Runs `flowrail-room` with the given arguments if `@finalangel/flowrail-room` is installed (in the project's `node_modules`, next to `flowrail`, or on the PATH); otherwise prints one line with the `npx @finalangel/flowrail-room …` command and exits 1. The control room's own commands (`flowrail start`, `demo`, `today`, `task`, `tasks`, `comments`, `resolve`, `remember`, `recall`, `routines`) are handed over the same way.
 
 ### `flowrail --version`, `flowrail help`
 

@@ -4,7 +4,7 @@ All notable changes to flowrail are recorded here. The format follows [Keep a Ch
 
 ## [0.1.0] (unreleased)
 
-First public release. Not yet on npm. Two packages: `flowrail`, the guard and its CLI, and `@flowrail/control-room` (command `flowrail-room`), the optional dashboard.
+First public release. Not yet on npm. Two packages: `flowrail`, the guard and its CLI, and `@finalangel/flowrail-room` (command `flowrail-room`), the optional dashboard.
 
 ### Added
 

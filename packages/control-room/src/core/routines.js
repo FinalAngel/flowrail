@@ -192,7 +192,7 @@ export function install(p, opts = {}) {
   const errors = validate(load(p));
   if (errors.length) throw bad(errors.join('; '));
   if (opts.http && commandRoutines(p).length) {
-    throw bad(`Command routines (${commandRoutines(p).map((r) => r.id).join(', ')}) are scheduled from the terminal, where you see each command first: npx @flowrail/control-room routines install`, 403);
+    throw bad(`Command routines (${commandRoutines(p).map((r) => r.id).join(', ')}) are scheduled from the terminal, where you see each command first: npx @finalangel/flowrail-room routines install`, 403);
   }
   uninstall(p);
   fs.mkdirSync(p.runs, { recursive: true });

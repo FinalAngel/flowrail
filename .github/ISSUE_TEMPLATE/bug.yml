@@ -13,7 +13,7 @@ body:
     id: repro
     attributes:
       label: Steps to reproduce
-      description: The smallest sequence of commands that shows the problem. `npx @flowrail/control-room demo` is a good clean starting point.
+      description: The smallest sequence of commands that shows the problem. `npx @finalangel/flowrail-room demo` is a good clean starting point.
       render: shell
     validations:
       required: true

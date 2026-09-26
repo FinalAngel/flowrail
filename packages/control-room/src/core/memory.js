@@ -31,7 +31,7 @@ const firstLine = (s) => String(s).trim().split('\n')[0].replace(/^#+\s*/, '').s
 export function rebuildIndex(p) {
   const items = list(p);
   const byType = TYPES.map((t) => [t, items.filter((i) => i.type === t)]).filter(([, xs]) => xs.length);
-  const lines = ['# Memory index', '', 'One line per memory. Maintained by `npx @flowrail/control-room remember`; edit the memory files, not this list.', ''];
+  const lines = ['# Memory index', '', 'One line per memory. Maintained by `npx @finalangel/flowrail-room remember`; edit the memory files, not this list.', ''];
   for (const [type, xs] of byType) {
     lines.push(`## ${type}`, '');
     for (const i of xs) lines.push(`- [${i.name}](${i.name}.md): ${i.description}`);

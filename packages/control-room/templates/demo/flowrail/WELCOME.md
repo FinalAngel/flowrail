@@ -1,6 +1,6 @@
 # Welcome to the Paper Plane example
 
-This is a sample flowrail workspace for a small open-source note app. It lives in a temp folder and nothing here touches your repo. Click around, leave comments, move cards. Run `npx @flowrail/control-room demo` again for a fresh copy.
+This is a sample flowrail workspace for a small open-source note app. It lives in a temp folder and nothing here touches your repo. Click around, leave comments, move cards. Run `npx @finalangel/flowrail-room demo` again for a fresh copy.
 
 ## Things to try
 
@@ -12,4 +12,4 @@ This is a sample flowrail workspace for a small open-source note app. It lives i
 
 ## How this maps to your project
 
-Run `npx flowrail init` in your own repo for the guard alone, or `npx @flowrail/control-room init` for the guard plus this dashboard. It shows every file it will add or change and asks before writing anything.
+Run `npx flowrail init` in your own repo for the guard alone, or `npx @finalangel/flowrail-room init` for the guard plus this dashboard. It shows every file it will add or change and asks before writing anything.

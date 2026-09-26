@@ -2,17 +2,17 @@
 
 This walks you through the first fifteen minutes with flowrail in a project you already work on. By the end, Claude will have tried to push and been held by a rule, acted on a comment you left in a document, filed a task and stored a memory.
 
-You need Node 20 or later, a git repository, and [Claude Code](https://docs.claude.com/en/docs/claude-code). If you want to look around before touching your own project, run `npx @flowrail/control-room demo` instead: it builds an example workspace in a temp folder.
+You need Node 20 or later, a git repository, and [Claude Code](https://docs.claude.com/en/docs/claude-code). If you want to look around before touching your own project, run `npx @finalangel/flowrail-room demo` instead: it builds an example workspace in a temp folder.
 
 ## Minute 0: install
 
 In the root of your project:
 
 ```sh
-npx @flowrail/control-room init
+npx @finalangel/flowrail-room init
 ```
 
-This walkthrough uses the optional control room (`@flowrail/control-room`): the guard plus a board, docs and memory. If all you want is the guard (red lines and hooks, no board, memory or `CLAUDE.md` block), run `npx flowrail init` instead, then read minutes 1, 2 and 11.
+This walkthrough uses the optional control room (`@finalangel/flowrail-room`): the guard plus a board, docs and memory. If all you want is the guard (red lines and hooks, no board, memory or `CLAUDE.md` block), run `npx flowrail init` instead, then read minutes 1, 2 and 11.
 
 flowrail looks before it writes. It prints what it found, for example:
 
@@ -85,12 +85,12 @@ npx flowrail redlines test "sudo git -c core.x=y push --tags"
 In a second terminal:
 
 ```sh
-npx @flowrail/control-room
+npx @finalangel/flowrail-room
 ```
 
 Your browser opens `http://127.0.0.1:4747`. The dashboard shows what needs you, a setup checklist driven by the files on disk, the red lines strip ("6 armed · held 1× this week"), the Today card and the sprint with four onboarding tasks. The header says "Guard live" when the hooks are installed and the guard's files match what flowrail shipped.
 
-The Today card lists what happened in the repo since midnight: the push you just declined, tasks filed and moved, commits, memories. The onboarding tasks and the starter memory and report are not news, so they never show there. When you come back after a while, "While you were away" lists what happened since your last visit. `npx @flowrail/control-room today` prints the day's list.
+The Today card lists what happened in the repo since midnight: the push you just declined, tasks filed and moved, commits, memories. The onboarding tasks and the starter memory and report are not news, so they never show there. When you come back after a while, "While you were away" lists what happened since your last visit. `npx @finalangel/flowrail-room today` prints the day's list.
 
 Open Red lines. Each rule leads with a summary of what it holds, and the push you declined is in the log.
 
@@ -108,7 +108,7 @@ Ask Claude to file something:
 > file a task to update the changelog before the next release
 ```
 
-Claude runs the control room's `task` command (`npx @flowrail/control-room task "Update the changelog before the next release"`). It lands in the current sprint (add `--sprint backlog` to park it), shows up in `tasks`, and appears on the board tagged "Filed by agent". A task you file yourself from a terminal is yours: it is assigned to your `git config user.name` (or "you").
+Claude runs the control room's `task` command (`npx @finalangel/flowrail-room task "Update the changelog before the next release"`). It lands in the current sprint (add `--sprint backlog` to park it), shows up in `tasks`, and appears on the board tagged "Filed by agent". A task you file yourself from a terminal is yours: it is assigned to your `git config user.name` (or "you").
 
 Ask it to remember something:
 
@@ -116,7 +116,7 @@ Ask it to remember something:
 > remember that releases are cut from the release branch, never from main
 ```
 
-Claude runs `npx @flowrail/control-room remember "..." --name release-branch` (the type defaults to `project`) and writes `flowrail/memory/release-branch.md`. In a later session, `npx @flowrail/control-room recall "which branch do releases come from"` finds it, and so does the Memory page. Recall is plain word matching with light stemming and a few synonyms (deploy, release and ship; npm, pnpm, yarn and "package manager"; schedule and weekdays), so "release schedule" finds "we deploy on Fridays".
+Claude runs `npx @finalangel/flowrail-room remember "..." --name release-branch` (the type defaults to `project`) and writes `flowrail/memory/release-branch.md`. In a later session, `npx @finalangel/flowrail-room recall "which branch do releases come from"` finds it, and so does the Memory page. Recall is plain word matching with light stemming and a few synonyms (deploy, release and ship; npm, pnpm, yarn and "package manager"; schedule and weekdays), so "release schedule" finds "we deploy on Fridays".
 
 ## Minute 11: what would it have caught?
 

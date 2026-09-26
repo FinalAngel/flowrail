@@ -4,7 +4,7 @@ How a Paper Plane version goes out. The agent prepares; a human publishes.
 
 ## Step 1: Freeze the scope
 
-Check that every task labelled with the release is Done or moved to the next sprint. File anything left over with `npx @flowrail/control-room task`.
+Check that every task labelled with the release is Done or moved to the next sprint. File anything left over with `npx @finalangel/flowrail-room task`.
 
 ## Step 2: Write the changelog
 

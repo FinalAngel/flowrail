@@ -338,7 +338,7 @@ export function planInit(root, opts = {}) {
     if (extra.length) changes.push({ path: 'flowrail/red-lines.json', kind: 'change', internal: true, before: readText(p.redlines), after: JSON.stringify([...current, ...extra], null, 2) + '\n' });
   }
 
-  // The control room (@flowrail/control-room) adds its files here: board, docs, memory, workflows.
+  // The control room (@finalangel/flowrail-room) adds its files here: board, docs, memory, workflows.
   if (opts.room) opts.room({ root, p, config, add, changes });
 
   // The guard itself, copied into the repo so the hooks need no npm.

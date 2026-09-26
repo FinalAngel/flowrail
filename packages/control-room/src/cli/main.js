@@ -5,7 +5,7 @@ import { VERSION } from '../core/pkg.js';
 
 export const HELP = `flowrail Control Room ${VERSION}
 
-Usage: npx @flowrail/control-room <command>   (installed: flowrail-room <command>)
+Usage: npx @finalangel/flowrail-room <command>   (installed: flowrail-room <command>)
 
   (no command)            dashboard on http://127.0.0.1:4747  --port N  --no-open
   init                    the guard plus the control room (board, docs, memory)  --yes  --agents-md

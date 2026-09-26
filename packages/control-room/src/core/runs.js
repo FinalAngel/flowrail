@@ -11,7 +11,7 @@ export const HEADLESS = {
   permissionMode: 'dontAsk',
   // Read-only flowrail subcommands only: never uninstall, hooks, routines, init or upgrade.
   allowed: ['Read', 'Grep', 'Glob', 'LS', 'Bash(git status:*)', 'Bash(git log:*)', 'Bash(git diff:*)', 'Bash(git show:*)',
-    ...READ_ONLY.flatMap((sub) => ['npx flowrail', 'flowrail', 'npx @flowrail/control-room', 'flowrail-room'].map((cli) => `Bash(${cli} ${sub}:*)`)), 'Write(./flowrail/artifacts/**)'],
+    ...READ_ONLY.flatMap((sub) => ['npx flowrail', 'flowrail', 'npx @finalangel/flowrail-room', 'flowrail-room'].map((cli) => `Bash(${cli} ${sub}:*)`)), 'Write(./flowrail/artifacts/**)'],
   disallowed: ['WebFetch', 'WebSearch', 'Bash(git push:*)', 'Bash(git commit:*)', 'Bash(rm:*)', 'Bash(curl:*)', 'Bash(wget:*)', 'Bash(ssh:*)', 'Bash(scp:*)', 'Edit', 'NotebookEdit'],
 };
 const CAP = 200 * 1024;

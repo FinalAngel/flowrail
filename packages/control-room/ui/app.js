@@ -12,7 +12,7 @@ export async function api(path, body) {
     : { method: 'POST', headers: { ...headers, 'content-type': 'application/json', 'X-Flowrail': '1' }, body: JSON.stringify(body) };
   let res;
   try { res = await fetch('/api' + path, init); }
-  catch { throw new Error('The flowrail server is not reachable. Is `npx @flowrail/control-room` still running?'); }
+  catch { throw new Error('The flowrail server is not reachable. Is `npx @finalangel/flowrail-room` still running?'); }
   if (res.status === 401) { showStale(); const e = new Error('This tab is from an older flowrail run. Reload.'); e.status = 401; throw e; }
   const txt = await res.text();
   let data = null;
@@ -259,11 +259,11 @@ function openPalette() {
     const slug = ql.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'fact';
     const run = q
       ? [
-          { section: 'Run', title: `npx @flowrail/control-room task "${quoted}"`, copy: `npx @flowrail/control-room task "${quoted}"`, icon: 'terminal', mono: true, kind: 'file a task' },
-          { section: 'Run', title: `npx @flowrail/control-room recall "${quoted}"`, copy: `npx @flowrail/control-room recall "${quoted}"`, icon: 'terminal', mono: true, kind: 'recall' },
-          { section: 'Run', title: `npx @flowrail/control-room remember "${quoted}" --type project --name ${slug}`, copy: `npx @flowrail/control-room remember "${quoted}" --type project --name ${slug}`, icon: 'terminal', mono: true, kind: 'remember' },
+          { section: 'Run', title: `npx @finalangel/flowrail-room task "${quoted}"`, copy: `npx @finalangel/flowrail-room task "${quoted}"`, icon: 'terminal', mono: true, kind: 'file a task' },
+          { section: 'Run', title: `npx @finalangel/flowrail-room recall "${quoted}"`, copy: `npx @finalangel/flowrail-room recall "${quoted}"`, icon: 'terminal', mono: true, kind: 'recall' },
+          { section: 'Run', title: `npx @finalangel/flowrail-room remember "${quoted}" --type project --name ${slug}`, copy: `npx @finalangel/flowrail-room remember "${quoted}" --type project --name ${slug}`, icon: 'terminal', mono: true, kind: 'remember' },
         ]
-      : ['npx @flowrail/control-room status', 'npx flowrail doctor', 'npx flowrail redlines test "git push origin main"', 'npx flowrail check'].map((c) => ({ section: 'Run', title: c, copy: c, icon: 'terminal', mono: true }));
+      : ['npx @finalangel/flowrail-room status', 'npx flowrail doctor', 'npx flowrail redlines test "git push origin main"', 'npx flowrail check'].map((c) => ({ section: 'Run', title: c, copy: c, icon: 'terminal', mono: true }));
     items = [...go, ...run];
     active = 0; paint();
     if (q.length < 2) return;

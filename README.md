@@ -150,7 +150,7 @@ More red lines come from plain-English recipes (`protect-path`, `publish-deploy`
 
 ## Control Room (optional)
 
-A separate package, [`@flowrail/control-room`](packages/control-room/), adds a local dashboard on top of the guard. The guard does not need it.
+A separate package, [`@finalangel/flowrail-room`](packages/control-room/), adds a local dashboard on top of the guard. The guard does not need it.
 
 <p align="center">
   <picture>
@@ -160,9 +160,9 @@ A separate package, [`@flowrail/control-room`](packages/control-room/), adds a l
 </p>
 
 ```sh
-npx @flowrail/control-room demo   # look around a sample workspace in a temp folder
-npx @flowrail/control-room init   # the guard plus the control room files
-npx @flowrail/control-room        # the dashboard on http://127.0.0.1:4747
+npx @finalangel/flowrail-room demo   # look around a sample workspace in a temp folder
+npx @finalangel/flowrail-room init   # the guard plus the control room files
+npx @finalangel/flowrail-room        # the dashboard on http://127.0.0.1:4747
 ```
 
 It shows each red line in plain English with its held count, a Try it box and the audit; comments on Markdown files that the next Claude Code session picks up; a board, a memory store with keyword recall, and what happened in the repo today.

@@ -196,7 +196,7 @@ function printNext(guardOnly) {
   out(`\n${c.bold('Next')}`);
   out(`  ${c.cyan('claude'.padEnd(w))} ask it to "git push". The red line holds it and it asks you instead.`);
   out(`  ${c.cyan(`${CLI} redlines`.padEnd(w))} what is armed, in plain English`);
-  if (!guardOnly) out(`  ${c.cyan('npx @flowrail/control-room'.padEnd(w))} dashboard on http://127.0.0.1:4747`);
+  if (!guardOnly) out(`  ${c.cyan('npx @finalangel/flowrail-room'.padEnd(w))} dashboard on http://127.0.0.1:4747`);
   out(`  ${c.cyan(`${CLI} doctor`.padEnd(w))} if anything looks off`);
 }
 

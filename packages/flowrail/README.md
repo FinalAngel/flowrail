@@ -18,6 +18,6 @@ The guard also guards itself. Commands that would edit or empty its files, the r
 
 `init` copies the guard (plain Node files, no dependencies) into `.claude/flowrail/guard/`, writes `flowrail/red-lines.json` and adds hook entries to `.claude/settings.json`. It reads the rules in your `CLAUDE.md`, says which ones are covered or only partly covered, and ends by probing every red line (`npx flowrail redlines verify` does the same later). Commit the files and everyone who clones is guarded, with no `npm install`.
 
-About 50 ms per tool call on a laptop, about 30 ms of it Node starting. The bypass corpus runs in CI: 848 bypass probes held, 330 false-positive probes allowed, 22 known gaps documented. `npx flowrail audit` shows what it adds beyond the `deny` and `ask` rules in your `settings.json`. No network, no telemetry. The optional dashboard is a separate package, [`@flowrail/control-room`](https://www.npmjs.com/package/@flowrail/control-room).
+About 50 ms per tool call on a laptop, about 30 ms of it Node starting. The bypass corpus runs in CI: 848 bypass probes held, 330 false-positive probes allowed, 22 known gaps documented. `npx flowrail audit` shows what it adds beyond the `deny` and `ask` rules in your `settings.json`. No network, no telemetry. The optional dashboard is a separate package, [`@finalangel/flowrail-room`](https://www.npmjs.com/package/@finalangel/flowrail-room).
 
 Docs, the tamper model and the bypass corpus: https://github.com/FinalAngel/flowrail. MIT.

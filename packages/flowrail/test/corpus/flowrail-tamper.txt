@@ -255,13 +255,13 @@ ALLOW npx flowrail redlines test "git push"
 # the control room's spellings of the same commands
 HOLD flowrail-room routines install
 HOLD flowrail room routines install
-HOLD npx @flowrail/control-room routines install
-HOLD npx @flowrail/control-room@latest uninstall
+HOLD npx @finalangel/flowrail-room routines install
+HOLD npx @finalangel/flowrail-room@latest uninstall
 HOLD flowrail-room uninstall
-HOLD npm uninstall @flowrail/control-room
-HOLD node node_modules/@flowrail/control-room/bin/flowrail-room.js routines install
+HOLD npm uninstall @finalangel/flowrail-room
+HOLD node node_modules/@finalangel/flowrail-room/bin/flowrail-room.js routines install
 ALLOW flowrail-room routines status
-ALLOW npx @flowrail/control-room demo
+ALLOW npx @finalangel/flowrail-room demo
 # globs, loop variables, piped file lists and copied trees (the shell expands them before running)
 HOLD for f in .claude/*/*/*.mjs; do cp /dev/null "$f"; done
 HOLD for f in .claude/flowrail/guard/*.js .claude/flowrail/guard/*/*.js; do : > "$f"; done

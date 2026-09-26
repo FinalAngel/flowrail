@@ -1,6 +1,6 @@
 # Concepts
 
-flowrail is two things. First, a hook that makes Claude Code respect your hard rules before a tool runs. Second, and optional, a set of conventions for keeping an agent's working state in your repo, with a CLI and a dashboard that read and write those files: the control room, a separate package (`@flowrail/control-room`, command `flowrail-room`). This page explains the pieces and why they are shaped the way they are.
+flowrail is two things. First, a hook that makes Claude Code respect your hard rules before a tool runs. Second, and optional, a set of conventions for keeping an agent's working state in your repo, with a CLI and a dashboard that read and write those files: the control room, a separate package (`@finalangel/flowrail-room`, command `flowrail-room`). This page explains the pieces and why they are shaped the way they are.
 
 ## The repo is the state
 

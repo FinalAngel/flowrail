@@ -24,7 +24,7 @@ ${c.bold('Maintenance')}
   flowrail uninstall              remove the guard and its hooks; flowrail/ stays
 
 ${c.dim(LEGEND)}
-${c.dim('Dashboard, tasks, comments and routines: npx @flowrail/control-room (optional, separate package)')}
+${c.dim('Dashboard, tasks, comments and routines: npx @finalangel/flowrail-room (optional, separate package)')}
 `;
 
 const COMMANDS = {
@@ -49,7 +49,7 @@ export function workspace() {
   if (!root) {
     err('no workspace in this folder or its parents.');
     out(`  ${c.cyan('npx flowrail init')}   set one up here`);
-    out(`  ${c.cyan('npx @flowrail/control-room demo')}   look around a sample workspace first`);
+    out(`  ${c.cyan('npx @finalangel/flowrail-room demo')}   look around a sample workspace first`);
     process.exit(1);
   }
   return paths(root);

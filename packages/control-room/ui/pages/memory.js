@@ -45,14 +45,14 @@ export function mount(el, ctx) {
         h('div.row', { style: 'margin-bottom:12px' }, h('h2', { style: 'font-size:13px;font-weight:500;color:var(--text-2)' }, hits.length ? `${hits.length} ${hits.length === 1 ? 'match' : 'matches'}` : 'Nothing recalled'), h('button.link', { type: 'button', style: 'margin-left:auto', onclick: () => { input.value = ''; recall(); } }, 'Clear')),
         hits.length
           ? h('div.mem-grid.stagger', hits.map((x) => card({ ...(byName.get(x.name) || {}), ...x, description: byName.get(x.name)?.description || x.title || x.snippet, body: byName.get(x.name) ? byName.get(x.name).body : x.snippet })))
-          : h('p.muted', `No memory mentions “${q}”. Try other words, or store it with npx @flowrail/control-room remember.`));
+          : h('p.muted', `No memory mentions “${q}”. Try other words, or store it with npx @finalangel/flowrail-room remember.`));
     } catch (e) { if (my === seq) clear(results).append(errorBox(e, recall)); }
   }
   input.addEventListener('input', debounce(recall, 220));
 
   function paintBrowse() {
     clear(browse);
-    if (!items.length) { browse.append(empty('Nothing remembered yet. Agents store facts with one command, and recall them before they guess.', 'npx @flowrail/control-room remember "Releases go out on Tuesdays" --type project --name release-day', ctx)); return; }
+    if (!items.length) { browse.append(empty('Nothing remembered yet. Agents store facts with one command, and recall them before they guess.', 'npx @finalangel/flowrail-room remember "Releases go out on Tuesdays" --type project --name release-day', ctx)); return; }
     const counts = Object.fromEntries(TYPES.map((t) => [t, items.filter((m) => m.type === t).length]));
     const pick = only && items.filter((m) => m.name === only);
     if (pick?.length) { browse.append(h('div.row', { style: 'margin-bottom:12px' }, h('span.meta.mono', only), h('button.link', { type: 'button', style: 'margin-left:auto', onclick: () => { only = ''; history.replaceState(null, '', '#/memory'); paintBrowse(); } }, 'Show all')), h('div.mem-grid', pick.map(card))); return; }

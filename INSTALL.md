@@ -24,7 +24,7 @@ command -v claude gh
 - If `flowrail/config.json` exists, flowrail is already set up. Skip to step 4 and offer `npx flowrail upgrade` instead of `init`.
 - If this is not a git repository, flowrail still works, but say so: the user loses the ability to review flowrail changes with `git diff`.
 - `claude` and `gh` are optional. Without Claude Code the dashboard, board, memory and checks work, but hooks do nothing.
-- Ask whether the user wants **the guard only** (`npx flowrail init`: red lines and hooks, nothing else) or **the guard plus the control room** (`npx @flowrail/control-room init`, a separate optional package).
+- Ask whether the user wants **the guard only** (`npx flowrail init`: red lines and hooks, nothing else) or **the guard plus the control room** (`npx @finalangel/flowrail-room init`, a separate optional package).
 
 ## 2. Explain
 
@@ -36,7 +36,7 @@ Tell the user, in a few sentences, what will happen:
 - `init` lists the MCP servers it finds and asks whether to guard their send/push/merge tools.
 - `init` reads `CLAUDE.md` and `AGENTS.md` and lists every rule it finds as covered, partial or not covered, and says which list items it skipped because they are not rules. Rules nothing covers are written into `red-lines.json` as "declared only", so they stay visible.
 - `.flowrail/` is added to `.gitignore`. It holds per-machine state.
-- The guard-only `npx flowrail init` writes no `CLAUDE.md` block: the hooks need no instructions. With `npx @flowrail/control-room init` there is also a `flowrail/` board, docs and memory with starter content, and a two-line block between `<!-- flowrail:start -->` and `<!-- flowrail:end -->` in `CLAUDE.md` that tells future sessions to stop and ask when a red line holds, and where reports go.
+- The guard-only `npx flowrail init` writes no `CLAUDE.md` block: the hooks need no instructions. With `npx @finalangel/flowrail-room init` there is also a `flowrail/` board, docs and memory with starter content, and a two-line block between `<!-- flowrail:start -->` and `<!-- flowrail:end -->` in `CLAUDE.md` that tells future sessions to stop and ask when a red line holds, and where reports go.
 - Nothing is sent over the network. No account is created.
 
 ## 3. Ask, then install
@@ -47,7 +47,7 @@ Then run it interactively, so the user sees each diff and answers each prompt th
 
 ```sh
 npx flowrail init                 # the guard only
-npx @flowrail/control-room init   # the guard plus the control room
+npx @finalangel/flowrail-room init   # the guard plus the control room
 ```
 
 `init` lists the rules it found in the user's files with a verdict, the files it will touch, and diffs for files that already exist. It may ask whether to guard the MCP servers it found, and whether to enforce a rule it recognizes (`You wrote "Do not deploy without approval". Enforce it as no-deploy-without-asking (ask)? [Y/n]`). At the end it probes every red line with calls it must hold and calls it must allow, and shows what the red lines would have caught in the user's last 30 days of Claude Code sessions (read locally, nothing is sent). Relay these prompts to the user; do not answer them on the user's behalf.
@@ -83,7 +83,7 @@ Then suggest the live version for their next session: ask Claude to push the cur
 Tell the user:
 
 - `npx flowrail redlines` lists what is armed, and `npx flowrail audit` replays their past sessions through the red lines.
-- If they chose the control room, `npx @flowrail/control-room` opens the dashboard at `http://127.0.0.1:4747`. The setup checklist on the first screen shows what is left.
+- If they chose the control room, `npx @finalangel/flowrail-room` opens the dashboard at `http://127.0.0.1:4747`. The setup checklist on the first screen shows what is left.
 - Commit `.claude/flowrail/guard/`, `.claude/settings.json` and `flowrail/red-lines.json`, so teammates get the guard when they clone.
 - `flowrail/red-lines.json` is where their rules live. Recipes: [docs/red-lines.md](docs/red-lines.md#recipes).
 - `npx flowrail uninstall` removes the guard, its hooks and the `CLAUDE.md` block and leaves their data.
