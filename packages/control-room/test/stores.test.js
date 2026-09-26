@@ -51,3 +51,22 @@ test('a memory store backs the Memory page and recall', async () => {
   assert.equal(facts.at(-1).name, 'new-fact');
   assert.equal((await req('POST', '/api/memory', { _action: 'trash', name: 'use-pnpm' })).status, 405);
 });
+
+test('routine and run stores: listed and run here, scheduled elsewhere', async () => {
+  const ran = [];
+  const routinesStore = { list: () => [{ id: 'lint', title: 'Lint', installed: false, scheduler: { label: 'the repo', command: 'make schedule' }, run: { type: 'command', cmd: ['make', 'lint'] } }], runNow: (id) => { ran.push(id); return { id: 'r1' }; } };
+  const runsStore = { list: () => [{ id: 'r1', title: 'Lint', status: 'ok', startedAt: '2026-01-01T00:00:00Z' }], get: (id) => (id === 'r1' ? { id, log: 'done' } : null) };
+  const s2 = await startServer({ root: p.root, port: 0, plugins: [{ id: 'auto', stores: { routines: routinesStore, runs: runsStore } }] });
+  try {
+    const r = (method, url, body) => new Promise((resolve, reject) => {
+      const q = http.request({ host: '127.0.0.1', port: s2.port, method, path: url, headers: { Host: `127.0.0.1:${s2.port}`, 'X-Flowrail-Token': s2.token, ...(method === 'POST' ? { 'X-Flowrail': '1' } : {}) } }, (res) => { let d = ''; res.on('data', (c) => { d += c; }); res.on('end', () => resolve({ status: res.statusCode, json: JSON.parse(d || 'null') })); });
+      q.on('error', reject); if (body) q.write(JSON.stringify(body)); q.end();
+    });
+    assert.equal((await r('GET', '/api/routines')).json[0].scheduler.command, 'make schedule');
+    assert.equal((await r('POST', '/api/routines', { _action: 'run', id: 'lint' })).json.id, 'r1');
+    assert.deepEqual(ran, ['lint']);
+    assert.equal((await r('POST', '/api/routines', { _action: 'install' })).status, 405);
+    assert.equal((await r('GET', '/api/runs/r1')).json.log, 'done');
+    assert.equal((await r('GET', '/api/runs')).json[0].id, 'r1');
+  } finally { await s2.close(); }
+});

@@ -110,7 +110,7 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
   const mem = () => memory.memoryFor(p);
   // Where artifacts and links live: config "artifactsDir" and "linksFile" (inside the repo), else flowrail/.
   const inRepo = (rel) => typeof rel === 'string' && rel.trim() && !path.isAbsolute(rel) && !rel.split(/[\\/]/).includes('..') && path.join(root, rel);
-  { const c = loadConfig(p); p.artifacts = inRepo(c.artifactsDir) || p.artifacts; p.links = inRepo(c.linksFile) || p.links; docs.setRoots(root, c.docsRoots); }
+  { const c = loadConfig(p); p.artifacts = inRepo(c.artifactsDir) || p.artifacts; p.links = inRepo(c.linksFile) || p.links; p.agents = inRepo(c.agentsDir) || p.agents; docs.setRoots(root, c.docsRoots); }
   const token = crypto.randomBytes(32).toString('hex');
   const tokenOk = (t) => typeof t === 'string' && t.length === token.length && crypto.timingSafeEqual(Buffer.from(t), Buffer.from(token));
   const clients = new Set();
@@ -236,10 +236,16 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
     'GET /api/workflows': () => workflows.list(p),
 
     'GET /api/routines': async () => {
+      if (routines.routinesFor(p)) return routines.list(p);
       const gh = await routines.githubRuns(p);
       return routines.list(p).map((r) => (gh[r.id] ? { ...r, github: gh[r.id] } : r));
     },
     'POST /api/routines': async (b) => {
+      const store = routines.routinesFor(p);
+      if (store) {
+        if (b._action === 'run') return store.runNow(need(b.id, 'id'));
+        throw new HttpError(405, 'these routines are scheduled by the repo itself, not from here');
+      }
       switch (b._action) {
         case 'run': return routines.runNow(p, need(b.id, 'id'), { wait: false });
         case 'install': return routines.install(p, { http: true });
@@ -276,7 +282,7 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
     'GET /api/apps/log': (_b, q) => ({ id: q.get('id'), log: apps.log(p, need(q.get('id'), 'id')) }),
     'GET /api/search': (_b, q) => search(p, q.get('q')),
     'GET /api/plugins': () => plugins.describe(exts),
-    'GET /api/doctor': async () => ({ checks: [...await doctor(p, { serving: true }), ...routines.doctorChecks(p)], headless: runs.HEADLESS, threatModel: THREAT_MODEL, server: { host: '127.0.0.1', port: getPort() } }),
+    'GET /api/doctor': async () => ({ checks: [...await doctor(p, { serving: true }), ...(routines.routinesFor(p) ? [] : routines.doctorChecks(p))], headless: runs.HEADLESS, threatModel: THREAT_MODEL, server: { host: '127.0.0.1', port: getPort() } }),
   };
 
   for (const pl of exts) {

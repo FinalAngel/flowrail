@@ -103,11 +103,14 @@ export function start(p, spec, meta = {}) {
   return { id, record, done };
 }
 
+/** Run records: a plugin's store (`stores.runs`: list(limit) and get(id)) when one is set, else .flowrail/runs/. */
 export function list(p, limit = 50) {
+  if (p.stores?.runs) return p.stores.runs.list(limit);
   return listFiles(p.runs, '.json').reverse().slice(0, limit).map((f) => readJson(path.join(p.runs, f), null)).filter((r) => r && r.id);
 }
 
 export function get(p, id) {
+  if (p.stores?.runs) return p.stores.runs.get(id);
   if (!/^[\w-]{1,64}$/.test(id)) return null;
   const r = readJson(path.join(p.runs, `${id}.json`), null);
   if (!r) return null;

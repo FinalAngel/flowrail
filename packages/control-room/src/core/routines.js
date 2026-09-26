@@ -146,7 +146,15 @@ function installedIds(p) {
   return ids;
 }
 
+/**
+ * The routines the pages show and run: a plugin's store when one is set (`stores.routines`: list()
+ * and runNow(id)), else flowrail/routines.json. A store's routines are scheduled by the repo's own
+ * tooling, so installing, saving and deleting them here is refused.
+ */
+export const routinesFor = (p) => p.stores?.routines || null;
+
 export function list(p, now = new Date()) {
+  if (routinesFor(p)) return routinesFor(p).list();
   const last = lastRuns(p);
   const installed = installedIds(p);
   return load(p).map((r) => ({

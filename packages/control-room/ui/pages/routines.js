@@ -18,13 +18,16 @@ export function mount(el, ctx) {
   function render(list) {
     list = Array.isArray(list) ? list : list?.routines || [];
     const installed = list.some((r) => r.installed);
+    // Routines from a store are scheduled by the repo's own tooling: say which, and offer no Install.
+    const managed = list.find((r) => r.scheduler)?.scheduler;
     root.append(h('header.page-head',
-      h('div', h('h1', 'Routines'), h('p.sub', 'Scheduled agent runs that report, not act, and the ones an event starts (GitHub Actions, a hook). Defined in flowrail/routines.json.')),
-      list.length ? h('div.actions', installed
+      h('div', h('h1', 'Routines'), h('p.sub', managed ? `Scheduled runs that report, not act. Scheduled by ${managed.label}.` : 'Scheduled agent runs that report, not act, and the ones an event starts (GitHub Actions, a hook). Defined in flowrail/routines.json.')),
+      list.length && !managed ? h('div.actions', installed
         ? h('button.btn', { type: 'button', onclick: () => sched('uninstall') }, 'Unschedule all')
         : h('button.btn.primary', { type: 'button', onclick: () => sched('install') }, 'Schedule routines')) : null));
     if (!list.length) { root.append(empty('A routine is a prompt or a command on a schedule, for example a Monday review of the board.', 'npx @finalangel/flowrail-room routines install', ctx)); return; }
-    if (!installed) root.append(h('div.notice.warn', { style: 'margin-bottom:16px' }, icon('alert'), h('div.body', h('span', 'Nothing is scheduled yet. flowrail uses launchd on macOS and crontab on Linux.'), cmd('npx @finalangel/flowrail-room routines install', ctx))));
+    if (managed && list.some((r) => r.installed === false)) root.append(h('div.notice.warn', { style: 'margin-bottom:16px' }, icon('alert'), h('div.body', h('span', 'Some routines are not scheduled on this machine.'), cmd(managed.command, ctx))));
+    else if (!installed && !managed) root.append(h('div.notice.warn', { style: 'margin-bottom:16px' }, icon('alert'), h('div.body', h('span', 'Nothing is scheduled yet. flowrail uses launchd on macOS and crontab on Linux.'), cmd('npx @finalangel/flowrail-room routines install', ctx))));
     root.append(h('div.card', { style: 'padding:4px 0' }, h('div.table-wrap', h('table.tbl.stack-sm',
       h('thead', h('tr', h('th', 'Routine'), h('th', 'Schedule'), h('th', 'Last run'), h('th', 'Next'), h('th', h('span.sr-only', 'Actions')))),
       h('tbody', list.map((r) => {
