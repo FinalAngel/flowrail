@@ -37,6 +37,7 @@ import { today, parseSince } from './core/today.js';
 import { watch } from './core/events.js';
 import { readJson } from 'flowrail/api';
 import * as plugins from './core/plugins.js';
+import * as library from './core/library.js';
 
 const UI_DIR = path.join(PKG_ROOT, 'ui');
 const MIME = {
@@ -235,7 +236,9 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
       if (b._action === 'trash') return artifacts.trash(p, need(b.name, 'name'));
       throw new HttpError(400, '_action must be trash');
     },
-    'GET /api/links': () => readJson(p.links, []),
+    'GET /api/links': () => library.links(p, readJson),
+    'GET /api/library': () => library.library(root, loadConfig(p)),
+    'GET /api/context': () => library.context(root, loadConfig(p)),
     'GET /api/runs': () => runs.list(p),
     'GET /api/search': (_b, q) => search(p, q.get('q')),
     'GET /api/plugins': () => plugins.describe(exts),

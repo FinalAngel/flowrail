@@ -163,16 +163,26 @@ function transcripts(dir, today) {
   });
 }
 
-function git(dir, args) {
-  execFileSync('git', ['-c', 'user.name=flowrail demo', '-c', 'user.email=demo@example.invalid', '-c', 'commit.gpgsign=false', ...args], { cwd: dir, stdio: 'ignore', timeout: 10000 });
+function git(dir, args, date) {
+  const env = date ? { ...process.env, GIT_AUTHOR_DATE: date, GIT_COMMITTER_DATE: date } : process.env;
+  execFileSync('git', ['-c', 'user.name=flowrail demo', '-c', 'user.email=demo@example.invalid', '-c', 'commit.gpgsign=false', ...args], { cwd: dir, stdio: 'ignore', timeout: 10000, env });
 }
+
+// The Library shows how long ago each document changed: older docs land in earlier commits.
+const HISTORY = [
+  [140, 'Record the first decisions', ['docs/decisions', 'docs/release-checklist.md']],
+  [55, 'Architecture and reading notes', ['docs/architecture.md', 'docs/ENGINEERING.md', 'flowrail/context/crdt-primer']],
+];
 
 /** Create the demo workspace in `dir` (which must not exist or be empty). */
 export function seed(dir, today = new Date()) {
   fs.mkdirSync(dir, { recursive: true });
   const p = paths(dir);
   copyTree(TEMPLATE, dir, today);
-  const config = { ...defaultConfig('Paper Plane'), sprintStart: mondayOf(addDays(today, -28)), demo: true, lastVisit: at(today, 1, 18, 30) };
+  const config = {
+    ...defaultConfig('Paper Plane'), sprintStart: mondayOf(addDays(today, -28)), demo: true, lastVisit: at(today, 1, 18, 30),
+    areas: [{ name: 'Product', router: 'docs/PRODUCT.md' }, { name: 'Engineering', router: 'docs/ENGINEERING.md' }],
+  };
   writeJson(p.config, config);
   writeJson(p.board, boardFor(config, today));
   rebuildIndex(p);
@@ -197,6 +207,10 @@ export function seed(dir, today = new Date()) {
 
   try {
     git(dir, ['init', '-q', '-b', 'main']);
+    for (const [days, msg, files] of HISTORY) {
+      git(dir, ['add', '--', ...files]);
+      git(dir, ['commit', '-q', '-m', msg], at(today, days, 11, 0));
+    }
     git(dir, ['add', '-A']);
     git(dir, ['commit', '-q', '-m', 'Paper Plane: example workspace']);
     fs.appendFileSync(path.join(dir, 'docs', 'roadmap.md'), '\n<!-- draft: reorder after the encryption decision -->\n');
