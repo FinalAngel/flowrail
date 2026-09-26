@@ -55,9 +55,25 @@ const NAV = [
   ['Safety', [['redlines', 'Red lines', '/redlines'], ['security', 'Security', '/security']]],
 ];
 const SETTINGS = ['settings', 'Settings', '/settings'];
-const PAGES = [...NAV.flatMap(([, items]) => items), SETTINGS];
+let PAGES = [...NAV.flatMap(([, items]) => items), SETTINGS];
+const MODULE = {};
 const ALIAS = { '/graph': '/knowledge', '/dashboard': '/' };
 const ICON = { dashboard: 'dashboard', board: 'board', docs: 'docs', graph: 'graph', memory: 'memory', artifacts: 'artifacts', routines: 'routines', workflows: 'workflows', team: 'team', redlines: 'redlines', security: 'security', settings: 'settings' };
+
+/** Plugin pages join their group (a new group sits above Safety); one on a built-in path replaces it. */
+async function loadPlugins() {
+  let list = [];
+  try { list = await api('/plugins'); } catch { return; }
+  for (const pg of list.flatMap((pl) => pl.pages)) {
+    for (const [, items] of NAV) { const i = items.findIndex(([, , href]) => href === pg.path); if (i >= 0) items.splice(i, 1); }
+    let group = NAV.find(([g]) => g === (pg.group || 'Now'));
+    if (!group) { group = [pg.group, []]; NAV.splice(NAV.length - 1, 0, group); }
+    group[1].push([pg.id, pg.title, pg.path]);
+    ICON[pg.id] = pg.icon || 'file';
+    MODULE[pg.id] = pg.module;
+  }
+  PAGES = [...NAV.flatMap(([, items]) => items), SETTINGS];
+}
 
 function parseHash() {
   const raw = decodeURI(location.hash.slice(1)) || '/';
@@ -324,7 +340,7 @@ async function route() {
   }
   document.title = `${page[1]} · flowrail`;
   let mod;
-  try { mod = await import(`./pages/${page[0]}.js`); }
+  try { mod = await import(MODULE[page[0]] || `./pages/${page[0]}.js`); }
   catch (e) { if (my === routeSeq) el.append(h('div.error', { role: 'alert' }, icon('alert'), `Could not load the ${page[1]} page. ${e.message}`)); return; }
   if (my !== routeSeq) return;
   const dispose = [];
@@ -352,6 +368,6 @@ async function route() {
 window.addEventListener('hashchange', route);
 listeners.add(debounce(() => refreshShell(), 400));
 renderSidebar(); renderTopbar();
-route();
+loadPlugins().finally(route);
 refreshShell();
 connectEvents();

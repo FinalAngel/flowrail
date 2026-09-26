@@ -4,6 +4,7 @@
 //   GET /                   -> ui/index.html
 //   GET /ui/<file>          -> ui/<file> (app.css, app.js, pages/*.js, fonts/*, favicon.svg, ...)
 //   GET /favicon.ico        -> ui/favicon.svg when present, else 204
+//   GET /x/<plugin>/<file>  -> a plugin's static files (see src/core/plugins.js), same CSP as /ui
 //   GET /artifacts/<name>   -> flowrail/artifacts/<name>.html, served with a sandbox CSP (scripts, no popups,
 //                              own origin) and connect-src 'none', so a report cannot call the API or read the page
 //   /api/*                  -> JSON API (see docs/api.md), /api/events is Server-Sent Events
@@ -35,6 +36,7 @@ import { overview, search, drift } from './core/overview.js';
 import { today, parseSince } from './core/today.js';
 import { watch } from './core/events.js';
 import { readJson } from 'flowrail/api';
+import * as plugins from './core/plugins.js';
 
 const UI_DIR = path.join(PKG_ROOT, 'ui');
 const MIME = {
@@ -98,8 +100,9 @@ function need(v, name) {
 }
 
 /** Build the request handler for a workspace. `getPort` returns the bound port (for the Host check). */
-export function createApp(root, getPort, { auditEnv = process.env } = {}) {
+export function createApp(root, getPort, { auditEnv = process.env, plugins: extra = [] } = {}) {
   const p = paths(root);
+  const exts = plugins.prepare(extra);
   const token = crypto.randomBytes(32).toString('hex');
   const tokenOk = (t) => typeof t === 'string' && t.length === token.length && crypto.timingSafeEqual(Buffer.from(t), Buffer.from(token));
   const clients = new Set();
@@ -235,8 +238,17 @@ export function createApp(root, getPort, { auditEnv = process.env } = {}) {
     'GET /api/links': () => readJson(p.links, []),
     'GET /api/runs': () => runs.list(p),
     'GET /api/search': (_b, q) => search(p, q.get('q')),
+    'GET /api/plugins': () => plugins.describe(exts),
     'GET /api/doctor': async () => ({ checks: [...await doctor(p, { serving: true }), ...routines.doctorChecks(p)], headless: runs.HEADLESS, threatModel: THREAT_MODEL, server: { host: '127.0.0.1', port: getPort() } }),
   };
+
+  for (const pl of exts) {
+    const ctx = { root, paths: p, broadcast, HttpError };
+    for (const [key, fn] of Object.entries(pl.routes || {})) {
+      const [method, name] = key.split(' ');
+      routes[`${method} /api/x/${pl.id}/${name}`] = (b, q) => fn(b, q, ctx);
+    }
+  }
 
   function checkRequest(req, pathname, url) {
     const port = getPort();
@@ -258,8 +270,8 @@ export function createApp(root, getPort, { auditEnv = process.env } = {}) {
     res.end(data);
   }
 
-  function serveUi(res, rel) {
-    const uiReal = fs.existsSync(UI_DIR) ? fs.realpathSync(UI_DIR) : UI_DIR;
+  function serveUi(res, rel, dir = UI_DIR) {
+    const uiReal = fs.existsSync(dir) ? fs.realpathSync(dir) : dir;
     const file = path.join(uiReal, rel);
     if (rel.includes('\0') || !file.startsWith(uiReal + path.sep)) return send(res, 404, { error: 'not found' });
     let real;
@@ -303,6 +315,11 @@ export function createApp(root, getPort, { auditEnv = process.env } = {}) {
       if (req.method === 'GET' || req.method === 'HEAD') {
         if (pathname === '/' || pathname === '/index.html') return serveIndex(res);
         if (pathname.startsWith('/ui/')) return serveUi(res, pathname.slice(4));
+        if (pathname.startsWith('/x/')) {
+          const [, , id, ...rest] = pathname.split('/');
+          const pl = exts.find((x) => x.id === id && x.ui);
+          return pl ? serveUi(res, rest.join('/'), pl.ui) : send(res, 404, { error: 'not found' });
+        }
         if (pathname === '/favicon.ico') return fs.existsSync(path.join(UI_DIR, 'favicon.svg')) ? serveUi(res, 'favicon.svg') : send(res, 204, '');
         if (pathname.startsWith('/artifacts/')) {
           const file = artifacts.fileFor(p, pathname.slice('/artifacts/'.length));
@@ -347,9 +364,9 @@ export function createApp(root, getPort, { auditEnv = process.env } = {}) {
  * Start the server on the first free port from `port` to `port + tries - 1`.
  * @returns {Promise<{server: http.Server, token: string, port: number, url: string, close: () => Promise<void>, tried: number[]}>}
  */
-export async function startServer({ root, port = 4747, tries = 11, auditEnv }) {
+export async function startServer({ root, port = 4747, tries = 11, auditEnv, plugins: extra }) {
   let bound = port;
-  const app = createApp(root, () => bound, { auditEnv });
+  const app = createApp(root, () => bound, { auditEnv, plugins: extra });
   const server = http.createServer(app);
   server.keepAliveTimeout = 5000;
   const tried = [];

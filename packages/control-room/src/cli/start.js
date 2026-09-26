@@ -13,6 +13,7 @@ import { cliName } from 'flowrail/api';
 import { seed } from '../core/demo.js';
 import { readJson } from 'flowrail/api';
 import { registerPort, unregisterPort } from '../core/ports.js';
+import { fromConfig } from '../core/plugins.js';
 
 function openBrowser(url) {
   const cmd = process.platform === 'darwin' ? ['open', [url]] : process.platform === 'win32' ? ['cmd', ['/c', 'start', '', url]] : ['xdg-open', [url]];
@@ -26,7 +27,7 @@ function openBrowser(url) {
 async function serve(p, flags, banner, auditEnv) {
   const config = loadConfig(p);
   const want = Number(flags.port) || config.port || 4747;
-  const s = await startServer({ root: p.root, port: want, auditEnv });
+  const s = await startServer({ root: p.root, port: want, auditEnv, plugins: await fromConfig(p.root, config.plugins) });
   // The guard reads the live ports and holds HTTP clients aimed at them (the API token is in the page).
   await registerPort(s.port).catch(() => {});
   const o = overview(p);

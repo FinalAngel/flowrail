@@ -56,6 +56,37 @@ export function mount(el, ctx) {
 
 Every page needs an empty state that says what the page is for, shows the CLI command that fills it, and offers example data.
 
+## Plugins: your own pages without a fork
+
+A plugin adds pages and API routes to the control room from your own repo. It is an object:
+
+```js
+// room/crm.mjs
+import path from 'node:path';
+export default {
+  id: 'crm',                                            // [a-z][a-z0-9-]*
+  ui: path.join(import.meta.dirname, 'ui'),             // served at /x/crm/<file>
+  pages: [{ id: 'leads', title: 'Leads', path: '/leads', group: 'Sales', icon: 'board', module: 'leads.js' }],
+  routes: {
+    'GET leads': (body, query, ctx) => readLeads(ctx.root), // GET /api/x/crm/leads
+    'POST leads': (body, query, ctx) => saveLead(ctx.root, body),
+  },
+};
+```
+
+Load it one of two ways:
+
+- **From config.** Add `"plugins": ["room/crm.mjs"]` to `flowrail/config.json` (paths inside the repo). `npx @finalangel/flowrail-room` imports them at start. The dashboard's settings API cannot set this field, and the guard asks before an agent edits `config.json`.
+- **From code.** Start the server yourself, for example to load TypeScript through `tsx`:
+
+  ```js
+  import { startServer } from '@finalangel/flowrail-room/server';
+  import crm from './room/crm.ts';
+  await startServer({ root: process.cwd(), port: 4747, plugins: [crm] });
+  ```
+
+The page module (`ui/leads.js`) exports `mount(el, ctx)` exactly like a built-in page, and can import the shared helpers from `/ui/lib/dom.js` and `/ui/icons.js`. `ctx.api('/x/crm/leads')` reaches its routes. Routes get `ctx` with `root`, `paths`, `broadcast(area)` and `HttpError`, and sit behind the same Host, Origin, token and `X-Flowrail` checks as every built-in route. A page in a group that does not exist yet gets a new group above Safety. A page whose `path` equals a built-in page's path replaces it. Plugins run with your permissions in the server process, so load only code you would run yourself.
+
 ## Adapters for other agent CLIs
 
 **Planned, not built.** Nothing below exists in the code yet: there is no `packages/flowrail/src/adapters/` folder, and hooks are installed for Claude Code only. This section is the proposed interface, written down so contributors can discuss it.

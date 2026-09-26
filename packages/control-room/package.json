@@ -3,6 +3,10 @@
   "version": "0.1.0",
   "description": "A local dashboard for flowrail: red lines, audit, comments your agent acts on, and an optional board. Zero third-party deps, no cloud, MIT.",
   "type": "module",
+  "exports": {
+    "./server": "./src/server.js",
+    "./package.json": "./package.json"
+  },
   "bin": {
     "flowrail-room": "bin/flowrail-room.js"
   },
