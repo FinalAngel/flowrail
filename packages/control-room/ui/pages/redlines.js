@@ -1,4 +1,4 @@
-import { h, icon, clear, loader, cmd, clock, day, sheet, confirmBox, debounce, empty, plural, relTime } from '../lib/dom.js';
+import { h, icon, clear, loader, cmd, clock, day, sheet, confirmBox, debounce, empty, plural, relTime, busy, pref, savePref } from '../lib/dom.js';
 
 const SEV = { block: 'Blocks', ask: 'Asks first', warn: 'Warns' };
 const HELD = { block: 'held, not run', ask: 'held, agent asked instead', warn: 'allowed with a warning' };
@@ -111,11 +111,11 @@ export function mount(el, ctx) {
   const verifyBox = h('div', { 'aria-live': 'polite' });
   const pick = (o, ...ks) => { for (const k of ks) if (o?.[k] != null && o[k] !== '') return o[k]; return ''; };
   async function verify(btn) {
-    btn.disabled = true;
     clear(verifyBox).append(h('div.skeleton', { 'aria-busy': 'true', 'aria-label': 'Verifying' }, h('div.sk-row', { style: '--w:60%' })));
-    try { clear(verifyBox).append(probeTable(await ctx.api('/redlines', { _action: 'verify' }))); }
-    catch (e) { clear(verifyBox).append(h('div.notice.warn', { style: 'margin-bottom:16px' }, icon('alert'), h('div.body', h('span', e.message)))); }
-    finally { btn.disabled = false; }
+    await busy(btn, (async () => {
+      try { clear(verifyBox).append(probeTable(await ctx.api('/redlines', { _action: 'verify' }))); }
+      catch (e) { clear(verifyBox).append(h('div.notice.warn', { style: 'margin-bottom:16px' }, icon('alert'), h('div.body', h('span', e.message)))); }
+    })());
   }
   function probeTable(r) {
     // verifyRedlines: { lines: [{ id, positive: [{ probe, decision, ok }], negative: [...] }], skipped }
@@ -141,11 +141,11 @@ export function mount(el, ctx) {
   }
 
   /* ---------- What these rules would have caught: replay of recent Claude Code transcripts ---------- */
-  let auditDays = 30;
+  let auditDays = [7, 30, 90].includes(pref('redlines-audit-days', 30)) ? pref('redlines-audit-days', 30) : 30;
   const auditCache = {};
   function auditPanel() {
     const box = h('div', { 'aria-live': 'polite' });
-    const seg = h('div.seg', { role: 'group', 'aria-label': 'Period' }, [7, 30, 90].map((n) => h('button', { type: 'button', 'aria-pressed': String(n === auditDays), onclick: () => { auditDays = n; seg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.textContent === `${n} days`))); paint(); } }, `${n} days`)));
+    const seg = h('div.seg', { role: 'group', 'aria-label': 'Period' }, [7, 30, 90].map((n) => h('button', { type: 'button', 'aria-pressed': String(n === auditDays), onclick: () => { auditDays = n; savePref('redlines-audit-days', n); seg.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b.textContent === `${n} days`))); paint(); } }, `${n} days`)));
     const paint = async () => {
       const n = auditDays;
       if (!auditCache[n]) clear(box).append(h('div.skeleton', { 'aria-busy': 'true', 'aria-label': 'Loading' }, h('div.sk-row', { style: '--w:72%' }), h('div.sk-row', { style: '--w:54%' })));
@@ -192,7 +192,7 @@ export function mount(el, ctx) {
   }
 
   function tester() {
-    const tool = h('select.input', { id: 'try-tool', 'aria-label': 'Tool', style: 'width:auto' }, ['Bash', 'Write', 'Edit'].map((t) => h('option', { value: t }, t)));
+    const tool = h('select.input', { id: 'try-tool', 'aria-label': 'Tool', style: 'width:auto', onchange: (e) => savePref('redlines-try-tool', e.target.value) }, ['Bash', 'Write', 'Edit'].map((t) => h('option', { value: t, selected: t === pref('redlines-try-tool', 'Bash') }, t)));
     const input = h('input.input.mono', { id: 'try-cmd', placeholder: 'git push origin main', autocomplete: 'off', spellcheck: 'false' });
     const out = h('div.decision', { 'aria-live': 'polite' }, h('span.muted', 'Type a command or a file path to see what the guard decides.'));
     let seq = 0;
@@ -251,9 +251,10 @@ export function mount(el, ctx) {
     paint(d.checkRanAt || d.checkResults?.length ? d.checkResults : null);
     return h('section.card', { 'aria-labelledby': 'chk-h' },
       h('div.card-head', h('h2', { id: 'chk-h' }, 'Checks'), h('button.btn.sm', { type: 'button', style: 'margin-left:auto', onclick: async (e) => {
-        const b = e.currentTarget; b.disabled = true;
-        try { const r = await ctx.api('/redlines', { _action: 'check' }); paint(Array.isArray(r) ? r : r?.results || []); ctx.toast(`Checked ${r?.files ?? 'the'} files`); }
-        catch (x) { ctx.toast(x.message, 'warn'); } finally { b.disabled = false; }
+        await busy(e.currentTarget, (async () => {
+          try { const r = await ctx.api('/redlines', { _action: 'check' }); paint(Array.isArray(r) ? r : r?.results || []); ctx.toast(`Checked ${r?.files ?? 'the'} files`); }
+          catch (x) { ctx.toast(x.message, 'warn'); }
+        })());
       } }, icon('play', 12), 'Run checks')),
       res);
   }
@@ -307,8 +308,7 @@ export function mount(el, ctx) {
         if (cpat.value) next.check = { glob: cglob.value || '**/*', pattern: cpat.value, message: cmsg.value || next.title }; else delete next.check;
         const lines = (existing ? data.lines.map((x) => (x.id === existing.id ? next : x)) : [...data.lines, next]).map(bare);
         clear(calm);
-        try { await ctx.api('/redlines', { _action: 'save', lines }); ctx.toast(existing ? 'Red line saved' : 'Red line added'); close(); reload(); ctx.refreshShell(); }
-        catch (x) { refused(x); }
+        await busy(e.submitter, ctx.api('/redlines', { _action: 'save', lines }).then(() => { ctx.toast(existing ? 'Red line saved' : 'Red line added'); close(); reload(); ctx.refreshShell(); }, refused));
       } },
         f('rl-title', 'The rule, in your words', title),
         h('div.form-grid', f('rl-id', 'Id', idIn), f('rl-sev', 'When it matches', sev)),

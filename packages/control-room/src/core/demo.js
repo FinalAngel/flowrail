@@ -168,13 +168,27 @@ function git(dir, args) {
 }
 
 /** Create the demo workspace in `dir` (which must not exist or be empty). */
+// Three fictional GitHub issues, as the board's cache holds them: the demo never runs gh.
+function githubIssues(p, today) {
+  const issue = (number, title, labels, closedDays) => ({
+    number, title, url: `https://github.com/paper-plane/app/issues/${number}`, state: closedDays == null ? 'OPEN' : 'CLOSED',
+    closedAt: closedDays == null ? null : at(today, closedDays, 11, 20), updatedAt: at(today, closedDays ?? 1, 11, 20), labels, assignees: ['you'],
+  });
+  writeJson(path.join(p.local, 'github-issues.json'), { repo: 'paper-plane/app', at: at(today, 0, 7, 55), issues: [
+    issue(142, 'Dark mode: note list loses contrast on hover', ['ui', 'good first issue']),
+    issue(138, 'Crash when a note title is exactly 256 characters', ['bug']),
+    issue(131, 'Document the export format', ['docs'], 2),
+  ] });
+}
+
 export function seed(dir, today = new Date()) {
   fs.mkdirSync(dir, { recursive: true });
   const p = paths(dir);
   copyTree(TEMPLATE, dir, today);
-  const config = { ...defaultConfig('Paper Plane'), sprintStart: mondayOf(addDays(today, -28)), demo: true, lastVisit: at(today, 1, 18, 30) };
+  const config = { ...defaultConfig('Paper Plane'), sprintStart: mondayOf(addDays(today, -28)), demo: true, lastVisit: at(today, 1, 18, 30), github: { repo: 'paper-plane/app', assignee: '@me' } };
   writeJson(p.config, config);
   writeJson(p.board, boardFor(config, today));
+  githubIssues(p, today);
   rebuildIndex(p);
   // Memories were stored over the past weeks, not all at seed time; the newest one is from this morning.
   fs.readdirSync(p.memory).filter((f) => f.endsWith('.md') && f !== 'INDEX.md').sort().forEach((f, i) => {

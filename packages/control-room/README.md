@@ -12,7 +12,7 @@ npx @finalangel/flowrail-room        # the dashboard on http://127.0.0.1:4747
 
 - **Red lines**: each rule in plain English with its held count, a Try it box, the Verify table and an audit of your recent sessions. It warns when the rules were changed outside flowrail.
 - **Comments as instructions**: select a passage in any Markdown file and comment on it; the next Claude Code session receives the open comments through the `SessionStart` hook. Comments are signed; one written into the folder by anything else is shown as unverified.
-- **Board and memory**: sprints in `flowrail/board.json` (`npx @finalangel/flowrail-room task "…"`), one fact per file in `flowrail/memory/` (`npx @finalangel/flowrail-room recall "…"`, no model call).
+- **Board and memory**: sprints in `flowrail/board.json` (`npx @finalangel/flowrail-room task "…"`) with your assigned GitHub issues shown read-only when `config.json` names a repo, one fact per file in `flowrail/memory/` (`npx @finalangel/flowrail-room recall "…"`, no model call).
 - **Today and routines**: what happened in the repo since midnight, and scheduled report-only runs on launchd or cron.
 
 It listens on `127.0.0.1` only, makes no outbound connections, and keeps everything in `flowrail/` (committed) and `.flowrail/` (per machine). The API can add and tighten red lines, never weaken them. `init` adds a two-line block to `CLAUDE.md`; the guard alone adds none. `npx @finalangel/flowrail-room --help` lists the commands; guard commands stay `npx flowrail …`.

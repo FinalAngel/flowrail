@@ -139,3 +139,45 @@ export function confirmBox(message, okLabel = 'Move to trash') {
 }
 
 export const plural = (n, one, many = one + 's') => `${n} ${n === 1 ? one : many}`;
+
+/**
+ * A button waits on its own work: a ring turns where its icon is, and it takes no second press
+ * until `promise` settles. Returns the promise, so callers can still await or catch it.
+ */
+export function busy(button, promise) {
+  if (!button) return promise;
+  button.classList.add('busy');
+  button.setAttribute('aria-busy', 'true');
+  const done = () => { button.classList.remove('busy'); button.removeAttribute('aria-busy'); };
+  Promise.resolve(promise).then(done, done);
+  return promise;
+}
+
+/**
+ * Resolves when a run stops saying "running" (polls /api/runs/<id> every 2 s, gives up after two
+ * minutes) with its last record, or null. `api` is ctx.api.
+ */
+export function waitForRun(api, id, { every = 2000, limit = 120000 } = {}) {
+  return new Promise((resolve) => {
+    const t0 = Date.now();
+    const tick = async () => {
+      let run = null;
+      try { run = await api('/runs/' + encodeURIComponent(id)); } catch { /* keep polling until the limit */ }
+      if ((run && run.status !== 'running') || Date.now() - t0 >= limit) return resolve(run);
+      setTimeout(tick, every);
+    };
+    tick();
+  });
+}
+
+/** Hold a button until the run it started has finished. */
+export const busyUntilRun = (button, api, id, opts) => busy(button, waitForRun(api, id, opts));
+
+// Filters, switches and sorts remember their state per browser; search boxes never do.
+const PREF = 'flowrail-f-';
+export function pref(key, fallback) {
+  try { const v = localStorage.getItem(PREF + key); return v == null ? fallback : JSON.parse(v); } catch { return fallback; }
+}
+export function savePref(key, value) {
+  try { localStorage.setItem(PREF + key, JSON.stringify(value)); } catch { /* private mode: not remembered */ }
+}

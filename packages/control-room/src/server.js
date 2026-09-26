@@ -23,6 +23,7 @@ import { paths, PathError, hooksStatus, hooksSummary, auditSummary, doctor, test
 import { loadConfig, saveConfig } from 'flowrail/api';
 import { PKG_ROOT, VERSION } from './core/pkg.js';
 import * as board from './core/board.js';
+import * as github from './core/github.js';
 import * as docs from './core/docs.js';
 import * as comments from './core/comments.js';
 import * as memory from './core/memory.js';
@@ -134,6 +135,14 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
         case 'trash': return board.trash(p, need(b.id, 'id'));
         default: throw new HttpError(400, '_action must be create, update, note or trash');
       }
+    },
+
+    // Read-only GitHub issues for the current sprint (config "github"); nothing is written back.
+    'GET /api/board/issues': async (_b, q) => {
+      const config = loadConfig(p);
+      const r = await github.fetchIssues(p, config, { force: q.get('refresh') === '1' });
+      if (!r) return { configured: false, issues: [] };
+      return { configured: true, ...r, issues: github.forSprint(r.issues, board.sprints(config).current) };
     },
 
     'GET /api/docs/tree': () => docs.tree(root),

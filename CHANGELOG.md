@@ -2,6 +2,14 @@
 
 All notable changes to flowrail are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/). Before 1.0, minor versions may change file formats and the HTTP API; any such change is listed here with what to do about it.
 
+## [Unreleased]
+
+### Added
+
+- The board shows GitHub issues, read-only: set `"github": { "repo": "owner/name", "assignee": "@me" }` in `flowrail/config.json` and the current sprint shows the open issues assigned to you and those closed during it, as cards that open GitHub. It asks the `gh` CLI, caches for five minutes, says "GitHub unavailable" when `gh` cannot answer, and never writes to GitHub. A switch on the board hides them.
+- Buttons wait on their own work: Run now, Verify, Run checks, Save and the other buttons that start something show a ring and take no second press until it finishes; Run now holds until the routine's run record stops saying running (two minutes at most).
+- Filters remember their state per browser: the board's assignee, "Filed by agent" and GitHub switches, the memory type, the audit period and the tool in "Try a command". Search boxes are never kept.
+
 ## [0.1.0] (unreleased)
 
 First public release. Not yet on npm. Two packages: `flowrail`, the guard and its CLI, and `@finalangel/flowrail-room` (command `flowrail-room`), the optional dashboard.
