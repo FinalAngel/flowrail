@@ -188,6 +188,8 @@ const ICON_NAME = /^[a-z][a-zA-Z0-9]{0,30}$/;
  * opens in Docs; anything else (javascript:, data:, file:) is dropped.
  */
 export function normalizeLinks(raw) {
+  // Also { categories: [{ name, links }] }, the shape some link lists already have.
+  if (raw && Array.isArray(raw.categories)) raw = raw.categories.map((c) => ({ ...c, category: c?.category || c?.name }));
   if (!Array.isArray(raw)) return [];
   const str = (v, n) => (typeof v === 'string' ? v.trim().slice(0, n) : '');
   return raw.filter((c) => c && typeof c === 'object').map((c) => ({

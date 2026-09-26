@@ -34,7 +34,7 @@ export function validate(pl) {
   return pl;
 }
 
-const STORE_METHODS = { board: ['read', 'create', 'update', 'note', 'trash'] };
+const STORE_METHODS = { board: ['read', 'create', 'update', 'note', 'trash'], memory: ['list', 'recall', 'store'] };
 
 /** The data stores plugins supply (`stores: { board }`); one plugin per store. */
 export function stores(plugins) {

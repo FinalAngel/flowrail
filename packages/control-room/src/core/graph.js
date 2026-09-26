@@ -6,7 +6,7 @@ import path from 'node:path';
 import { areas as libraryAreas, areaOf as libraryAreaOf } from './library.js';
 import { listDocs } from './docs.js';
 import { readText } from 'flowrail/api';
-import { list as listMemory } from './memory.js';
+import { memoryFor } from './memory.js';
 import { load as loadRoutines } from './routines.js';
 import { workflowsDir } from './workflows.js';
 import { loadLines } from 'flowrail/api';
@@ -52,7 +52,7 @@ export function build(p) {
   const wfDir = path.relative(p.root, workflowsDir(p)).split(path.sep).join('/');
   add({ id: 'hub', kind: 'hub', label: config.name || path.basename(p.root), ...(fs.existsSync(path.join(p.root, 'CLAUDE.md')) ? { path: 'CLAUDE.md' } : {}) });
 
-  const memByName = new Map(listMemory(p).map((m) => [m.name, m]));
+  const memByName = new Map(memoryFor(p).list().map((m) => [m.name, m]));
   const files = listDocs(p.root, 3000).filter((f) => /\.(md|markdown)$/i.test(f));
   const idFor = new Map();
   const byBase = new Map();

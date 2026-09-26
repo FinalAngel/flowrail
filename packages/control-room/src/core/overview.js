@@ -97,7 +97,7 @@ export function overview(p) {
       redlinesTotal: lines.length,
       routinesFailed: failed.length,
       runsFailedDay: runs.list(p, 50).filter((r) => r.status === 'failed' && Date.now() - Date.parse(r.endedAt || r.startedAt) < 86400000).length,
-      memories: memory.list(p).length,
+      memories: memory.memoryFor(p).list().length,
     },
     sprint: { ...b.config.current, total: current.length, done: current.filter((t) => t.status === 'Done').length, inProgress: current.filter((t) => t.status === 'In Progress').length, review: current.filter((t) => t.status === 'Review').length },
     hooks: hooksSummary(hooks),
@@ -122,7 +122,7 @@ export function search(p, q, limit = 30) {
   for (const t of board.storeFor(p).read().tasks) {
     if (`${t.id} ${t.title}`.toLowerCase().includes(needle)) out.push({ kind: 'task', title: `${t.id} ${t.title}`, href: `#/board?task=${t.id}`, status: t.status });
   }
-  for (const m of memory.list(p)) {
+  for (const m of memory.memoryFor(p).list()) {
     if (`${m.name} ${m.description}`.toLowerCase().includes(needle)) out.push({ kind: 'memory', title: m.description, href: `#/memory?name=${encodeURIComponent(m.name)}`, name: m.name });
   }
   for (const rel of docs.filter((d) => /\.(md|markdown)$/i.test(d)).slice(0, 800)) {

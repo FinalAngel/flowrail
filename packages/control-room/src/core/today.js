@@ -100,7 +100,7 @@ export function today(p, now = new Date(), opts = {}) {
     items.push({ kind: 'routine', title: `Routine ${e.id} ${e.exit === 0 ? 'ran' : `failed (exit ${e.exit})`}`, ...(e.firstLine ? { detail: e.firstLine } : {}), at: e.at, href: '#/routines', by: 'agent' });
   }
 
-  for (const m of memory.list(p)) {
+  for (const m of memory.memoryFor(p).list()) {
     if (m.seed) continue;
     let mtime;
     try { mtime = fs.statSync(path.join(p.root, m.path)).mtime.toISOString(); } catch { continue; }

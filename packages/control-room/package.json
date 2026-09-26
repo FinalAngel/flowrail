@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     "./server": "./src/server.js",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./comments": "./src/core/comments.js"
   },
   "bin": {
     "flowrail-room": "bin/flowrail-room.js"

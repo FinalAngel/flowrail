@@ -107,6 +107,10 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
   const exts = plugins.prepare(extra);
   const p = { ...paths(root), stores: plugins.stores(exts) };
   const tasks = () => board.storeFor(p);
+  const mem = () => memory.memoryFor(p);
+  // Where artifacts and links live: config "artifactsDir" and "linksFile" (inside the repo), else flowrail/.
+  const inRepo = (rel) => typeof rel === 'string' && rel.trim() && !path.isAbsolute(rel) && !rel.split(/[\\/]/).includes('..') && path.join(root, rel);
+  { const c = loadConfig(p); p.artifacts = inRepo(c.artifactsDir) || p.artifacts; p.links = inRepo(c.linksFile) || p.links; docs.setRoots(root, c.docsRoots); }
   const token = crypto.randomBytes(32).toString('hex');
   const tokenOk = (t) => typeof t === 'string' && t.length === token.length && crypto.timingSafeEqual(Buffer.from(t), Buffer.from(token));
   const clients = new Set();
@@ -166,11 +170,14 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
       }
     },
 
-    'GET /api/memory': () => ({ items: memory.list(p), types: memory.TYPES }),
-    'GET /api/recall': (_b, q) => ({ hits: memory.recall(p, q.get('q') || '', Number(q.get('limit')) || 8) }),
+    'GET /api/memory': () => ({ items: mem().list(), types: memory.TYPES }),
+    'GET /api/recall': (_b, q) => ({ hits: mem().recall(q.get('q') || '', Number(q.get('limit')) || 8) }),
     'POST /api/memory': (b) => {
-      if (b._action === 'store') return memory.store(p, { name: b.name, type: b.type, description: b.description, body: b.body, force: !!b.force });
-      if (b._action === 'trash') return memory.trash(p, need(b.name, 'name'));
+      if (b._action === 'store') return mem().store({ name: b.name, type: b.type, description: b.description, body: b.body, force: !!b.force });
+      if (b._action === 'trash') {
+        if (!mem().trash) throw new HttpError(405, 'this memory store does not trash');
+        return mem().trash(need(b.name, 'name'));
+      }
       throw new HttpError(400, '_action must be store or trash');
     },
 

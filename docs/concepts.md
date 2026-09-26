@@ -177,7 +177,9 @@ or put a table in `CLAUDE.md` whose rows link one router file per area (`| Sales
 
 **Links** are the bookmarks in `flowrail/links.json`. Web links open in a new tab, repo paths in Docs.
 
-These four settings are file-only: the dashboard's settings API cannot change them.
+**Where things live.** Three more file-only settings point the room at folders a repo already has: `"docsRoots": ["docs", "README.md"]` limits what Docs, the Library, search and the map list, open and write to those folders and files (unset shows the whole repo, minus secrets and dot-folders); `"artifactsDir"` and `"linksFile"` move artifacts and the link list out of `flowrail/`. A link file may also be `{ "categories": [{ "name", "links" }] }`.
+
+These settings are file-only: the dashboard's settings API cannot change them.
 
 ## Team
 

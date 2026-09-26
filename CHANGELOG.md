@@ -6,6 +6,7 @@ All notable changes to flowrail are recorded here. The format follows [Keep a Ch
 
 ### Added
 
+- A memory store (`stores: { memory }`) backs the Memory page and recall with memories kept elsewhere, and `docsRoots`, `artifactsDir` and `linksFile` in `config.json` point the room at a repo's own folders; `docsRoots` also limits what Docs will open or write.
 - Plugin stores: a plugin can supply the board's data (`stores: { board }`), so the Board page, the overview, Today and search read your own tracker or file. A store brings its own priorities and groups. The Board shows one sprint at a time, with arrows to the earlier and planned ones.
 - The board shows GitHub issues, read-only: set `"github": { "repo": "owner/name", "assignee": "@me" }` in `flowrail/config.json` and the current sprint shows the open issues assigned to you and those closed during it, as cards that open GitHub. It asks the `gh` CLI, caches for five minutes, says "GitHub unavailable" when `gh` cannot answer, and never writes to GitHub. A switch on the board hides them.
 - Buttons wait on their own work: Run now, Verify, Run checks, Save and the other buttons that start something show a ring and take no second press until it finishes; Run now holds until the routine's run record stops saying running (two minutes at most).

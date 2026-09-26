@@ -9,6 +9,16 @@ export const TYPES = ['user', 'feedback', 'project', 'reference'];
 const NAME_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
 const bad = (msg, status = 400) => Object.assign(new Error(msg), { status });
 
+/**
+ * The memory every page reads and writes: a plugin's store when one is set (`stores.memory`), else
+ * flowrail/memory/. A store answers list(), recall(question, limit) and store(m); trash(name) is
+ * optional. A memory whose `path` is null lives outside the repo and has no Docs link.
+ */
+export function memoryFor(p) {
+  if (p.stores?.memory) return p.stores.memory;
+  return { list: () => list(p), recall: (q, n) => recall(p, q, n), store: (m) => store(p, m), trash: (name) => trash(p, name) };
+}
+
 export function list(p) {
   return listFiles(p.memory, '.md').filter((f) => f !== 'INDEX.md').map((file) => {
     const text = readText(path.join(p.memory, file));

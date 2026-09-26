@@ -27,7 +27,7 @@ export function mount(el, ctx) {
   const card = (m) => h('article.card.mem',
     md('p.fact', inline(String(m.description || m.snippet || m.name || ''))),
     bodyOf(m) && md('div.body.prose', renderMarkdown(bodyOf(m), { base: m.path || 'flowrail/memory/' })),
-    h('div.m', h('span.chip', m.type || m.source || 'memory'), h('span.p', m.path || `flowrail/memory/${m.name}.md`), m.created && h('span', shortDate(m.created)), m.score != null && h('span.num', { title: 'Recall score' }, `score ${(+m.score).toFixed(2).replace(/\.00$/, '')}`)));
+    h('div.m', h('span.chip', m.type || m.source || 'memory'), m.path !== null && h('span.p', m.path || `flowrail/memory/${m.name}.md`), m.created && h('span', shortDate(m.created)), m.score != null && h('span.num', { title: 'Recall score' }, `score ${(+m.score).toFixed(2).replace(/\.00$/, '')}`)));
 
   async function recall() {
     const my = ++seq;
