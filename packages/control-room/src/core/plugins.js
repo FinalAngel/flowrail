@@ -10,6 +10,13 @@
 // A route answers at /api/x/<id>/<name> behind the same Host, Origin, token and X-Flowrail checks as
 // every built-in route. A page module lives in `ui` and exports mount(el, ctx) like the built-in pages.
 // A page whose path equals a built-in page's path replaces that page.
+//
+// Optional, for a plugin that brings a whole server of its own:
+//   handle(req, res, { kind, rest })  answers /api/x/<id>/<rest> when no route matches (kind 'api',
+//                                     behind the token and CSRF checks, body unread), and GET/HEAD
+//                                     under its own `prefixes` (kind 'file', no token, like /ui/).
+//   prefixes: ['/crm/']              top-level GET paths it serves; built-in paths always win.
+//   aliases: { '/old': '/new' }      page addresses that redirect in the browser.
 import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 
@@ -17,6 +24,8 @@ const ID = /^[a-z][a-z0-9-]{0,39}$/;
 const ROUTE = /^(GET|POST) ([a-z0-9][a-z0-9/_-]*)$/;
 const PAGE_PATH = /^\/[a-z0-9/_-]*$/;
 const FILE = /^[\w.-]+(\/[\w.-]+)*\.m?js$/;
+const PREFIX = /^\/[a-z0-9][a-z0-9-]*\/$/;
+const RESERVED = ['/api/', '/ui/', '/x/', '/artifacts/'];
 
 /** Check a plugin's shape; throws with the plugin id and what is wrong. */
 export function validate(pl) {
@@ -26,6 +35,13 @@ export function validate(pl) {
   for (const pg of pl.pages || []) {
     if (!ID.test(pg.id) || typeof pg.title !== 'string' || !PAGE_PATH.test(pg.path || '')) throw new Error(`${where}: page needs id, title and a path like /leads`);
     if (!pl.ui || !FILE.test(pg.module || '') || pg.module.includes('..')) throw new Error(`${where}: page ${pg.id} needs ui and a module like leads.js`);
+  }
+  if (pl.handle !== undefined && typeof pl.handle !== 'function') throw new Error(`${where}: handle must be a function`);
+  for (const pre of pl.prefixes || []) {
+    if (typeof pre !== 'string' || !PREFIX.test(pre) || RESERVED.includes(pre) || !pl.handle) throw new Error(`${where}: prefix "${pre}" must look like /name/, not ${RESERVED.join(' ')}, and needs handle`);
+  }
+  for (const [from, to] of Object.entries(pl.aliases || {})) {
+    if (!PAGE_PATH.test(from) || !PAGE_PATH.test(String(to))) throw new Error(`${where}: alias ${from} -> ${to} must be page paths like /old`);
   }
   for (const [key, fn] of Object.entries(pl.routes || {})) {
     if (!ROUTE.test(key) || key.includes('..')) throw new Error(`${where}: route "${key}" must look like "GET name" or "POST name/sub"`);
@@ -78,5 +94,6 @@ export async function fromConfig(root, list = []) {
 /** What the page needs to draw the nav and load the modules. */
 export const describe = (plugins) => plugins.map((pl) => ({
   id: pl.id,
+  aliases: pl.aliases || {},
   pages: (pl.pages || []).map(({ id, title, path: p, group, icon, module }) => ({ id: `${pl.id}:${id}`, title, path: p, group: group || null, icon: icon || null, module: `/x/${pl.id}/${module}` })),
 }));

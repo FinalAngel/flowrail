@@ -364,6 +364,8 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
           const pl = exts.find((x) => x.id === id && x.ui);
           return pl ? serveUi(res, rest.join('/'), pl.ui) : send(res, 404, { error: 'not found' });
         }
+        const own = exts.find((x) => x.prefixes?.some((pre) => pathname.startsWith(pre)));
+        if (own && !['/api/', '/ui/', '/x/', '/artifacts/'].some((pre) => pathname.startsWith(pre))) return await own.handle(req, res, { kind: 'file', rest: pathname });
         if (pathname === '/favicon.ico') return fs.existsSync(path.join(UI_DIR, 'favicon.svg')) ? serveUi(res, 'favicon.svg') : send(res, 204, '');
         if (pathname.startsWith('/artifacts/')) {
           const file = artifacts.fileFor(p, pathname.slice('/artifacts/'.length));
@@ -380,6 +382,11 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
       }
 
       const route = routes[`${req.method === 'HEAD' ? 'GET' : req.method} ${pathname}`];
+      if (!route && pathname.startsWith('/api/x/')) {
+        const [, , , id, ...rest] = pathname.split('/');
+        const pl = exts.find((x) => x.id === id && x.handle);
+        if (pl) return await pl.handle(req, res, { kind: 'api', rest: '/' + rest.join('/') });
+      }
       if (!route) {
         const other = routes[`${req.method === 'GET' ? 'POST' : 'GET'} ${pathname}`];
         return send(res, other ? 405 : 404, { error: other ? 'method not allowed' : 'not found' });

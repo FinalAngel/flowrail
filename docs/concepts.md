@@ -179,6 +179,8 @@ or put a table in `CLAUDE.md` whose rows link one router file per area (`| Sales
 
 **Where things live.** Three more file-only settings point the room at folders a repo already has: `"docsRoots": ["docs", "README.md"]` limits what Docs, the Library, search and the map list, open and write to those folders and files (unset shows the whole repo, minus secrets and dot-folders); `"artifactsDir"`, `"linksFile"` and `"agentsDir"` (where the agent status files are) move artifacts, the link list and Team's live state out of `flowrail/` and `.flowrail/`. A link file may also be `{ "categories": [{ "name", "links" }] }`.
 
+`"brand": { "name": "Acme ops", "mono": "Acme" }` names the sidebar and the tab titles (the `mono` start of the name is set in the mono face).
+
 These settings are file-only: the dashboard's settings API cannot change them.
 
 ## Team

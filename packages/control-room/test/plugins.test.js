@@ -40,7 +40,7 @@ function req(method, url, { token = s.token, csrf = true, body } = {}) {
 
 test('the page learns the plugin pages', async () => {
   const r = await req('GET', '/api/plugins');
-  assert.deepEqual(r.json, [{ id: 'crm', pages: [{ id: 'crm:leads', title: 'Leads', path: '/leads', group: 'Sales', icon: 'board', module: '/x/crm/leads.js' }] }]);
+  assert.deepEqual(r.json, [{ id: 'crm', aliases: {}, pages: [{ id: 'crm:leads', title: 'Leads', path: '/leads', group: 'Sales', icon: 'board', module: '/x/crm/leads.js' }] }]);
 });
 
 test('plugin routes sit behind the same token and CSRF checks', async () => {
@@ -101,4 +101,37 @@ test('a plugin store backs the board, the overview and search', async () => {
   } finally { await s2.close(); }
   await assert.rejects(startServer({ root: p.root, port: 0, plugins: [{ id: 'bad', stores: { board: { read() {} } } }] }), /needs create/);
   await assert.rejects(startServer({ root: p.root, port: 0, plugins: [{ id: 'bad', stores: { nope: {} } }] }), /unknown store/);
+});
+
+test('a plugin handle answers its API fallback behind the token, and its own GET prefixes', async () => {
+  const seen = [];
+  const whole = {
+    id: 'whole',
+    prefixes: ['/whole/'],
+    aliases: { '/old': '/new' },
+    routes: { 'GET exact': () => ({ exact: true }) },
+    handle(req, res, info) {
+      seen.push([req.method, info.kind, info.rest]);
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      res.end(`${info.kind}:${info.rest}`);
+    },
+  };
+  const s3 = await startServer({ root: p.root, port: 0, plugins: [whole] });
+  try {
+    const r = (method, url, { token = s3.token, csrf = true } = {}) => new Promise((resolve, reject) => {
+      const q = http.request({ host: '127.0.0.1', port: s3.port, method, path: url, headers: { Host: `127.0.0.1:${s3.port}`, ...(token ? { 'X-Flowrail-Token': token } : {}), ...(method === 'POST' && csrf ? { 'X-Flowrail': '1' } : {}) } }, (res) => { let d = ''; res.on('data', (c) => { d += c; }); res.on('end', () => resolve({ status: res.statusCode, data: d })); });
+      q.on('error', reject); q.end();
+    });
+    assert.equal((await r('GET', '/api/x/whole/exact')).data, '{"exact":true}');
+    assert.equal((await r('GET', '/api/x/whole/api/leads?x=1')).data, 'api:/api/leads');
+    assert.equal((await r('POST', '/api/x/whole/api/move')).data, 'api:/api/move');
+    assert.equal((await r('GET', '/api/x/whole/api/leads', { token: null })).status, 401, 'the fallback keeps the token check');
+    assert.equal((await r('POST', '/api/x/whole/api/move', { csrf: false })).status, 403, 'and the CSRF header');
+    assert.equal((await r('GET', '/whole/ui/a.js', { token: null })).data, 'file:/whole/ui/a.js');
+    assert.equal((await r('GET', '/ui/app.js', { token: null })).status, 200, 'built-in paths still answer');
+    assert.deepEqual((await (async () => JSON.parse((await r('GET', '/api/plugins')).data))())[0].aliases, { '/old': '/new' });
+  } finally { await s3.close(); }
+  assert.throws(() => validate({ id: 'a', prefixes: ['/api/'], handle() {} }), /prefix/);
+  assert.throws(() => validate({ id: 'a', prefixes: ['/a/'] }), /needs handle/);
+  assert.throws(() => validate({ id: 'a', aliases: { old: '/new' } }), /alias/);
 });

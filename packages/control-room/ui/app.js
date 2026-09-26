@@ -57,6 +57,7 @@ const NAV = [
 const SETTINGS = ['settings', 'Settings', '/settings'];
 let PAGES = [...NAV.flatMap(([, items]) => items), SETTINGS];
 const MODULE = {};
+let BRAND = null;
 const ALIAS = { '/graph': '/knowledge', '/dashboard': '/' };
 const ICON = { dashboard: 'dashboard', board: 'board', docs: 'docs', graph: 'graph', memory: 'memory', artifacts: 'artifacts', routines: 'routines', runs: 'terminal', workflows: 'workflows', team: 'team', redlines: 'redlines', security: 'security', settings: 'settings', library: 'library', context: 'context', links: 'link' };
 
@@ -64,6 +65,7 @@ const ICON = { dashboard: 'dashboard', board: 'board', docs: 'docs', graph: 'gra
 async function loadPlugins() {
   let list = [];
   try { list = await api('/plugins'); } catch { return; }
+  for (const pl of list) Object.assign(ALIAS, pl.aliases || {});
   for (const pg of list.flatMap((pl) => pl.pages)) {
     for (const [, items] of NAV) { const i = items.findIndex(([, , href]) => href === pg.path); if (i >= 0) items.splice(i, 1); }
     let group = NAV.find(([g]) => g === (pg.group || 'Now'));
@@ -81,7 +83,10 @@ async function loadPlugins() {
  */
 async function regroupNav() {
   let nav;
-  try { nav = (await api('/config'))?.nav; } catch { return; }
+  let config;
+  try { config = await api('/config'); nav = config?.nav; } catch { return; }
+  // config "brand": { "name": "Acme ops", "mono": "Acme" } names the sidebar and the tab titles.
+  if (typeof config?.brand?.name === 'string' && config.brand.name.trim()) BRAND = { name: config.brand.name.trim().slice(0, 40), mono: typeof config.brand.mono === 'string' ? config.brand.mono : '' };
   if (!nav || typeof nav !== 'object' || Array.isArray(nav)) return;
   const take = (id) => {
     for (const [, items] of NAV) {
@@ -164,7 +169,9 @@ function renderSidebar() {
   };
   const link = ([id, label, href]) => h('a', { href: '#' + href, 'aria-current': path === href ? 'page' : null, onclick: closeNav }, icon(ICON[id]), h('span', label), badge(id));
   clear(side).append(
-    h('a.brand', { href: '#/', 'aria-label': 'flowrail home', onclick: closeNav }, icon('mark', 20), h('span.wordmark', h('span.f', 'flow'), h('span.r', 'rail'))),
+    h('a.brand', { href: '#/', 'aria-label': `${BRAND?.name || 'flowrail'} home`, onclick: closeNav }, icon('mark', 20), BRAND
+      ? h('span.wordmark', BRAND.mono && BRAND.name.startsWith(BRAND.mono) ? [h('span.f', BRAND.mono), h('span.r', BRAND.name.slice(BRAND.mono.length))] : h('span.r', BRAND.name))
+      : h('span.wordmark', h('span.f', 'flow'), h('span.r', 'rail'))),
     h('nav.nav', { 'aria-label': 'Pages' }, NAV.map(([group, items]) => [group, items.filter(on)]).filter(([, items]) => items.length).map(([group, items]) => h('div.nav-group', { role: 'group', 'aria-label': group }, h('div.nav-label', { 'aria-hidden': 'true' }, group), items.map(link)))),
     h('div.sidebar-foot.nav', link(SETTINGS), shell.overview?.workspace?.version && h('div.ver', 'v' + shell.overview.workspace.version)),
   );
@@ -357,11 +364,11 @@ async function route() {
   const el = content();
   clear(el);
   if (!page) {
-    document.title = 'Not found · flowrail';
+    document.title = `Not found · ${BRAND?.name || 'flowrail'}`;
     el.append(h('div.empty', h('h1', 'This page does not exist'), h('p', `Nothing lives at ${path}.`), h('a.btn', { href: '#/' }, 'Back to the dashboard')));
     return;
   }
-  document.title = `${page[1]} · flowrail`;
+  document.title = `${page[1]} · ${BRAND?.name || 'flowrail'}`;
   let mod;
   try { mod = await import(MODULE[page[0]] || `./pages/${page[0]}.js`); }
   catch (e) { if (my === routeSeq) el.append(h('div.error', { role: 'alert' }, icon('alert'), `Could not load the ${page[1]} page. ${e.message}`)); return; }

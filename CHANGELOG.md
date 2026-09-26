@@ -10,6 +10,7 @@ All notable changes to flowrail are recorded here. The format follows [Keep a Ch
 
 ### Added
 
+- A plugin can pass requests through to a server of its own (`handle`, `prefixes`), redirect old page addresses (`aliases`), and `config.json` `brand` names the sidebar: enough to move an existing local app onto the room page by page.
 - Routine and run stores (`stores: { routines, runs }`) show routines a repo schedules with its own tooling, run them now and show their runs; `agentsDir` points Team at existing agent status files.
 - A memory store (`stores: { memory }`) backs the Memory page and recall with memories kept elsewhere, and `docsRoots`, `artifactsDir` and `linksFile` in `config.json` point the room at a repo's own folders; `docsRoots` also limits what Docs will open or write.
 - Plugin stores: a plugin can supply the board's data (`stores: { board }`), so the Board page, the overview, Today and search read your own tracker or file. A store brings its own priorities and groups. The Board shows one sprint at a time, with arrows to the earlier and planned ones.
