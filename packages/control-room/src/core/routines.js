@@ -3,13 +3,15 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { execFileSync, spawnSync } from 'node:child_process';
-import { readJson, writeJson, readJsonl, appendLine, nowIso, pad, addDays } from 'flowrail/api';
+import { execFile, execFileSync, spawnSync } from 'node:child_process';
+import { readJson, writeJson, readJsonl, appendLine, nowIso, pad, addDays, loadConfig } from 'flowrail/api';
 import { PKG_ROOT } from './pkg.js';
 import * as runs from './runs.js';
 
 const DAYS = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 const EVERY = ['day', 'weekday', 'hour', ...DAYS];
+const EVENTS = ['github-actions', 'hook'];
+const scheduled = (r) => r && r.on === undefined;
 const bad = (msg, status = 400) => Object.assign(new Error(msg), { status });
 
 export function load(p) {
@@ -26,9 +28,21 @@ export function validate(routines) {
     if (!r || !/^[a-z0-9][a-z0-9-]{0,63}$/.test(r.id || '')) errors.push(`${at}: id must be a lowercase slug`);
     if (r && ids.has(r.id)) errors.push(`${at}: duplicate id`);
     ids.add(r && r.id);
-    const s = (r && r.schedule) || {};
-    if (!EVERY.includes(s.every)) errors.push(`${at}: schedule.every must be one of ${EVERY.join(', ')}`);
-    if (s.every !== 'hour' && !/^([01]\d|2[0-3]):[0-5]\d$/.test(s.at || '')) errors.push(`${at}: schedule.at must be HH:MM`);
+    if (r && r.on !== undefined) {
+      // An event routine: something else runs it (GitHub Actions, a hook). Never scheduled here.
+      const on = r.on || {};
+      if (!EVENTS.includes(on.event)) errors.push(`${at}: on.event must be one of ${EVENTS.join(', ')}`);
+      if (on.event === 'github-actions') {
+        if (!/^[\w.-]+\/[\w.-]+$/.test(on.repo || '')) errors.push(`${at}: on.repo must be owner/name`);
+        if (!/^[\w.-]+\.ya?ml$/.test(on.workflow || '')) errors.push(`${at}: on.workflow must be a workflow file name like ci.yml`);
+      }
+      if (r.schedule !== undefined) errors.push(`${at}: an event routine has no schedule`);
+      if (r.run === undefined) return;
+    } else {
+      const s = (r && r.schedule) || {};
+      if (!EVERY.includes(s.every)) errors.push(`${at}: schedule.every must be one of ${EVERY.join(', ')}`);
+      if (s.every !== 'hour' && !/^([01]\d|2[0-3]):[0-5]\d$/.test(s.at || '')) errors.push(`${at}: schedule.at must be HH:MM`);
+    }
     const run = (r && r.run) || {};
     if (run.type === 'claude' && !run.prompt) errors.push(`${at}: run.prompt is required`);
     else if (run.type === 'command' && !(Array.isArray(run.cmd) && run.cmd.length)) errors.push(`${at}: run.cmd must be an argv array`);
@@ -72,7 +86,7 @@ export function deleteFromApi(p, id) {
 }
 
 /** Enabled command routines, which `routines install` shows before scheduling. */
-export const commandRoutines = (p) => load(p).filter((r) => r.enabled !== false && r.run && r.run.type === 'command');
+export const commandRoutines = (p) => load(p).filter((r) => scheduled(r) && r.enabled !== false && r.run && r.run.type === 'command');
 
 const cap = (s) => s[0].toUpperCase() + s.slice(1);
 
@@ -138,11 +152,53 @@ export function list(p, now = new Date()) {
   return load(p).map((r) => ({
     ...r,
     enabled: r.enabled !== false,
-    scheduleText: describeSchedule(r.schedule),
-    installed: installed.has(r.id),
+    scheduleText: scheduled(r) ? describeSchedule(r.schedule) : describeEvent(r.on),
+    installed: scheduled(r) ? installed.has(r.id) : null,
     lastRun: last[r.id] ? { at: last[r.id].at, exit: last[r.id].exit, run: last[r.id].run || null, firstLine: last[r.id].firstLine || '' } : null,
-    next: r.enabled === false ? null : nextRun(r.schedule, now),
+    next: r.enabled === false || !scheduled(r) ? null : nextRun(r.schedule, now),
   }));
+}
+
+/** "On GitHub Actions: ci.yml", "When a hook runs it" */
+export function describeEvent(on = {}) {
+  if (on.event === 'github-actions') return `On GitHub Actions: ${on.workflow}`;
+  return 'When something else runs it';
+}
+
+const GH_TTL = 5 * 60000;
+const ghCache = (p) => path.join(p.local, 'github-runs.json');
+
+/** gh as a promise; tests pass their own. Resolves stdout, rejects on any failure or timeout. */
+export const ghExec = (args) => new Promise((resolve, reject) => {
+  execFile('gh', args, { timeout: 8000, maxBuffer: 1024 * 1024 }, (err, stdout) => (err ? reject(err) : resolve(stdout)));
+});
+
+/**
+ * The last runs of every GitHub Actions routine, read-only through `gh run list`, cached for five
+ * minutes in .flowrail/github-runs.json. The demo reads the cache only and never calls gh.
+ * @returns {Promise<Object<string, {runs?: object[], error?: string, at: string}>>} by routine id
+ */
+export async function githubRuns(p, { exec = ghExec, now = Date.now() } = {}) {
+  const cache = readJson(ghCache(p), {});
+  const demo = !!loadConfig(p).demo;
+  const out = {};
+  let dirty = false;
+  for (const r of load(p).filter((x) => x && x.on && x.on.event === 'github-actions')) {
+    const key = `${r.on.repo}/${r.on.workflow}`;
+    const hit = cache[key];
+    if (hit && (demo || now - Date.parse(hit.at) < GH_TTL)) { out[r.id] = hit; continue; }
+    if (demo) { out[r.id] = { error: 'GitHub unavailable', at: new Date(now).toISOString() }; continue; }
+    try {
+      const raw = await exec(['run', 'list', '--repo', r.on.repo, '--workflow', r.on.workflow, '--limit', '5', '--json', 'status,conclusion,createdAt,displayTitle,headBranch,url']);
+      const runs = JSON.parse(raw).map((x) => ({ status: x.status, conclusion: x.conclusion || null, at: x.createdAt, title: x.displayTitle, branch: x.headBranch, url: /^https:\/\/github\.com\//.test(x.url || '') ? x.url : null }));
+      out[r.id] = cache[key] = { runs, at: new Date(now).toISOString() };
+    } catch {
+      out[r.id] = cache[key] = { error: 'GitHub unavailable', at: new Date(now).toISOString() };
+    }
+    dirty = true;
+  }
+  if (dirty) writeJson(ghCache(p), cache);
+  return out;
 }
 
 const BIN = path.join(PKG_ROOT, 'bin', 'flowrail-room.js');
@@ -188,7 +244,7 @@ export function cronLineFor(p, r) {
  * schedule a program without the human seeing its argv in the terminal first.
  */
 export function install(p, opts = {}) {
-  const routines = load(p).filter((r) => r.enabled !== false);
+  const routines = load(p).filter((r) => scheduled(r) && r.enabled !== false);
   const errors = validate(load(p));
   if (errors.length) throw bad(errors.join('; '));
   if (opts.http && commandRoutines(p).length) {
@@ -259,6 +315,7 @@ export function status(p) {
 export async function runNow(p, id, { wait = true } = {}) {
   const r = load(p).find((x) => x.id === id);
   if (!r) throw bad(`no routine ${id}`, 404);
+  if (!r.run) throw bad(`${r.title || r.id} is run by ${describeEvent(r.on).toLowerCase()}, not from here`, 409);
   const d = new Date();
   const day = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
   const spec = r.run.type === 'claude'

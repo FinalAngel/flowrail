@@ -19,7 +19,7 @@ export function mount(el, ctx) {
     list = Array.isArray(list) ? list : list?.routines || [];
     const installed = list.some((r) => r.installed);
     root.append(h('header.page-head',
-      h('div', h('h1', 'Routines'), h('p.sub', 'Scheduled agent runs that report, not act. Defined in flowrail/routines.json.')),
+      h('div', h('h1', 'Routines'), h('p.sub', 'Scheduled agent runs that report, not act, and the ones an event starts (GitHub Actions, a hook). Defined in flowrail/routines.json.')),
       list.length ? h('div.actions', installed
         ? h('button.btn', { type: 'button', onclick: () => sched('uninstall') }, 'Unschedule all')
         : h('button.btn.primary', { type: 'button', onclick: () => sched('install') }, 'Schedule routines')) : null));
@@ -34,12 +34,23 @@ export function mount(el, ctx) {
           h('td', h('div', { style: 'font-weight:500' }, r.title || r.id), h('div.meta.mono', { style: 'font-size:12px' }, r.run?.type === 'command' ? (r.run.cmd || []).join(' ') : r.id),
             failed && first && h('div.mono', { style: 'font-size:12px;color:var(--warn);margin-top:4px;overflow-wrap:anywhere' }, first)),
           h('td', r.scheduleText || scheduleWords(r.schedule), r.enabled === false && h('div.meta', 'Disabled')),
-          h('td', !r.lastRun ? h('span.faint', 'Never') : failed ? h('span.status.warn', h('span.dot'), `Failed, exit ${r.lastRun.exit}`) : h('span.status.ok', h('span.dot'), 'OK'), r.lastRun && h('div.meta', relTime(r.lastRun.at))),
-          h('td', r.installed === false ? h('span.faint', 'Not scheduled') : r.next ? relTime(r.next) : '—'),
+          h('td', r.github ? github(r.github) : [!r.lastRun ? h('span.faint', 'Never') : failed ? h('span.status.warn', h('span.dot'), `Failed, exit ${r.lastRun.exit}`) : h('span.status.ok', h('span.dot'), 'OK'), r.lastRun && h('div.meta', relTime(r.lastRun.at))]),
+          h('td', r.on ? h('span.faint', 'On its event') : r.installed === false ? h('span.faint', 'Not scheduled') : r.next ? relTime(r.next) : '—'),
           h('td', h('div.row', { style: 'justify-content:flex-end;flex-wrap:nowrap' },
-            h('button.btn.sm', { type: 'button', onclick: (e) => run(r, e.currentTarget) }, icon('play', 12), 'Run now'),
-            h('button.btn.sm.ghost', { type: 'button', onclick: () => output(r) }, 'Output'))));
+            r.run && h('button.btn.sm', { type: 'button', onclick: (e) => run(r, e.currentTarget) }, icon('play', 12), 'Run now'),
+            r.run && h('button.btn.sm.ghost', { type: 'button', onclick: () => output(r) }, 'Output'))));
       }))))));
+  }
+
+  // GitHub Actions runs, read-only: the latest result, and the ones before it as dots.
+  function github(g) {
+    if (g.error || !g.runs?.length) return h('span.faint', g.error || 'No runs yet');
+    const [last, ...rest] = g.runs;
+    const word = last.status !== 'completed' ? ['ok working', 'Running'] : last.conclusion === 'success' ? ['ok', 'Passed'] : ['warn', last.conclusion === 'cancelled' ? 'Cancelled' : 'Failed'];
+    const label = h('span.status', { class: word[0] }, h('span.dot'), word[1]);
+    return [last.url ? h('a', { href: last.url, target: '_blank', rel: 'noopener noreferrer', style: 'text-decoration:none' }, label) : label,
+      h('div.meta', `${relTime(last.at)}${last.branch ? ` · ${last.branch}` : ''}`),
+      rest.length > 0 && h('div.meta', { 'aria-label': `${rest.length} earlier runs` }, rest.map((x) => (x.conclusion === 'success' ? '●' : x.status !== 'completed' ? '◌' : '○')).join(' '))];
   }
 
   async function run(r, btn) {

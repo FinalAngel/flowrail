@@ -10,6 +10,9 @@ export function areaFor(rel) {
   if (r.startsWith('flowrail/memory')) return 'memory';
   if (r === 'flowrail/red-lines.json' || r.startsWith('.flowrail/redlines') || r.startsWith('.flowrail/check-results')) return 'redlines';
   if (r === 'flowrail/routines.json' || r.startsWith('.flowrail/runs')) return 'routines';
+  // An app's pid file says it started or stopped; its log is too chatty to refresh on.
+  if (r.startsWith('.flowrail/apps/')) return r.endsWith('.pid') ? 'routines' : null;
+  if (r === '.flowrail/github-runs.json') return 'routines';
   if (r.startsWith('flowrail/artifacts')) return 'artifacts';
   if (r.startsWith('.flowrail/agents') || r.startsWith('.claude/')) return 'agents';
   if (r.startsWith('.flowrail/trash')) return null;

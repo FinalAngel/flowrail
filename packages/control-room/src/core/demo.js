@@ -116,6 +116,26 @@ function activity(p, today) {
   appendLine(p.activityLog, { at: at(today, 0, 9, 5), kind: 'task', id: 'T-0002', title: 'Write the sync protocol section in architecture.md', from: 'In Progress', to: 'Review', by: 'agent' });
 }
 
+// Two local programs the Runs page can start. Neither starts on its own; both only print.
+const DEMO_APPS = [
+  { id: 'docs', name: 'Docs site', cmd: ['node', 'scripts/docs-server.js'], url: 'http://127.0.0.1:4791' },
+  { id: 'sync-watcher', name: 'Sync test watcher', cmd: ['node', 'scripts/watch-sync.js'] },
+];
+
+/** The CI routine's runs as `gh run list` would report them (the demo never calls gh). */
+function githubRuns(p, today) {
+  const run = (days, hh, conclusion, title, branch = 'main') => ({ status: 'completed', conclusion, at: at(today, days, hh, 12), title, branch, url: null });
+  writeJson(path.join(p.local, 'github-runs.json'), {
+    'paper-plane/app/ci.yml': { at: new Date(today).toISOString(), runs: [
+      run(0, 9, 'success', 'Drain the offline queue in order', 'fix-offline-queue'),
+      run(1, 16, 'failure', 'Retry sync on 503'),
+      run(1, 11, 'success', 'Search index updates per changed note'),
+      run(2, 15, 'success', 'Keyboard shortcut for new note'),
+      run(3, 10, 'success', 'Dark mode for the settings screen'),
+    ] },
+  });
+}
+
 function runsFor(p, today) {
   const rec = (id, routine, title, kind, days, hh, exit, log, extra) => {
     const startedAt = at(today, days, hh, 0);
@@ -127,6 +147,7 @@ function runsFor(p, today) {
   const lastMonday = (today.getDay() + 6) % 7 || 7;
   rec(`${d(lastMonday)}-070000-a1b2`, 'weekly-digest', 'Weekly digest', 'claude', lastMonday, 7, 1, 'the prompt was too long for the model (212k tokens, the limit is 200k)\nThe digest read every file in docs/. Limit it to the board and the git log.\n', { prompt: 'Write the week in review.' });
   rec(`${d(1)}-080000-c3d4`, 'morning-brief', 'Morning brief', 'claude', 1, 8, 0, 'Wrote flowrail/artifacts/morning-brief.html\n', { prompt: 'Morning brief' });
+  appendLine(p.routinesLog, { id: 'release-notes', at: at(today, 2, 17, 40), exit: 0 });
   rec(`${d(1)}-180000-e5f6`, 'stale-branches', 'Stale branches', 'command', 1, 18, 0, '  docs-sync-protocol\n  fix-search-latency\n* main\n', { cmd: ['git', 'branch', '--merged'] });
 }
 
@@ -172,7 +193,7 @@ export function seed(dir, today = new Date()) {
   fs.mkdirSync(dir, { recursive: true });
   const p = paths(dir);
   copyTree(TEMPLATE, dir, today);
-  const config = { ...defaultConfig('Paper Plane'), sprintStart: mondayOf(addDays(today, -28)), demo: true, lastVisit: at(today, 1, 18, 30) };
+  const config = { ...defaultConfig('Paper Plane'), sprintStart: mondayOf(addDays(today, -28)), demo: true, lastVisit: at(today, 1, 18, 30), apps: DEMO_APPS };
   writeJson(p.config, config);
   writeJson(p.board, boardFor(config, today));
   rebuildIndex(p);
@@ -191,6 +212,7 @@ export function seed(dir, today = new Date()) {
   comments(p, today);
   redlineLog(p, today);
   runsFor(p, today);
+  githubRuns(p, today);
   transcripts(dir, today);
   writeJson(path.join(p.agents, 'reviewer.json'), { agent: 'reviewer', state: 'running', at: new Date(today.getTime() - 4 * 60000).toISOString(), session: 'demo' });
   writeJson(path.join(p.agents, 'docs-writer.json'), { agent: 'docs-writer', state: 'done', at: new Date(today.getTime() - 25 * 60000).toISOString(), session: 'demo' });

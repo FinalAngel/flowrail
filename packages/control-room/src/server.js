@@ -30,6 +30,7 @@ import * as workflows from './core/workflows.js';
 import * as routines from './core/routines.js';
 import * as artifacts from './core/artifacts.js';
 import * as runs from './core/runs.js';
+import * as apps from './core/apps.js';
 import { team } from './core/team.js';
 import { build as buildGraph } from './core/graph.js';
 import { overview, search, drift } from './core/overview.js';
@@ -217,7 +218,10 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
     'GET /api/graph': () => buildGraph(p),
     'GET /api/workflows': () => workflows.list(p),
 
-    'GET /api/routines': () => routines.list(p),
+    'GET /api/routines': async () => {
+      const gh = await routines.githubRuns(p);
+      return routines.list(p).map((r) => (gh[r.id] ? { ...r, github: gh[r.id] } : r));
+    },
     'POST /api/routines': async (b) => {
       switch (b._action) {
         case 'run': return routines.runNow(p, need(b.id, 'id'), { wait: false });
@@ -237,6 +241,20 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
     },
     'GET /api/links': () => readJson(p.links, []),
     'GET /api/runs': () => runs.list(p),
+    // The Runs page in one call: recorded runs, what a headless run may do, and the apps.
+    'GET /api/automation': async () => {
+      let appList = [];
+      let appsError = null;
+      try { appList = await apps.list(p); } catch (e) { appsError = e.message; }
+      return { runs: runs.list(p), headless: runs.HEADLESS, apps: appList, appsError };
+    },
+    // Apps are started and stopped by id; the list itself lives in flowrail/config.json only.
+    'POST /api/apps': (b) => {
+      if (b._action === 'start') return apps.start(p, need(b.id, 'id'));
+      if (b._action === 'stop') return apps.stop(p, need(b.id, 'id'));
+      throw new HttpError(400, '_action must be start or stop; apps are added in flowrail/config.json only');
+    },
+    'GET /api/apps/log': (_b, q) => ({ id: q.get('id'), log: apps.log(p, need(q.get('id'), 'id')) }),
     'GET /api/search': (_b, q) => search(p, q.get('q')),
     'GET /api/plugins': () => plugins.describe(exts),
     'GET /api/doctor': async () => ({ checks: [...await doctor(p, { serving: true }), ...routines.doctorChecks(p)], headless: runs.HEADLESS, threatModel: THREAT_MODEL, server: { host: '127.0.0.1', port: getPort() } }),

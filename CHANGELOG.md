@@ -2,6 +2,15 @@
 
 All notable changes to flowrail are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/). Before 1.0, minor versions may change file formats and the HTTP API; any such change is listed here with what to do about it.
 
+## Unreleased
+
+### Added
+
+- Runs page in the control room: every headless run with who started it (a routine or Run now), how long it took, its result and its output, plus what an unattended run may do (the allowed and refused tools). The sidebar counts runs that failed in the last day.
+- Apps: local programs in `flowrail/config.json` (`"apps"`) that the Runs page starts and stops (detached, no shell, output in `.flowrail/apps/`). File-only, like command routines.
+- Event routines: `"on": { "event": "github-actions", "repo", "workflow" }` shows a GitHub Actions workflow's last runs on the Routines page through `gh` (read-only, cached five minutes); `"on": { "event": "hook" }` lists a routine something else runs. Neither is ever scheduled.
+- Workflows: `workflowsDir` in `config.json` points the Workflows page at a folder of your own, and `## Action:` / `## Sub-command:` headings group the steps of a file with several routines in it. MANDATORY in a step heading marks a gate too.
+
 ## [0.1.0] (unreleased)
 
 First public release. Not yet on npm. Two packages: `flowrail`, the guard and its CLI, and `@finalangel/flowrail-room` (command `flowrail-room`), the optional dashboard.
