@@ -9,6 +9,7 @@ All notable changes to flowrail are recorded here. The format follows [Keep a Ch
 - The board shows GitHub issues, read-only: set `"github": { "repo": "owner/name", "assignee": "@me" }` in `flowrail/config.json` and the current sprint shows the open issues assigned to you and those closed during it, as cards that open GitHub. It asks the `gh` CLI, caches for five minutes, says "GitHub unavailable" when `gh` cannot answer, and never writes to GitHub. A switch on the board hides them.
 - Buttons wait on their own work: Run now, Verify, Run checks, Save and the other buttons that start something show a ring and take no second press until it finishes; Run now holds until the routine's run record stops saying running (two minutes at most).
 - Filters remember their state per browser: the board's assignee, "Filed by agent" and GitHub switches, the memory type, the audit period and the tool in "Try a command". Search boxes are never kept.
+- The Graph page has three views, switched in the header and remembered per browser (`#/knowledge?view=graph|rings|tree`). **Rings** draws the repo around `CLAUDE.md` on one rhythm: skills and commands, area markers, documents grouped by area (a folder with many documents is one star with its count), routines and red lines, artifacts. **Tree** is the folder hierarchy with counts and area chips, navigable with the arrow keys. Areas come from `areas` in `flowrail/config.json` or a router table in `CLAUDE.md`; `GET /api/graph` now returns `areas`, and `ring` and `area` on each node.
 
 ## [0.1.0] (unreleased)
 

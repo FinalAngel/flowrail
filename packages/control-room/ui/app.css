@@ -14,6 +14,7 @@
   --ease:cubic-bezier(.2,.8,.2,1); --dur-state:150ms; --dur-arrive:280ms; --dur-sheet:360ms;
   --font:"Geist",system-ui,sans-serif; --mono:"Geist Mono",ui-monospace,Menlo,monospace;
   --glass: rgb(247 247 245/.78);
+  --area-1:#2F5FB3; --area-2:#0E7C66; --area-3:#9A5B00; --area-4:#8A3FA0; --area-5:#B5476B; --area-6:#3C7A8C; --area-7:#6B6F4A; --area-8:#7A6A2E;
   --k-doc:#5A5F63; --k-folder:#8A8F93; --k-memory:#2F5FB3; --k-skill:#7A6A2E; --k-agent:#9A5B00; --k-workflow:#3C7A8C; --k-routine:#6B6F4A; --k-redline:#0E7C66; --k-hub:#16181A;
   color-scheme: light;
 }
@@ -26,6 +27,7 @@
     --info:#8AB4FF; --focus:#3DD6AC;
     --shadow-1:inset 0 1px 0 rgb(255 255 255/.04); --shadow-2:inset 0 1px 0 rgb(255 255 255/.05); --shadow-pop:0 24px 64px -16px rgb(0 0 0/.6);
     --glass: rgb(15 17 19/.74);
+    --area-1:#8AB4FF; --area-2:#3DD6AC; --area-3:#F2B35B; --area-4:#C99BE0; --area-5:#F08DA8; --area-6:#7CC4D6; --area-7:#B8BC8E; --area-8:#D8C98A;
     --k-doc:#A3A9AE; --k-folder:#6F767C; --k-memory:#8AB4FF; --k-skill:#D8C98A; --k-agent:#F2B35B; --k-workflow:#7CC4D6; --k-routine:#B8BC8E; --k-redline:#3DD6AC; --k-hub:#ECEEEF;
     color-scheme: dark;
   }
@@ -38,6 +40,7 @@
   --info:#8AB4FF; --focus:#3DD6AC;
   --shadow-1:inset 0 1px 0 rgb(255 255 255/.04); --shadow-2:inset 0 1px 0 rgb(255 255 255/.05); --shadow-pop:0 24px 64px -16px rgb(0 0 0/.6);
   --glass: rgb(15 17 19/.74);
+  --area-1:#8AB4FF; --area-2:#3DD6AC; --area-3:#F2B35B; --area-4:#C99BE0; --area-5:#F08DA8; --area-6:#7CC4D6; --area-7:#B8BC8E; --area-8:#D8C98A;
   --k-doc:#A3A9AE; --k-folder:#6F767C; --k-memory:#8AB4FF; --k-skill:#D8C98A; --k-agent:#F2B35B; --k-workflow:#7CC4D6; --k-routine:#B8BC8E; --k-redline:#3DD6AC; --k-hub:#ECEEEF;
   color-scheme: dark;
 }
@@ -410,6 +413,27 @@ pre.raw { max-width: 100%; overflow-x: auto; background: var(--tray); padding: 1
 .canvas-box canvas { display: block; width: 100%; height: 100%; cursor: grab; }
 .canvas-box canvas.dragging { cursor: grabbing; }
 .canvas-tools { position: absolute; right: 10px; bottom: 10px; display: flex; gap: 2px; padding: 3px; border-radius: var(--r-pill); background: var(--glass); backdrop-filter: blur(10px); border: 1px solid var(--hairline); }
+/* Map: Rings and Tree */
+.rings-box { position: relative; }
+.rings-box canvas { display: block; width: 100%; }
+.rings-tip { position: absolute; transform: translate(-50%, -100%); padding: 4px 10px; border-radius: var(--r-pill); background: var(--text); color: var(--bg); font-size: 12px; white-space: nowrap; pointer-events: none; box-shadow: var(--shadow-2); }
+.rings-legend { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px 16px; margin-top: var(--s3); font-size: 13px; color: var(--text-2); }
+.rings-legend .rl { display: inline-flex; align-items: center; gap: 7px; }
+.rings-legend .rl i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); }
+.rings-list:focus-within { position: static; width: auto; height: auto; overflow: visible; clip: auto; white-space: normal; margin-top: var(--s3); }
+.map-tree { padding: 10px 8px; }
+.map-tree > .meta { padding: 0 8px 8px; }
+.map-tree ul { list-style: none; margin: 0; padding: 0; }
+.map-tree [role=treeitem] { outline: none; }
+.map-tree .tn { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 8px 0 calc(8px + var(--lvl) * 18px); border-radius: var(--r-ctl); cursor: pointer; font-size: 13.5px; }
+.map-tree .tn:hover { background: var(--tray); }
+.map-tree [role=treeitem][aria-selected=true] > .tn { background: var(--tray); }
+.map-tree [role=treeitem]:focus-visible > .tn { box-shadow: inset 0 0 0 2px var(--focus); }
+.map-tree .tw { width: 12px; color: var(--text-3); font-size: 11px; }
+.map-tree .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.map-tree [aria-expanded] > .tn .t { font-weight: 500; }
+.map-tree .n { margin-left: auto; font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; }
+.chip.area { height: 20px; color: var(--c); background: color-mix(in srgb, var(--c) 12%, transparent); }
 .canvas-status { position: absolute; left: 12px; top: 10px; font-size: 12px; color: var(--text-3); font-variant-numeric: tabular-nums; pointer-events: none; }
 
 /* Red lines */

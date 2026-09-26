@@ -20,6 +20,10 @@ Sync compares two folders and merges them. Merges happen per paragraph: if two d
 2. On connect, devices exchange clocks and send only notes that changed.
 3. The receiver merges paragraph by paragraph and writes the result.
 
+## Where things live
+
+The code is in `src/`. The agents that work on it are in `.claude/agents/`, their skills in `.claude/skills/`.
+
 ## Testing
 
 Unit tests live next to the code. The sync tests run two stores against a shared temp folder. The team agrees that [[flaky-tests-go-to-quarantine]].

@@ -153,6 +153,12 @@ A routine is an agent run on a schedule, defined in `flowrail/routines.json`:
 
 An artifact is an HTML file an agent writes to `flowrail/artifacts/` for you to read: a report, a comparison, a chart. An optional sidecar `<name>.json` gives it a title, summary and tags. The dashboard lists them and opens them in a sandbox (see [security.md](security.md#artifacts)).
 
+## The map
+
+The Graph page shows the repo three ways. **Graph** is the link graph: docs, memories and automation joined by Markdown links, `[[wikilinks]]` and folders. **Rings** puts `CLAUDE.md` in the middle and draws everything else on rings at one steady rhythm: skills and commands, one marker per area, the documents grouped by area, routines and red lines, and artifacts on the outside. **Tree** is the folder hierarchy with counts.
+
+Areas are the parts of your repo that have a router, a document that says what belongs to that part. Name them in `flowrail/config.json` (`"areas": [{ "name": "Sales", "router": "SALES.md" }]`), or in a table in `CLAUDE.md` whose rows link a router (`| Sales | [SALES.md](SALES.md) | ... |`). A file belongs to the area whose router names it or a folder above it.
+
 ## Team
 
 The Team page lists the subagents defined in `.claude/agents/`, the skills, and the slash commands. The subagent hooks record when each agent starts and stops, so you can see who is working.

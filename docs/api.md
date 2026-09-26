@@ -177,7 +177,9 @@ Each line carries four derived fields. `summary` is a plain-English sentence: wh
 
 ### Knowledge graph
 
-`GET /api/graph` returns `{ nodes: [{ id, kind, label, path?, size }], links: [{ source, target, kind }], truncated }`. `kind` is one of `doc`, `folder`, `memory`, `skill`, `agent`, `workflow`, `routine`, `redline`, `hub`. Links come from Markdown links, `[[wikilinks]]` and folder containment. At most 1500 nodes.
+`GET /api/graph` returns `{ nodes: [{ id, kind, label, path?, size, ring, area?, href? }], links: [{ source, target, kind }], areas: [{ name, router }], truncated }`. `kind` is one of `doc`, `folder`, `memory`, `skill` (a skill or a `.claude/commands` command), `agent`, `workflow`, `routine`, `redline`, `artifact`, `hub`. `ring` is where the Rings view draws the node: `hub`, `skill`, `band` (documents), `routine` or `artifact`. `area` is the index into `areas` of the area a file or folder belongs to.
+
+Areas come from `areas: [{ "name": "Sales", "router": "SALES.md" }]` in `flowrail/config.json`, or else from the rows of a table in `CLAUDE.md` that link a router (`| Sales | [SALES.md](SALES.md) | ... |`), at most 12. A file belongs to the area whose router names it (a Markdown link or a path in backticks) or names a folder above it; the most specific mention wins, and a router is in its own area. Links come from Markdown links, `[[wikilinks]]` and folder containment. At most 1500 nodes.
 
 ### Workflows
 
