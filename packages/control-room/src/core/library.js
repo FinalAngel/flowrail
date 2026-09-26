@@ -166,14 +166,16 @@ export function context(root, config = {}) {
     let index;
     try { index = safePath(root, `${base}/index.md`, { mustExist: true }); } catch { return []; }
     const text = head(index, 64 * 1024);
-    const { data } = parseFrontmatter(text);
+    const { data, body } = parseFrontmatter(text);
     const str = (v) => (typeof v === 'string' ? v : '');
     const docs = fs.readdirSync(path.dirname(index)).filter((f) => /\.md$/i.test(f) && f !== 'index.md').sort().map((f) => `${base}/${f}`)
       .filter((r) => { try { safePath(root, r, { mustExist: true }); return true; } catch { return false; } });
     let changed = null;
     try { changed = new Date(fs.statSync(index).mtimeMs).toISOString(); } catch { /* gone */ }
     const title = titleOf(text, `${base}/index.md`);
-    return [{ slug, title: title === 'index' ? slug : title, source: str(data.source), summary: str(data.summary), path: `${base}/index.md`, docs, changed }];
+    // The summary, else a description, else the first paragraph under the title; the source, else a url or an author.
+    const para = String(body).replace(/^\s*#.*\n/, '').split(/\n\s*\n/).map((x) => x.trim()).find((x) => x && !/^[#>|`-]/.test(x)) || '';
+    return [{ slug, title: title === 'index' ? slug : title, source: str(data.source) || str(data.url) || str(data.author), summary: str(data.summary) || str(data.description) || para.slice(0, 240), path: `${base}/index.md`, docs, changed }];
   });
   return { dir: rel, entries };
 }

@@ -6,7 +6,7 @@ export function mount(el, ctx) {
   let list = [];
 
   const gallery = () => {
-    clear(root).append(h('header.page-head', h('div', h('h1', 'Artifacts'), h('p.sub', 'Reports agents leave in flowrail/artifacts for you to read.'))));
+    clear(root).append(h('header.page-head', h('div', h('h1', 'Artifacts'), h('p.sub', 'Reports agents leave for you to read.'))));
     if (!list.length) { root.append(empty('Ask an agent to write a self-contained HTML report into flowrail/artifacts/.', 'ls flowrail/artifacts', ctx)); return; }
     root.append(h('div.art-grid.stagger', [...list].sort((a, b) => String(b.created).localeCompare(String(a.created))).map((a) => h('a.card.art', { href: '#/artifacts?name=' + encodeURIComponent(a.name) },
       h('span.t', a.title || a.name), a.summary && h('span.s', a.summary),

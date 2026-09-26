@@ -7,7 +7,7 @@ export function mount(el, ctx) {
   const render = (cats) => {
     cats = Array.isArray(cats) ? cats : [];
     const n = cats.reduce((s, c) => s + c.items.length, 0);
-    root.append(h('header.page-head', h('div', h('h1', 'Links'), h('p.sub', n ? `${n} links in flowrail/links.json` : 'The places you and your agents keep going back to.'))));
+    root.append(h('header.page-head', h('div', h('h1', 'Links'), h('p.sub', n ? `${n} links` : 'The places you and your agents keep going back to.'))));
     if (!n) {
       root.append(empty('Group links by category in flowrail/links.json. Web links open in a new tab; a repo path opens in Docs.',
         `echo '[{"category":"Project","items":[{"title":"Roadmap","url":"docs/roadmap.md"}]}]' > flowrail/links.json`, ctx));
