@@ -3,10 +3,12 @@
 // carries the ring the Rings view draws it on and, for files, the area it belongs to.
 import fs from 'node:fs';
 import path from 'node:path';
+import { areas as libraryAreas, areaOf as libraryAreaOf } from './library.js';
 import { listDocs } from './docs.js';
 import { readText } from 'flowrail/api';
 import { list as listMemory } from './memory.js';
 import { load as loadRoutines } from './routines.js';
+import { workflowsDir } from './workflows.js';
 import { loadLines } from 'flowrail/api';
 import { loadConfig } from 'flowrail/api';
 import { list as listArtifacts } from './artifacts.js';
@@ -18,61 +20,25 @@ const MAX_AREAS = 12;
 export const RING = { hub: 'hub', skill: 'skill', agent: 'skill', doc: 'band', folder: 'band', memory: 'band', workflow: 'band', routine: 'routine', redline: 'routine', artifact: 'artifact' };
 
 /**
- * The areas of the repo: config `areas: [{ name, router }]`, else the rows of a CLAUDE.md table that
- * link a router (`| Sales | [SALES.md](SALES.md) | ... |`). A file belongs to the area whose router
- * names it (a Markdown link, or a path in backticks), or names a folder above it; the most specific
- * wins, and a router belongs to its own area.
+ * The areas of the repo, as the Library defines them (src/core/library.js): config `areas`, else a
+ * CLAUDE.md router table; a file belongs to the area whose router names it or a folder above it.
  * @returns {{areas: {name:string, router:string}[], areaOf: (rel:string) => number|null}}
  */
 export function areasOf(p, config = loadConfig(p)) {
-  let defs = Array.isArray(config.areas) ? config.areas.filter((a) => a && typeof a.name === 'string' && typeof a.router === 'string') : [];
-  if (!defs.length) {
-    const cm = readText(path.join(p.root, 'CLAUDE.md'));
-    for (const m of cm.matchAll(/^\|\s*([^|\n]*?[^|\s][^|\n]*?)\s*\|\s*\[[^\]]*\]\(([^)\s]+\.md)\)/gm)) defs.push({ name: m[1], router: m[2] });
-  }
-  const seen = new Set();
-  const areas = [];
-  for (const d of defs) {
-    const router = path.posix.normalize(d.router.replace(/^\.\//, ''));
-    if (router.startsWith('..') || path.posix.isAbsolute(router) || seen.has(router) || areas.length >= MAX_AREAS) continue;
-    seen.add(router);
-    areas.push({ name: d.name.slice(0, 40), router });
-  }
-  const files = new Map();
-  const dirs = [];
-  areas.forEach((a, i) => {
-    files.set(a.router, i);
-    const text = readText(path.join(p.root, a.router)).slice(0, 256 * 1024);
-    const base = path.posix.dirname(a.router);
-    const mention = (rel, isDir) => {
-      rel = path.posix.normalize(rel).replace(/\/$/, '');
-      if (!rel || rel === '.' || rel.startsWith('..')) return;
-      let dir = isDir;
-      if (!dir) { try { dir = fs.statSync(path.join(p.root, rel)).isDirectory(); } catch { dir = false; } }
-      if (dir) dirs.push([rel + '/', i]);
-      else if (!files.has(rel)) files.set(rel, i);
-    };
-    for (const m of text.matchAll(/\]\(([^)\s#?]+)/g)) {
-      if (/^[a-z]+:/i.test(m[1]) || m[1].startsWith('/')) continue;
-      try { mention(path.posix.join(base, decodeURIComponent(m[1])), m[1].endsWith('/')); } catch { /* bad escape */ }
-    }
-    for (const m of text.matchAll(/`([\w.@-]+(?:\/[\w.@-]*)+)`/g)) mention(m[1], m[1].endsWith('/'));
-  });
-  dirs.sort((a, b) => b[0].length - a[0].length);
-  const areaOf = (rel) => {
-    if (files.has(rel)) return files.get(rel);
-    const hit = dirs.find(([d]) => rel.startsWith(d));
-    return hit ? hit[1] : null;
+  const list = libraryAreas(p.root, config).slice(0, MAX_AREAS);
+  const index = new Map(list.map((a, i) => [a.name, i]));
+  return {
+    areas: list.map(({ name, router }) => ({ name: name.slice(0, 40), router })),
+    areaOf: (rel) => { const name = libraryAreaOf(rel, list); return name === null ? null : index.get(name); },
   };
-  return { areas, areaOf };
 }
 
-function kindFor(rel) {
+function kindFor(rel, wf = 'flowrail/workflows') {
   if (/^flowrail\/memory\/(?!INDEX\.md$)[^/]+\.md$/.test(rel)) return 'memory';
   if (/^\.claude\/skills\/[^/]+\/SKILL\.md$/.test(rel)) return 'skill';
   if (/^\.claude\/agents\/[^/]+\.md$/.test(rel)) return 'agent';
   if (/^\.claude\/commands\/[^/]+\.md$/.test(rel)) return 'command';
-  if (/^flowrail\/workflows\/[^/]+\.md$/.test(rel)) return 'workflow';
+  if (path.posix.dirname(rel) === wf && rel.endsWith('.md')) return 'workflow';
   return 'doc';
 }
 
@@ -83,6 +49,7 @@ export function build(p) {
   const link = (source, target, kind) => { if (source !== target) links.push({ source, target, kind }); };
   const config = loadConfig(p);
   const { areas, areaOf } = areasOf(p, config);
+  const wfDir = path.relative(p.root, workflowsDir(p)).split(path.sep).join('/');
   add({ id: 'hub', kind: 'hub', label: config.name || path.basename(p.root), ...(fs.existsSync(path.join(p.root, 'CLAUDE.md')) ? { path: 'CLAUDE.md' } : {}) });
 
   const memByName = new Map(listMemory(p).map((m) => [m.name, m]));
@@ -102,7 +69,7 @@ export function build(p) {
   };
 
   for (const rel of files) {
-    const kind = kindFor(rel);
+    const kind = kindFor(rel, wfDir);
     const dir = path.posix.dirname(rel) === '.' ? '' : path.posix.dirname(rel);
     let id;
     let label = path.posix.basename(rel);

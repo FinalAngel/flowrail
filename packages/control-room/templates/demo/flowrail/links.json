@@ -2,14 +2,54 @@
   {
     "category": "Project",
     "items": [
-      { "title": "Roadmap", "url": "docs/roadmap.md", "description": "What ships next" },
-      { "title": "Architecture", "url": "docs/architecture.md", "description": "Editor, store, sync" }
+      {
+        "title": "Roadmap",
+        "url": "docs/roadmap.md",
+        "description": "What ships next"
+      },
+      {
+        "title": "Architecture",
+        "url": "docs/architecture.md",
+        "description": "Editor, store, sync"
+      },
+      {
+        "title": "Release checklist",
+        "url": "docs/release-checklist.md",
+        "description": "Before every tag"
+      }
+    ]
+  },
+  {
+    "category": "Team",
+    "items": [
+      {
+        "title": "Issue tracker",
+        "url": "https://example.com/paper-plane/issues",
+        "description": "Bugs and feature requests",
+        "icon": "board"
+      },
+      {
+        "title": "Design files",
+        "url": "https://example.com/paper-plane/design",
+        "description": "Editor and conflict view mockups",
+        "icon": "edit"
+      },
+      {
+        "title": "Nightly builds",
+        "url": "https://example.com/paper-plane/nightly",
+        "description": "Latest build for every platform",
+        "icon": "terminal"
+      }
     ]
   },
   {
     "category": "flowrail",
     "items": [
-      { "title": "Documentation", "url": "https://github.com/FinalAngel/flowrail/tree/main/docs", "description": "Concepts, red lines, CLI and API" }
+      {
+        "title": "Documentation",
+        "url": "https://github.com/FinalAngel/flowrail/tree/main/docs",
+        "description": "Concepts, red lines, CLI and API"
+      }
     ]
   }
 ]

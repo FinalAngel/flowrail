@@ -18,6 +18,9 @@ All notable changes to flowrail are recorded here. The format follows [Keep a Ch
 - Apps: local programs in `flowrail/config.json` (`"apps"`) that the Runs page starts and stops (detached, no shell, output in `.flowrail/apps/`). File-only, like command routines.
 - Event routines: `"on": { "event": "github-actions", "repo", "workflow" }` shows a GitHub Actions workflow's last runs on the Routines page through `gh` (read-only, cached five minutes); `"on": { "event": "hook" }` lists a routine something else runs. Neither is ever scheduled.
 - Workflows: `workflowsDir` in `config.json` points the Workflows page at a folder of your own, and `## Action:` / `## Sub-command:` headings group the steps of a file with several routines in it. MANDATORY in a step heading marks a gate too.
+- Library page: every Markdown document with its area, last change (one batched `git log`, file time for uncommitted files) and a fresh, aging or stale state (`"staleDays"`), with a staleness bar, filters and sorting.
+- Areas: group documents by the router file that names them, from `"areas"` in `config.json` or a `CLAUDE.md` table of routers. `"nav"` regroups the sidebar into named groups, such as departments.
+- Context page for the reference shelf in `flowrail/context/` (`"contextDir"`), and a Links page for `flowrail/links.json` (web links and repo paths; anything else is dropped).
 
 ## [0.1.0] (unreleased)
 

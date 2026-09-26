@@ -159,6 +159,26 @@ The Graph page shows the repo three ways. **Graph** is the link graph: docs, mem
 
 Areas are the parts of your repo that have a router, a document that says what belongs to that part. Name them in `flowrail/config.json` (`"areas": [{ "name": "Sales", "router": "SALES.md" }]`), or in a table in `CLAUDE.md` whose rows link a router (`| Sales | [SALES.md](SALES.md) | ... |`). A file belongs to the area whose router names it or a folder above it.
 
+## Library, areas and context
+
+The **Library** lists every Markdown document with when it last changed (from git history, or the file time outside git) and whether it is fresh, aging or stale. The thresholds are `"staleDays": [30, 90]` in `flowrail/config.json`.
+
+**Areas** group documents by who owns them. List them in `config.json`:
+
+```json
+"areas": [{ "name": "Product", "router": "docs/PRODUCT.md" }, { "name": "Engineering", "router": "docs/ENGINEERING.md" }]
+```
+
+or put a table in `CLAUDE.md` whose rows link one router file per area (`| Sales | [SALES.md](SALES.md) | leads, playbooks |`); `config.json` wins when both exist. A router is an ordinary Markdown page that names the files and folders of its area, as links, `code` or plain paths. A document belongs to the area whose router names it, or else names a folder above it; the longest folder wins. Agents read the same routers to find their way, so one file serves both.
+
+**`nav`** regroups the sidebar, for example by department: `"nav": { "Product": ["board", "library"], "Engineering": ["workflows", "routines"] }` puts those pages in those groups, in that order, above the rest. Page ids are the ones in the page addresses; a plugin page's id is `<plugin>:<page>`.
+
+**Context** is the reference shelf: one folder per source under `flowrail/context/` (or `"contextDir"`), each with an `index.md` whose frontmatter gives `title`, `source` and `summary`, plus any notes beside it.
+
+**Links** are the bookmarks in `flowrail/links.json`. Web links open in a new tab, repo paths in Docs.
+
+These four settings are file-only: the dashboard's settings API cannot change them.
+
 ## Team
 
 The Team page lists the subagents defined in `.claude/agents/`, the skills, and the slash commands. The subagent hooks record when each agent starts and stops, so you can see who is working.

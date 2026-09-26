@@ -50,7 +50,7 @@ export function toast(message, kind = 'info') {
 /* ---------- Pages ---------- */
 const NAV = [
   ['Now', [['dashboard', 'Dashboard', '/'], ['board', 'Board', '/board']]],
-  ['Knowledge', [['docs', 'Docs', '/docs'], ['graph', 'Graph', '/knowledge'], ['memory', 'Memory', '/memory'], ['artifacts', 'Artifacts', '/artifacts']]],
+  ['Knowledge', [['docs', 'Docs', '/docs'], ['graph', 'Graph', '/knowledge'], ['library', 'Library', '/library'], ['context', 'Context', '/context'], ['memory', 'Memory', '/memory'], ['artifacts', 'Artifacts', '/artifacts'], ['links', 'Links', '/links']]],
   ['Automation', [['routines', 'Routines', '/routines'], ['runs', 'Runs', '/runs'], ['workflows', 'Workflows', '/workflows'], ['team', 'Team', '/team']]],
   ['Safety', [['redlines', 'Red lines', '/redlines'], ['security', 'Security', '/security']]],
 ];
@@ -58,7 +58,7 @@ const SETTINGS = ['settings', 'Settings', '/settings'];
 let PAGES = [...NAV.flatMap(([, items]) => items), SETTINGS];
 const MODULE = {};
 const ALIAS = { '/graph': '/knowledge', '/dashboard': '/' };
-const ICON = { dashboard: 'dashboard', board: 'board', docs: 'docs', graph: 'graph', memory: 'memory', artifacts: 'artifacts', routines: 'routines', runs: 'terminal', workflows: 'workflows', team: 'team', redlines: 'redlines', security: 'security', settings: 'settings' };
+const ICON = { dashboard: 'dashboard', board: 'board', docs: 'docs', graph: 'graph', memory: 'memory', artifacts: 'artifacts', routines: 'routines', runs: 'terminal', workflows: 'workflows', team: 'team', redlines: 'redlines', security: 'security', settings: 'settings', library: 'library', context: 'context', links: 'link' };
 
 /** Plugin pages join their group (a new group sits above Safety); one on a built-in path replaces it. */
 async function loadPlugins() {
@@ -72,6 +72,28 @@ async function loadPlugins() {
     ICON[pg.id] = pg.icon || 'file';
     MODULE[pg.id] = pg.module;
   }
+  PAGES = [...NAV.flatMap(([, items]) => items), SETTINGS];
+}
+
+/**
+ * flowrail/config.json "nav": { "Sales": ["board", "library"] } moves pages into named groups, in
+ * that order, above the rest (a department sidebar). Unknown ids are ignored; empty groups vanish.
+ */
+async function regroupNav() {
+  let nav;
+  try { nav = (await api('/config'))?.nav; } catch { return; }
+  if (!nav || typeof nav !== 'object' || Array.isArray(nav)) return;
+  const take = (id) => {
+    for (const [, items] of NAV) {
+      const i = items.findIndex(([pid]) => pid === id);
+      if (i >= 0) return items.splice(i, 1)[0];
+    }
+    return null;
+  };
+  const groups = Object.entries(nav).filter(([, ids]) => Array.isArray(ids))
+    .map(([name, ids]) => [String(name).slice(0, 40), ids.map((id) => take(String(id))).filter(Boolean)]);
+  NAV.splice(0, 0, ...groups.filter(([, items]) => items.length));
+  for (let i = NAV.length - 1; i >= 0; i--) if (!NAV[i][1].length) NAV.splice(i, 1);
   PAGES = [...NAV.flatMap(([, items]) => items), SETTINGS];
 }
 
@@ -369,6 +391,6 @@ async function route() {
 window.addEventListener('hashchange', route);
 listeners.add(debounce(() => refreshShell(), 400));
 renderSidebar(); renderTopbar();
-loadPlugins().finally(route);
+loadPlugins().then(regroupNav).finally(route);
 refreshShell();
 connectEvents();
