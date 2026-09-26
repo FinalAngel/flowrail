@@ -68,6 +68,15 @@ export function build(p) {
     return id;
   };
 
+  // Routines, red lines and artifacts first, then skills and agents, then documents: when the cap
+  // is reached it drops documents, never the few things on the outer rings.
+  const artDir = path.relative(p.root, p.artifacts).split(path.sep).join('/');
+  for (const r of loadRoutines(p)) if (add({ id: `routine:${r.id}`, kind: 'routine', label: r.title || r.id, path: 'flowrail/routines.json' })) link('hub', `routine:${r.id}`, 'module');
+  for (const l of loadLines(p)) if (add({ id: `redline:${l.id}`, kind: 'redline', label: l.title || l.id, path: 'flowrail/red-lines.json' })) link('hub', `redline:${l.id}`, 'module');
+  for (const a of listArtifacts(p)) add({ id: `artifact:${a.name}`, kind: 'artifact', label: a.title, path: `${artDir}/${a.name}`, href: a.href });
+  const rank = (rel) => (kindFor(rel, wfDir) === 'doc' ? 1 : 0);
+  files.sort((a, b) => rank(a) - rank(b));
+
   for (const rel of files) {
     const kind = kindFor(rel, wfDir);
     const dir = path.posix.dirname(rel) === '.' ? '' : path.posix.dirname(rel);
@@ -101,9 +110,6 @@ export function build(p) {
     byBase.set(path.posix.basename(rel, path.posix.extname(rel)).toLowerCase(), id);
   }
 
-  for (const r of loadRoutines(p)) if (add({ id: `routine:${r.id}`, kind: 'routine', label: r.title || r.id, path: 'flowrail/routines.json' })) link('hub', `routine:${r.id}`, 'module');
-  for (const l of loadLines(p)) if (add({ id: `redline:${l.id}`, kind: 'redline', label: l.title || l.id, path: 'flowrail/red-lines.json' })) link('hub', `redline:${l.id}`, 'module');
-  for (const a of listArtifacts(p)) add({ id: `artifact:${a.name}`, kind: 'artifact', label: a.title, path: `flowrail/artifacts/${a.name}`, href: a.href });
   for (const n of nodes.values()) {
     n.ring = RING[n.kind] || 'band';
     if (n.kind === 'folder' && areaOf(n.path + '/') !== null) n.area = areaOf(n.path + '/');

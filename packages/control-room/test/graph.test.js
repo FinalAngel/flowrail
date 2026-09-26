@@ -68,3 +68,19 @@ test('the map stops at 1500 nodes and says so', () => {
   assert.ok(g.nodes.length <= 1500);
   assert.equal(g.truncated, true);
 });
+
+test('at the node cap, documents give way: routines, artifacts and skills stay on the map', () => {
+  const p = workspace();
+  for (let i = 0; i < 1600; i++) write(p.root, `notes/n${i}.md`);
+  write(p.root, '.claude/skills/review/SKILL.md', '---\nname: review\n---\n');
+  fs.mkdirSync(path.join(p.root, 'reports'), { recursive: true });
+  fs.writeFileSync(path.join(p.root, 'reports', 'weekly.html'), '<title>Weekly</title>');
+  const pp = { ...p, artifacts: path.join(p.root, 'reports') };
+  const g = build(pp);
+  assert.equal(g.truncated, true);
+  assert.ok(g.nodes.some((n) => n.kind === 'skill'), 'the skill survives the cap');
+  const art = g.nodes.find((n) => n.kind === 'artifact');
+  assert.ok(art, 'the artifact survives the cap');
+  assert.equal(art.path, 'reports/weekly.html', 'the artifact path follows artifactsDir');
+  assert.ok(g.nodes.some((n) => n.kind === 'redline'), 'red lines survive the cap');
+});

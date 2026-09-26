@@ -15,7 +15,7 @@ const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 const ease = (t) => 1 - (1 - t) ** 3;
 
 export function rings(el, ctx) {
-  let graph = null, items = [], links = [], byId = new Map(), areas = [];
+  let graph = null, items = [], base = [], links = [], byId = new Map(), areas = [];
   let colors = {}, hover = null, settled = false, t0 = 0, raf = 0, U = 0, cx = 0, cy = 0;
   const sprites = new Map();
 
@@ -50,30 +50,50 @@ export function rings(el, ctx) {
   function build() {
     const n = graph.nodes;
     const hub = n.find((x) => x.kind === 'hub');
-    items = [{ ...hub, ring: 'hub' }];
-    for (const r of ['skill', 'routine', 'artifact']) items.push(...n.filter((x) => x.ring === r).map((x) => ({ ...x })));
-    // The band: documents grouped by area, folders with many documents folded into one star.
+    // Everything but the band's documents: placed on its rings in layout(), never folded.
+    base = [{ ...hub, ring: 'hub' }];
+    for (const r of ['skill', 'routine', 'artifact']) base.push(...n.filter((x) => x.ring === r).map((x) => ({ ...x })));
+    // The band's documents by area; how many fold into folder stars is decided in layout(), where
+    // each area's room is known.
     const docs = n.filter((x) => x.ring === 'band' && x.kind !== 'folder');
     const groups = new Map();
     for (const d of docs) {
       const a = d.area ?? -1;
-      if (!groups.has(a)) groups.set(a, new Map());
-      const dir = d.path.includes('/') ? d.path.slice(0, d.path.lastIndexOf('/')) : '';
-      const g = groups.get(a);
-      if (!g.has(dir)) g.set(dir, []);
-      g.get(dir).push(d);
+      if (!groups.has(a)) groups.set(a, []);
+      groups.get(a).push({ ...d, area: a });
     }
-    const band = [];
-    for (const [a, dirs] of [...groups].sort((x, y) => (x[0] === -1) - (y[0] === -1) || x[0] - y[0])) {
-      const inArea = [];
-      for (const [dir, list] of [...dirs].sort((x, y) => x[0].localeCompare(y[0]))) {
-        if (dir && list.length > FOLD) inArea.push({ id: `fold:${a}:${dir}`, kind: 'folder', label: dir.split('/').pop() + '/', path: dir, count: list.length, area: a, members: new Set(list.map((d) => d.id)) });
-        else inArea.push(...list.map((d) => ({ ...d, area: a })));
+    items = [];
+    items.sectors = [...groups].sort((x, y) => (x[0] === -1) - (y[0] === -1) || x[0] - y[0]).map(([area, list]) => ({ area, docs: list, items: [] }));
+    fold(Infinity);
+  }
+
+  const dirOf = (p) => (p.includes('/') ? p.slice(0, p.lastIndexOf('/')) : '');
+  const cut = (dir, depth) => dir.split('/').slice(0, depth).join('/');
+
+  /** One area's band items: its documents, with folders folded into stars until they fit `cap`. */
+  function foldArea(s, cap) {
+    const deepest = Math.max(1, ...s.docs.map((d) => dirOf(d.path).split('/').length));
+    // Fold big folders, then any folder with two or more, then by ever shallower parent folders.
+    const steps = [[Infinity, FOLD + 1], [Infinity, 2]];
+    for (let d = deepest - 1; d >= 1; d--) steps.push([d, 2]);
+    let out = [];
+    for (const [depth, min] of steps) {
+      const byDir = new Map();
+      for (const d of s.docs) { const k = cut(dirOf(d.path), depth); if (!byDir.has(k)) byDir.set(k, []); byDir.get(k).push(d); }
+      out = [];
+      for (const [dir, list] of [...byDir].sort((x, y) => x[0].localeCompare(y[0]))) {
+        if (dir && list.length >= min) out.push({ id: `fold:${s.area}:${dir}`, kind: 'folder', label: dir.split('/').pop() + '/', path: dir, count: list.length, area: s.area, members: new Set(list.map((d) => d.id)) });
+        else out.push(...list);
       }
-      band.push({ area: a, items: inArea });
+      if (out.length <= cap) break;
     }
-    items.push(...band.flatMap((b) => b.items.map((x) => ({ ...x, ring: 'band' }))));
-    items.sectors = band;
+    return out;
+  }
+
+  /** Rebuild the band's items at the given room per area, then the lookup and the links. */
+  function fold(capOf) {
+    for (const s of items.sectors) s.items = foldArea(s, typeof capOf === 'function' ? capOf(s) : capOf);
+    items.splice(0, items.length, ...base, ...items.sectors.flatMap((s) => s.items.map((x) => ({ ...x, ring: 'band' }))));
     byId = new Map(items.map((x) => [x.id, x]));
     // A link into a folded document points at its folder's star.
     const folded = new Map();
@@ -83,46 +103,79 @@ export function rings(el, ctx) {
     links = [];
     for (const l of graph.links) {
       if (l.kind === 'contains' || l.kind === 'module') continue;
-      const s = at(l.source), t = at(l.target);
-      if (!s || !t || s === t || seen.has(s + '>' + t)) continue;
-      seen.add(s + '>' + t);
-      links.push({ s, t });
+      const a = at(l.source), b = at(l.target);
+      if (!a || !b || a === b || seen.has(a + '>' + b)) continue;
+      seen.add(a + '>' + b);
+      links.push({ s: a, t: b });
     }
   }
 
-  /** Target positions from the one unit U. */
+  /**
+   * Target positions from the one unit U. An entry gets U/3 of arc (the pitch); a ring with more
+   * than one row's worth adds rows around its radius, and the two-unit band adds rows inside it.
+   * The area that needs the most rows sets them for every area, so the rows line up.
+   */
   function layout() {
     const w = canvas.clientWidth, hh = canvas.clientHeight;
     cx = w / 2; cy = hh / 2;
-    U = Math.max(10, (Math.min(w, hh) / 2 - 26) / 7);
+    U = Math.max(10, (Math.min(w, hh) / 2 - 18) / 7.4);
     const R = { skill: U, area: 2 * U, band0: 3 * U, band1: 5 * U, routine: 6 * U, artifact: 7 * U };
-    const around = (list, r, phase = -Math.PI / 2) => list.forEach((x, i) => { const a = phase + (i / Math.max(1, list.length)) * 2 * Math.PI; x.a = a; x.r = r; });
-    const hub = items[0]; hub.a = 0; hub.r = 0;
-    around(items.filter((x) => x.ring === 'skill'), R.skill);
-    around(items.filter((x) => x.ring === 'routine'), R.routine, -Math.PI / 2 + 0.2);
-    around(items.filter((x) => x.ring === 'artifact'), R.artifact, -Math.PI / 2 + 0.1);
-    // Sectors: each area gets arc in proportion to its items (at least a little), with a gap between.
-    const sec = items.sectors, gap = sec.length > 1 ? 0.06 : 0;
-    const weight = sec.map((s) => Math.max(2, s.items.length));
-    const total = weight.reduce((a, b) => a + b, 0);
-    let a0 = -Math.PI / 2;
-    const spacing = U / 3;
-    sec.forEach((s, i) => {
-      const span = (2 * Math.PI - gap * sec.length) * (weight[i] / total);
-      s.a0 = a0; s.a1 = a0 + span; s.mid = a0 + span / 2;
-      // Rows across the band: as many as the items need at one spacing, at most as the depth allows.
-      const perRow = Math.max(1, Math.floor((span * (R.band0 + R.band1) / 2) / spacing));
-      const rows = Math.min(7, Math.max(1, Math.ceil(s.items.length / perRow)));
-      const per = Math.ceil(s.items.length / rows);
-      s.items.forEach((x, j) => {
-        const row = Math.floor(j / per), k = j % per, inRow = Math.min(per, s.items.length - row * per);
-        const it = byId.get(x.id);
-        it.r = R.band0 + ((row + 0.5) / rows) * (R.band1 - R.band0);
-        it.a = a0 + span * ((k + 0.5) / inRow) + (row % 2 ? span * 0.25 / inRow : 0);
+    const pitch = U / 3;
+    items.pitch = pitch;
+    const TAU = 2 * Math.PI;
+    // outward: extra rows grow away from the centre (the skills ring, so the hub's name stays clear).
+    const ring = (list, r, phase, outward = false) => {
+      const perRow = Math.max(1, Math.floor((TAU * r) / pitch));
+      const rows = Math.max(1, Math.min(3, Math.ceil(list.length / perRow)));
+      const per = Math.ceil(list.length / rows);
+      list.forEach((x, i) => {
+        const row = Math.floor(i / per), k = i % per, n = Math.min(per, list.length - row * per);
+        x.r = r + (outward ? row : row - (rows - 1) / 2) * pitch;
+        x.a = phase + ((k + (row % 2) * 0.5) / n) * TAU;
       });
-      a0 += span + gap;
+    };
+    // Sectors: room by the square root of the documents, never less than the area's name needs,
+    // with a gap between areas.
+    const sec = items.sectors, gap = sec.length > 1 ? 0.05 : 0, rl = R.area + U * 0.42;
+    const c = canvas.getContext('2d');
+    c.font = '500 11px Geist, system-ui, sans-serif';
+    const minSpan = sec.map((s) => (s.area < 0 ? 0.05 : (c.measureText(areas[s.area]?.name || '').width + 18) / rl));
+    const want = sec.map((s) => Math.sqrt(Math.max(1, s.docs.length)));
+    const free = TAU - gap * sec.length;
+    let spans = want.map((x) => (x / want.reduce((a, b) => a + b, 0)) * free);
+    // Lift the small ones to their minimum and take it from the rest, in proportion.
+    for (let pass = 0; pass < 4; pass++) {
+      const short = spans.map((x, i) => Math.max(0, minSpan[i] - x));
+      const need = short.reduce((a, b) => a + b, 0);
+      if (need < 1e-6) break;
+      const spare = spans.map((x, i) => (short[i] ? 0 : Math.max(0, x - minSpan[i])));
+      const pool = spare.reduce((a, b) => a + b, 0);
+      if (pool <= need) break;
+      spans = spans.map((x, i) => (short[i] ? minSpan[i] : x - (spare[i] / pool) * need));
+    }
+    const depth = R.band1 - R.band0, maxRows = Math.max(1, Math.floor(depth / pitch));
+    sec.forEach((s, i) => { s.span = spans[i]; s.perRow = Math.max(1, Math.floor((spans[i] * R.band0) / pitch)); });
+    fold((s) => s.perRow * maxRows);
+    const rows = Math.min(maxRows, Math.max(1, ...sec.map((s) => Math.ceil(s.items.length / s.perRow))));
+    const rowR = (row) => R.band0 + (row + 0.5) * (depth / rows);
+    let a0 = -Math.PI / 2;
+    sec.forEach((s) => {
+      s.a0 = a0; s.a1 = a0 + s.span; s.mid = a0 + s.span / 2;
+      const per = Math.max(1, Math.ceil(s.items.length / rows));
+      s.items.forEach((x, j) => {
+        const row = Math.floor(j / per), k = j % per, n = Math.min(per, s.items.length - row * per);
+        const it = byId.get(x.id);
+        it.r = rowR(row);
+        it.a = a0 + s.span * ((k + 0.5 + (row % 2 ? 0.25 : 0)) / (n + 0.5));
+      });
+      a0 += s.span + gap;
     });
+    const hub = items[0]; hub.a = 0; hub.r = 0;
+    ring(items.filter((x) => x.ring === 'skill'), R.skill, -Math.PI / 2, true);
+    ring(items.filter((x) => x.ring === 'routine'), R.routine, -Math.PI / 2 + 0.2);
+    ring(items.filter((x) => x.ring === 'artifact'), R.artifact, -Math.PI / 2 + 0.1);
     items.R = R;
+    items.labelR = rl;
   }
 
   /* ---------- colour and sprites ---------- */
@@ -153,7 +206,13 @@ export function rings(el, ctx) {
     sprites.set(color, c);
     return c;
   }
-  const size = (x) => (x.kind === 'hub' ? U * 0.34 : x.kind === 'folder' ? Math.min(U * 0.3, 4 + Math.sqrt(x.count) * 2.2) : x.ring === 'band' ? Math.min(U * 0.14, 4.2) : Math.min(U * 0.12, 3.6));
+  // Stars grow with their count but stay inside their own slot, so neighbours never touch.
+  const size = (x) => {
+    const slot = (items.pitch || U / 3) * 0.48;
+    if (x.kind === 'hub') return U * 0.34;
+    if (x.kind === 'folder') return Math.min(slot, 2.5 + Math.sqrt(x.count) * 1.4);
+    return Math.min(slot * 0.62, x.ring === 'band' ? 4.2 : 3.6);
+  };
   function point(c, x, y, r, color) {
     if (r * 2 / CORE > BIG) { c.fillStyle = color; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill(); return; }
     const R = r / CORE;
@@ -203,7 +262,7 @@ export function rings(el, ctx) {
       const m = { a: s.mid, r: R.area };
       const [x, y] = xy(m, ease(t));
       point(c, x, y, Math.min(U * 0.16, 5), areaColor(s.area));
-      if (t === 1) arcLabel(c, areas[s.area]?.name || '', s, R.area + U * 0.42, areaColor(s.area));
+      if (t === 1) arcLabel(c, areas[s.area]?.name || '', s, items.labelR, areaColor(s.area));
     }
     const near = new Set();
     if (hot) { near.add(hover); near.add(items[0].id); for (const l of links) { if (l.s === hover) near.add(l.t); if (l.t === hover) near.add(l.s); } }
@@ -212,11 +271,12 @@ export function rings(el, ctx) {
       c.globalAlpha = hot && !near.has(x.id) ? 0.3 : 1;
       const r = size(x);
       point(c, px, py, r, x.kind === 'hub' ? colors.hub : colorOf(x));
-      if (x.kind === 'folder' && r > 6 && t === 1) {
+      if (x.kind === 'folder' && r >= 6 && t === 1) {
         c.fillStyle = colors.surface;
-        c.font = `600 ${Math.max(9, r * 0.9)}px Geist, system-ui, sans-serif`;
+        const label = x.count > 999 ? `${Math.round(x.count / 100) / 10}k` : String(x.count);
+        c.font = `600 ${Math.min(r * 1.05, Math.max(7, (r * 2.2) / Math.max(1, label.length * 0.62)))}px Geist, system-ui, sans-serif`;
         c.textAlign = 'center'; c.textBaseline = 'middle';
-        c.fillText(String(x.count), px, py + 0.5);
+        c.fillText(label, px, py + 0.5);
       }
     }
     c.globalAlpha = 1;
@@ -317,8 +377,9 @@ export function rings(el, ctx) {
 
   function resize() {
     const w = box.clientWidth;
-    canvas.style.height = Math.round(Math.min(w, Math.max(360, innerHeight - 250))) + 'px';
+    canvas.style.height = Math.round(Math.min(w, Math.max(360, innerHeight - 200))) + 'px';
     layout();
+    paintList(); // folding depends on the room, so the list follows the layout
     draw(settled ? 1 : 0);
   }
   const ro = new ResizeObserver(() => { if (items.length) resize(); });
