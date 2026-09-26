@@ -598,3 +598,17 @@ table.probes td:not(.mono) { white-space: nowrap; overflow-wrap: normal; }
 table.probes tr:last-child td { border-bottom: 0; }
 table.probes .ok { color: var(--accent); }
 table.probes .bad, table.probes tr.fail td:first-child { color: var(--danger); font-weight: 500; }
+
+/* A button waiting on its own work: the ring turns where its icon is, no second press. */
+.btn.busy, .icon-btn.busy { pointer-events: none; }
+.btn.busy > .icon, .icon-btn.busy > .icon { display: none; }
+.btn.busy::before, .icon-btn.busy::before { content: ""; flex: none; width: 13px; height: 13px; border: 1.6px solid var(--hairline); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; }
+.btn.primary.busy::before { border-color: color-mix(in srgb, var(--accent-ink) 35%, transparent); border-top-color: var(--accent-ink); }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .btn.busy::before, .icon-btn.busy::before { animation-duration: 2s; } }
+
+/* A GitHub issue on the board: read-only, a link to GitHub, never dragged. */
+.tcard.issue { color: inherit; text-decoration: none; cursor: pointer; border-style: dashed; background: color-mix(in srgb, var(--surface) 70%, var(--tray)); box-shadow: none; }
+.tcard.issue:hover { box-shadow: var(--shadow-1); }
+.tcard.issue:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.tcard.issue .title::after { content: none; }

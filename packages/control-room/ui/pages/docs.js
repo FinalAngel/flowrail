@@ -1,4 +1,4 @@
-import { h, icon, clear, relTime, skeleton, errorBox, empty, confirmBox, debounce } from '../lib/dom.js';
+import { h, icon, clear, relTime, skeleton, errorBox, empty, confirmBox, debounce, busy } from '../lib/dom.js';
 import { renderMarkdown } from '../lib/markdown.js';
 
 const EDITABLE = /\.(md|markdown|txt)$/i;
@@ -94,7 +94,8 @@ export function mount(el, ctx) {
     if (editing) {
       const ta = h('textarea.input.editor', { 'aria-label': `Edit ${path}`, spellcheck: 'true', value: file.text });
       const err = h('div', { role: 'alert' });
-      const save = async () => {
+      let saveBtn;
+      const save = () => busy(saveBtn, (async () => {
         try {
           const r = await ctx.api('/docs/file', { path, text: ta.value, mtime: file.mtime });
           file.text = ta.value; file.mtime = r?.mtime ?? Date.now(); editing = false; paintDoc(); ctx.toast('Saved');
@@ -103,9 +104,9 @@ export function mount(el, ctx) {
             ? h('div.notice.warn', icon('alert'), h('div.body', h('span', 'This file changed on disk since you opened it. Copy your edits, then reload to see the new version.'), h('div', h('button.btn.sm', { type: 'button', onclick: () => loadDoc() }, 'Reload from disk'))))
             : errorBox(e));
         }
-      };
+      })());
       ta.addEventListener('keydown', (e) => { if ((e.metaKey || e.ctrlKey) && e.key === 's') { e.preventDefault(); save(); } });
-      docCol.append(ta, err, h('div.row', { style: 'margin-top:12px' }, h('button.btn.primary', { type: 'button', onclick: save }, 'Save'), h('button.btn', { type: 'button', onclick: () => { editing = false; paintDoc(); } }, 'Cancel'), h('span.meta', h('kbd', '⌘S'), ' saves')));
+      docCol.append(ta, err, h('div.row', { style: 'margin-top:12px' }, (saveBtn = h('button.btn.primary', { type: 'button', onclick: save }, 'Save')), h('button.btn', { type: 'button', onclick: () => { editing = false; paintDoc(); } }, 'Cancel'), h('span.meta', h('kbd', '⌘S'), ' saves')));
       ta.focus();
       return;
     }

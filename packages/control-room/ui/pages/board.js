@@ -1,11 +1,13 @@
-import { h, icon, clear, loader, relTime, shortDate, sheet, confirmBox, empty, debounce } from '../lib/dom.js';
+import { h, icon, clear, loader, relTime, shortDate, sheet, confirmBox, empty, debounce, busy, pref, savePref, append } from '../lib/dom.js';
 
 const COLS = ['Backlog', 'Todo', 'In Progress', 'Review', 'Done'];
 const PRIOS = ['P0', 'P1', 'P2', 'P3'];
 
 export function mount(el, ctx) {
-  let data = null, agents = new Set(['claude']);
-  const f = { q: '', who: '', agentOnly: false };
+  let data = null, gh = null, agents = new Set(['claude']);
+  // Filters come back after a reload (per browser); the search box never does.
+  const f = { q: '', who: pref('board-who', ''), agentOnly: pref('board-agent', false), github: pref('board-github', true) };
+  const setF = (k, v) => { f[k] = v; savePref(`board-${k === 'agentOnly' ? 'agent' : k}`, v); paint(); };
   const root = h('div');
   el.append(root);
 
@@ -73,13 +75,25 @@ export function mount(el, ctx) {
     return c;
   }
 
+  // A GitHub issue: read-only, opens on GitHub, never dragged or written back.
+  const issueCard = (i) => h('a.tcard.issue', { href: i.url, target: '_blank', rel: 'noopener noreferrer', 'aria-label': `GitHub issue #${i.number}: ${i.title} (opens GitHub)` },
+    h('div.top', h('span.id', `#${i.number}`), h('span.chip', { style: 'height:20px' }, icon('branch', 12), 'GitHub'), i.state === 'CLOSED' && h('span.faint', { style: 'margin-left:auto' }, 'closed')),
+    h('span.title', i.title),
+    h('div.foot', (i.assignees || []).slice(0, 1).map((a) => h('span.who', icon('user', 13), a)), (i.labels || []).slice(0, 2).map((l) => h('span.chip.mono', { style: 'height:20px' }, l))));
+  const issuesIn = (col) => {
+    if (!f.github || !gh?.available || (col !== 'Todo' && col !== 'Done')) return [];
+    const q = f.q.toLowerCase();
+    return gh.issues.filter((i) => (col === 'Done') === (i.state === 'CLOSED') && (!q || `#${i.number} ${i.title} ${(i.labels || []).join(' ')}`.toLowerCase().includes(q)));
+  };
+
   function column(name, tasks) {
-    const body = h('div.col-body', tasks.map(card));
+    const issues = issuesIn(name);
+    const body = h('div.col-body', tasks.map(card), issues.map(issueCard));
     const col = h('section.col', { 'aria-label': `${name}, ${tasks.length} tasks`,
       ondragover: (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; col.classList.add('drop'); },
       ondragleave: (e) => { if (!col.contains(e.relatedTarget)) col.classList.remove('drop'); },
       ondrop: (e) => { e.preventDefault(); col.classList.remove('drop'); const t = data.tasks.find((x) => x.id === e.dataTransfer.getData('text/plain')); if (t) move(t, name); } },
-      h('header.col-head', h('h2', { style: 'font-size:13px;font-weight:500' }, name), h('span.count', tasks.length),
+      h('header.col-head', h('h2', { style: 'font-size:13px;font-weight:500' }, name), h('span.count', tasks.length + issues.length),
         name === 'Backlog' || name === 'Todo' ? h('button.icon-btn', { type: 'button', style: 'margin-left:auto;width:28px;height:28px', 'aria-label': `New task in ${name}`, onclick: () => create(name) }, icon('plus')) : null),
       body);
     return col;
@@ -102,6 +116,22 @@ export function mount(el, ctx) {
     return cur ? `${cur.label || 'Current sprint'} · ${shortDate(cur.start)} to ${shortDate(cur.end)} · ${d} of ${n} done` : `${d} of ${n} done`;
   };
 
+  function filters() {
+    const people = [...new Set(data.tasks.map((t) => t.assignee).filter(Boolean))].sort();
+    if (f.who && f.who !== '(none)' && !people.includes(f.who)) f.who = '';
+    const search = h('input.input.search', { type: 'search', placeholder: 'Filter tasks', 'aria-label': 'Filter tasks', value: f.q, oninput: debounce((e) => { f.q = e.target.value; paint(); }, 80) });
+    append(clear(filterRow), [search,
+      h('select.input', { 'aria-label': 'Assignee', onchange: (e) => setF('who', e.target.value) },
+        h('option', { value: '' }, 'Anyone'), people.map((p) => h('option', { value: p, selected: f.who === p }, p)), h('option', { value: '(none)', selected: f.who === '(none)' }, 'Unassigned')),
+      h('label.switch', h('input', { type: 'checkbox', checked: f.agentOnly, onchange: (e) => setF('agentOnly', e.target.checked) }), 'Filed by agent'),
+      gh?.configured && h('label.switch', { title: `Open issues assigned in ${gh.repo}, and those closed this sprint. Read-only.` }, h('input', { type: 'checkbox', checked: f.github, onchange: (e) => setF('github', e.target.checked) }), 'GitHub issues'),
+      gh?.configured && !gh.available && h('span.chip.warn', { title: 'The gh CLI is missing, signed out or offline. Your tasks are unaffected.' }, icon('alert', 12), 'GitHub unavailable'),
+      gh?.configured && gh.available && f.github && h('button.icon-btn', { type: 'button', 'aria-label': 'Refresh GitHub issues', title: 'Refresh GitHub issues', onclick: (e) => busy(e.currentTarget, loadIssues(true)) }, icon('refresh'))]);
+  }
+  const loadIssues = (refresh) => ctx.api('/board/issues' + (refresh ? '?refresh=1' : ''))
+    .then((r) => { gh = r; }, () => { gh = null; })
+    .then(() => { if (data?.tasks.length && filterRow.isConnected) { filters(); paint(); } });
+
   function renderAll(d) {
     data = d;
     if (!data.tasks.length) {
@@ -109,12 +139,7 @@ export function mount(el, ctx) {
         empty('The board is flowrail/board.json. You and your agents file tasks into it.', 'npx @finalangel/flowrail-room task "Write the first test" --priority P2', ctx));
       return;
     }
-    const people = [...new Set(data.tasks.map((t) => t.assignee).filter(Boolean))].sort();
-    const search = h('input.input.search', { type: 'search', placeholder: 'Filter tasks', 'aria-label': 'Filter tasks', value: f.q, oninput: debounce((e) => { f.q = e.target.value; paint(); }, 80) });
-    clear(filterRow).append(search,
-      h('select.input', { 'aria-label': 'Assignee', onchange: (e) => { f.who = e.target.value; paint(); } },
-        h('option', { value: '' }, 'Anyone'), people.map((p) => h('option', { value: p, selected: f.who === p }, p)), h('option', { value: '(none)', selected: f.who === '(none)' }, 'Unassigned')),
-      h('label.switch', h('input', { type: 'checkbox', checked: f.agentOnly, onchange: (e) => { f.agentOnly = e.target.checked; paint(); } }), 'Filed by agent'));
+    filters();
     root.append(
       h('header.page-head', h('div', h('h1', 'Board'), h('p.sub', sub())),
         h('div.actions', h('button.btn.primary', { type: 'button', onclick: () => create('Todo') }, icon('plus'), 'New task'))),
@@ -134,10 +159,8 @@ export function mount(el, ctx) {
       body.append(h('form', { class: 'stack', onsubmit: async (e) => {
         e.preventDefault();
         if (!title.value.trim()) { title.setAttribute('aria-invalid', 'true'); err.textContent = 'Give the task a title.'; title.focus(); return; }
-        try {
-          const t = await ctx.api('/board', { _action: 'create', title: title.value.trim(), priority: prio.value, assignee: who.value.trim(), status: col === 'Backlog' ? 'Todo' : col, sprint: where.value === 'backlog' ? '' : data.config?.current?.start || 'current' });
-          ctx.toast(`Filed ${t?.id || 'task'}`); close(); reload();
-        } catch (x) { err.textContent = x.message; }
+        await busy(e.submitter, ctx.api('/board', { _action: 'create', title: title.value.trim(), priority: prio.value, assignee: who.value.trim(), status: col === 'Backlog' ? 'Todo' : col, sprint: where.value === 'backlog' ? '' : data.config?.current?.start || 'current' })
+          .then((t) => { ctx.toast(`Filed ${t?.id || 'task'}`); close(); reload(); }, (x) => { err.textContent = x.message; }));
       } },
         h('div.field', h('label', { for: 'nt-title' }, 'Title'), title),
         h('div.form-grid', h('div.field', h('label', { for: 'nt-prio' }, 'Priority'), prio), h('div.field', h('label', { for: 'nt-where' }, 'Sprint'), where),
@@ -167,7 +190,7 @@ export function mount(el, ctx) {
         h('form.stack', { onsubmit: async (e) => {
           e.preventDefault();
           const text = noteIn.value.trim(); if (!text) return;
-          try { await ctx.api('/board', { _action: 'note', id: t.id, text }); (t.notes ||= []).push({ at: new Date().toISOString(), by: 'you', text }); notes.append(h('li', h('div.by', 'you · just now'), h('div', text))); noteIn.value = ''; if (!notes.isConnected) { close(); detail(t); } }
+          try { await busy(e.submitter, ctx.api('/board', { _action: 'note', id: t.id, text })); (t.notes ||= []).push({ at: new Date().toISOString(), by: 'you', text }); notes.append(h('li', h('div.by', 'you · just now'), h('div', text))); noteIn.value = ''; if (!notes.isConnected) { close(); detail(t); } }
           catch (x) { ctx.toast(x.message, 'warn'); }
         } }, h('label.sr-only', { for: 'td-note' }, 'Note'), noteIn, h('div.row.end', h('button.btn.sm', { type: 'submit' }, 'Add note'))),
         h('hr.sep'),
@@ -179,6 +202,7 @@ export function mount(el, ctx) {
   }
 
   const reload = loader(root, () => ctx.api('/board'), renderAll, 5);
+  loadIssues(false);
   ctx.on(['board'], () => { if (!document.querySelector('dialog[open], .popover')) reload(); });
   const unmount = () => document.querySelector('.popover')?.remove();
   unmount.update = (params) => { const id = params.get('task'); const t = id && data?.tasks.find((x) => x.id === id); if (t) detail(t); };

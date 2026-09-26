@@ -1,4 +1,4 @@
-import { h, icon, clear, loader, debounce, skeleton, errorBox, empty, shortDate, sheet } from '../lib/dom.js';
+import { h, icon, clear, loader, debounce, skeleton, errorBox, empty, shortDate, sheet, busy, pref, savePref } from '../lib/dom.js';
 import { renderMarkdown, inline } from '../lib/markdown.js';
 
 // The renderer escapes every piece of source text; only its fixed tags reach the page.
@@ -13,7 +13,7 @@ const bodyOf = (m) => {
 };
 
 export function mount(el, ctx) {
-  let items = [], tab = 'all', q = ctx.params.get('q') || '', only = ctx.params.get('name') || '', seq = 0;
+  let items = [], tab = pref('memory-type', 'all'), q = ctx.params.get('q') || '', only = ctx.params.get('name') || '', seq = 0;
   const input = h('input', { type: 'search', placeholder: 'Ask your memory…', 'aria-label': 'Ask your memory', value: q, autocomplete: 'off' });
   const results = h('div');
   const browse = h('div');
@@ -56,10 +56,11 @@ export function mount(el, ctx) {
     const counts = Object.fromEntries(TYPES.map((t) => [t, items.filter((m) => m.type === t).length]));
     const pick = only && items.filter((m) => m.name === only);
     if (pick?.length) { browse.append(h('div.row', { style: 'margin-bottom:12px' }, h('span.meta.mono', only), h('button.link', { type: 'button', style: 'margin-left:auto', onclick: () => { only = ''; history.replaceState(null, '', '#/memory'); paintBrowse(); } }, 'Show all')), h('div.mem-grid', pick.map(card))); return; }
+    if (tab !== 'all' && !TYPES.includes(tab)) tab = 'all';
     const list = tab === 'all' ? items : items.filter((m) => m.type === tab);
     browse.append(
       h('div.seg', { role: 'tablist', 'aria-label': 'Browse by type', style: 'margin-bottom:16px' },
-        ['all', ...TYPES].map((t) => h('button', { type: 'button', role: 'tab', 'aria-selected': String(tab === t), onclick: () => { tab = t; paintBrowse(); } }, t === 'all' ? `All ${items.length}` : `${t[0].toUpperCase() + t.slice(1)} ${counts[t]}`))),
+        ['all', ...TYPES].map((t) => h('button', { type: 'button', role: 'tab', 'aria-selected': String(tab === t), onclick: () => { tab = t; savePref('memory-type', t); paintBrowse(); } }, t === 'all' ? `All ${items.length}` : `${t[0].toUpperCase() + t.slice(1)} ${counts[t]}`))),
       list.length ? h('div.mem-grid', { role: 'tabpanel' }, [...list].sort((a, b) => String(b.created).localeCompare(String(a.created))).map(card)) : h('p.muted', 'None of this type yet.'));
   }
 
@@ -74,8 +75,8 @@ export function mount(el, ctx) {
       body.append(h('form.stack', { onsubmit: async (e) => {
         e.preventDefault();
         if (!fact.value.trim() || !name.value.trim()) { err.textContent = 'A fact and a name are both needed.'; return; }
-        try { await ctx.api('/memory', { _action: 'store', name: name.value.trim(), type: type.value, description: fact.value.trim(), body: more.value.trim() }); ctx.toast('Remembered'); close(); reload(); }
-        catch (x) { err.textContent = x.status === 409 ? 'A memory with that name exists. Pick another name.' : x.message; }
+        await busy(e.submitter, ctx.api('/memory', { _action: 'store', name: name.value.trim(), type: type.value, description: fact.value.trim(), body: more.value.trim() })
+          .then(() => { ctx.toast('Remembered'); close(); reload(); }, (x) => { err.textContent = x.status === 409 ? 'A memory with that name exists. Pick another name.' : x.message; }));
       } },
         h('div.field', h('label', { for: 'm-fact' }, 'Fact'), fact),
         h('div.form-grid', h('div.field', h('label', { for: 'm-type' }, 'Type'), type), h('div.field', h('label', { for: 'm-name' }, 'Name'), name)),

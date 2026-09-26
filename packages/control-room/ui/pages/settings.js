@@ -1,4 +1,4 @@
-import { h, icon, clear, loader, cmd, skeleton, errorBox } from '../lib/dom.js';
+import { h, icon, clear, loader, cmd, skeleton, errorBox, busy } from '../lib/dom.js';
 import { doctorList } from './security.js';
 
 const MODULES = ['board', 'docs', 'knowledge', 'memory', 'routines', 'workflows', 'team', 'redlines', 'artifacts'];
@@ -32,8 +32,8 @@ export function mount(el, ctx) {
       const p = Number(port.value);
       if (!(p >= 1024 && p <= 65535)) { err.textContent = 'Port must be between 1024 and 65535.'; port.setAttribute('aria-invalid', 'true'); return; }
       const modules = Object.fromEntries(toggles.map((t) => { const i = t.querySelector('input'); return [i.name, i.checked]; }));
-      try { await ctx.api('/config', { name: name.value.trim(), port: p, sprintLength: Number(len.value), modules }); err.textContent = ''; ctx.toast('Saved. A new port applies on the next start.'); ctx.refreshShell(); }
-      catch (x) { err.textContent = x.message; }
+      await busy(e.submitter, ctx.api('/config', { name: name.value.trim(), port: p, sprintLength: Number(len.value), modules })
+        .then(() => { err.textContent = ''; ctx.toast('Saved. A new port applies on the next start.'); ctx.refreshShell(); }, (x) => { err.textContent = x.message; }));
     } },
       !editable && h('div.notice.warn', icon('alert'), h('div.body', h('span', 'This server cannot write the config. Edit flowrail/config.json in your editor; the dashboard picks it up.'))),
       h('div.form-grid', h('div.field', h('label', { for: 's-name' }, 'Name'), name), h('div.field', h('label', { for: 's-port' }, 'Port'), port),

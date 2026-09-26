@@ -1,4 +1,4 @@
-import { h, icon, clear, loader, relTime, empty, cmd, sheet, skeleton, errorBox } from '../lib/dom.js';
+import { h, icon, clear, loader, relTime, empty, cmd, sheet, skeleton, errorBox, busy, waitForRun } from '../lib/dom.js';
 
 const DAYS = { monday: 'Mondays', tuesday: 'Tuesdays', wednesday: 'Wednesdays', thursday: 'Thursdays', friday: 'Fridays', saturday: 'Saturdays', sunday: 'Sundays' };
 export function scheduleWords(s) {
@@ -43,9 +43,14 @@ export function mount(el, ctx) {
   }
 
   async function run(r, btn) {
-    btn.disabled = true;
-    try { await ctx.api('/routines', { _action: 'run', id: r.id }); ctx.toast(`${r.title || r.id} started. It reports back here.`); }
-    catch (e) { ctx.toast(e.message, 'warn'); } finally { btn.disabled = false; }
+    // The button holds until the run's own record stops saying "running" (two minutes at most).
+    await busy(btn, (async () => {
+      try {
+        const rec = await ctx.api('/routines', { _action: 'run', id: r.id });
+        ctx.toast(`${r.title || r.id} started. It reports back here.`);
+        if (rec?.id) { await waitForRun(ctx.api, rec.id); reload(); }
+      } catch (e) { ctx.toast(e.message, 'warn'); }
+    })());
   }
   async function sched(action) {
     try { await ctx.api('/routines', { _action: action }); ctx.toast(action === 'install' ? 'Routines scheduled' : 'Routines unscheduled'); reload(); }

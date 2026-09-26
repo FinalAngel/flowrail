@@ -10,7 +10,8 @@ Everything flowrail knows lives in two folders at the root of your project.
 
 ```text
 flowrail/
-  config.json        name, port, which modules are on, sprint length and start
+  config.json        name, port, which modules are on, sprint length and start, and the GitHub
+                     repo whose assigned issues the board shows (read-only, optional)
   red-lines.json     your hard rules
   board.json         tasks for the current sprint, the next one, and the backlog
   memory/            one fact per Markdown file, plus INDEX.md
