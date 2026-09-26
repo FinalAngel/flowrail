@@ -24,7 +24,7 @@ export const ACCEPT_CMD = 'npx flowrail redlines accept';
 
 export function overview(p) {
   const config = loadConfig(p);
-  const b = board.read(p, config);
+  const b = board.storeFor(p).read();
   let lines = [];
   let linesError = null;
   try { lines = loadLines(p); } catch (e) { linesError = e.message; }
@@ -77,7 +77,8 @@ export function overview(p) {
       : { kind: 'comment', title: `${c.path}: ${clip(c.body, 90)}`, href: docHref(c.path), severity: 'normal', at: c.created, status: 'Waiting for agent' });
   }
   for (const t of b.tasks.filter((x) => x.status === 'Review')) attention.push({ kind: 'task', title: `${t.id} is waiting for your review: ${clip(t.title, 80)}`, href: `#/board?task=${t.id}`, severity: 'normal' });
-  for (const t of b.tasks.filter((x) => x.priority === 'P0' && x.status !== 'Done' && x.status !== 'Review')) attention.push({ kind: 'task', title: `${t.id} is P0: ${clip(t.title, 80)}`, href: `#/board?task=${t.id}`, severity: 'warn' });
+  const top = b.config.priorities?.[0] || 'P0';
+  for (const t of b.tasks.filter((x) => x.priority === top && x.status !== 'Done' && x.status !== 'Review')) attention.push({ kind: 'task', title: `${t.id} is ${top}: ${clip(t.title, 80)}`, href: `#/board?task=${t.id}`, severity: 'warn' });
   // Failed routines last: they wait for a fix, not for a decision.
   for (const r of failed) attention.push({ kind: 'routine', title: `Routine "${r.title || r.id}" did not finish${r.lastRun.firstLine ? `: ${clip(r.lastRun.firstLine, 90)}` : ''}`, href: '#/routines', severity: 'warn', at: r.lastRun.at });
 
@@ -118,7 +119,7 @@ export function search(p, q, limit = 30) {
   const out = [];
   const docs = listDocs(p.root, 3000);
   for (const rel of docs) if (rel.toLowerCase().includes(needle)) out.push({ kind: 'doc', title: rel, href: docHref(rel) });
-  for (const t of board.load(p).tasks) {
+  for (const t of board.storeFor(p).read().tasks) {
     if (`${t.id} ${t.title}`.toLowerCase().includes(needle)) out.push({ kind: 'task', title: `${t.id} ${t.title}`, href: `#/board?task=${t.id}`, status: t.status });
   }
   for (const m of memory.list(p)) {

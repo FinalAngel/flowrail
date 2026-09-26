@@ -85,6 +85,8 @@ Load it one of two ways:
   await startServer({ root: process.cwd(), port: 4747, plugins: [crm] });
   ```
 
+A plugin can also bring the data behind a built-in page. `stores: { board }` replaces `flowrail/board.json` for the Board page, the overview, the Today feed and search, so tasks can live in a tracker or a file of your own. A board store has `read()`, which returns `{ config: { current, next, sprints?, priorities?, groups?, source? }, tasks }` (a task's `sprint` is its sprint's start date, `""` the backlog; `priorities` in rank order replace P0 to P3; `groups` are `{ name, color }` shown as a chip and a filter), plus `create(fields)`, `update(id, fields, by)`, `note(id, text, by)` and `trash(id)`. Throw an error with a `status` to answer the page with that status. Two plugins cannot supply the same store.
+
 The page module (`ui/leads.js`) exports `mount(el, ctx)` exactly like a built-in page, and can import the shared helpers from `/ui/lib/dom.js` and `/ui/icons.js`. `ctx.api('/x/crm/leads')` reaches its routes. Routes get `ctx` with `root`, `paths`, `broadcast(area)` and `HttpError`, and sit behind the same Host, Origin, token and `X-Flowrail` checks as every built-in route. A page in a group that does not exist yet gets a new group above Safety. A page whose `path` equals a built-in page's path replaces it. Plugins run with your permissions in the server process, so load only code you would run yourself.
 
 ## Adapters for other agent CLIs

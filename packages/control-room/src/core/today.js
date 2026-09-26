@@ -70,7 +70,7 @@ export function today(p, now = new Date(), opts = {}) {
   }
 
   // Tasks: created (board.json) and moved (activity log).
-  const b = board.load(p);
+  const b = board.storeFor(p).read();
   for (const t of b.tasks) {
     if (t.seed || !after(t.created)) continue;
     counts.tasksCreated++;

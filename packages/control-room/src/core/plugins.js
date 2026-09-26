@@ -34,6 +34,24 @@ export function validate(pl) {
   return pl;
 }
 
+const STORE_METHODS = { board: ['read', 'create', 'update', 'note', 'trash'] };
+
+/** The data stores plugins supply (`stores: { board }`); one plugin per store. */
+export function stores(plugins) {
+  const out = {};
+  for (const pl of plugins) {
+    for (const [name, store] of Object.entries(pl.stores || {})) {
+      const need = STORE_METHODS[name];
+      if (!need) throw new Error(`plugin "${pl.id}": unknown store "${name}" (known: ${Object.keys(STORE_METHODS).join(', ')})`);
+      const missing = need.filter((m) => typeof store?.[m] !== 'function');
+      if (missing.length) throw new Error(`plugin "${pl.id}": store ${name} needs ${missing.join(', ')}`);
+      if (out[name]) throw new Error(`store ${name} is supplied by two plugins`);
+      out[name] = store;
+    }
+  }
+  return out;
+}
+
 /** Validate a list and refuse duplicate ids. */
 export function prepare(plugins = []) {
   const seen = new Set();

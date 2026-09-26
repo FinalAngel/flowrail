@@ -1,6 +1,6 @@
 // Sprint board in flowrail/board.json. A task's `sprint` is the start date of its sprint; "" is the backlog.
 // Unfinished tasks from ended sprints roll into the current one on read, one priority higher.
-import { readJson, writeJson, nowIso, parseDate, localDate, addDays, mondayOf, trashJson, appendLine } from 'flowrail/api';
+import { readJson, writeJson, nowIso, parseDate, localDate, addDays, mondayOf, trashJson, appendLine, loadConfig } from 'flowrail/api';
 
 export const STATUSES = ['Todo', 'In Progress', 'Review', 'Done'];
 export const PRIORITIES = ['P0', 'P1', 'P2', 'P3'];
@@ -27,6 +27,23 @@ export function labelFor(config, sprintDate) {
   const start0 = parseDate(config.sprintStart || sprintDate);
   const i = Math.floor(Math.round((parseDate(sprintDate) - start0) / 86400000) / len);
   return `Sprint ${i + 1}`;
+}
+
+/**
+ * The board every page, the overview and the Today feed read and write: a plugin's store when one
+ * is set (see src/core/plugins.js, `stores.board`), else flowrail/board.json. A store answers
+ * read() -> { config: { current, next, priorities?, groups? }, tasks }, create(fields),
+ * update(id, fields, by), note(id, text, by) and trash(id).
+ */
+export function storeFor(p) {
+  if (p.stores?.board) return p.stores.board;
+  return {
+    read: () => read(p, loadConfig(p)),
+    create: (fields) => create(p, loadConfig(p), fields),
+    update: (id, fields, by) => update(p, loadConfig(p), id, fields, by),
+    note: (id, text, by) => note(p, id, text, by),
+    trash: (id) => trash(p, id),
+  };
 }
 
 export function load(p) {
@@ -62,7 +79,11 @@ export function read(p, config, today = new Date()) {
   const board = load(p);
   if (rollover(board, config, today)) save(p, board);
   const s = sprints(config, today);
-  return { config: { sprintLength: s.sprintLength, current: s.current, next: s.next }, tasks: board.tasks };
+  // Every sprint the page can step through: the ones tasks sit in, plus the current and the next.
+  const starts = [...new Set([...board.tasks.map((t) => t.sprint).filter(Boolean), s.current.start, s.next.start])].sort();
+  const len = s.sprintLength;
+  const list = starts.map((start) => ({ start, end: localDate(addDays(parseDate(start), len - 1)), label: labelFor(config, start) }));
+  return { config: { sprintLength: len, current: s.current, next: s.next, sprints: list }, tasks: board.tasks };
 }
 
 export function resolveSprint(config, value, today = new Date()) {

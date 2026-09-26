@@ -74,3 +74,31 @@ test('config plugins load from inside the repo only', async () => {
   assert.equal((await fromConfig(p.root, ['room.mjs']))[0].id, 'local');
   await assert.rejects(fromConfig(p.root, ['../x.mjs']), /outside the repo/);
 });
+
+test('a plugin store backs the board, the overview and search', async () => {
+  const calls = [];
+  const tasks = [{ id: 'X-1', title: 'From the store', status: 'In Progress', priority: 'High', sprint: '2026-01-05', group: 'Sales', notes: [] }];
+  const store = {
+    read: () => ({ config: { current: { start: '2026-01-05', end: '2026-01-18', label: 'Wk2' }, priorities: ['High', 'Mid', 'Low'], groups: [{ name: 'Sales' }], source: 'data/tasks.json' }, tasks }),
+    create: (f) => { calls.push(['create', f.title]); return { id: 'X-2', ...f }; },
+    update: (id, f, by) => { calls.push(['update', id, f.status, by]); return { id, ...f }; },
+    note: (id, text) => { calls.push(['note', id, text]); return { id }; },
+    trash: (id) => { calls.push(['trash', id]); return { ok: true }; },
+  };
+  const s2 = await startServer({ root: p.root, port: 0, plugins: [{ id: 'tasks', stores: { board: store } }] });
+  try {
+    const r = (method, url, body) => new Promise((resolve, reject) => {
+      const q = http.request({ host: '127.0.0.1', port: s2.port, method, path: url, headers: { Host: `127.0.0.1:${s2.port}`, 'X-Flowrail-Token': s2.token, ...(method === 'POST' ? { 'X-Flowrail': '1' } : {}) } }, (res) => { let d = ''; res.on('data', (c) => { d += c; }); res.on('end', () => resolve(JSON.parse(d))); });
+      q.on('error', reject); if (body) q.write(JSON.stringify(body)); q.end();
+    });
+    assert.equal((await r('GET', '/api/board')).tasks[0].id, 'X-1');
+    await r('POST', '/api/board', { _action: 'create', title: 'New' });
+    await r('POST', '/api/board', { _action: 'update', id: 'X-1', status: 'Done' });
+    assert.deepEqual(calls, [['create', 'New'], ['update', 'X-1', 'Done', 'human']]);
+    const ov = await r('GET', '/api/overview');
+    assert.equal(ov.counts.inProgress, 1);
+    assert.equal((await r('GET', '/api/search?q=store'))[0]?.title ?? (await r('GET', '/api/search?q=store')).results?.[0]?.title, 'X-1 From the store');
+  } finally { await s2.close(); }
+  await assert.rejects(startServer({ root: p.root, port: 0, plugins: [{ id: 'bad', stores: { board: { read() {} } } }] }), /needs create/);
+  await assert.rejects(startServer({ root: p.root, port: 0, plugins: [{ id: 'bad', stores: { nope: {} } }] }), /unknown store/);
+});

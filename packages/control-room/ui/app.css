@@ -337,6 +337,11 @@ dialog.palette[open] { animation: pop var(--dur-arrive) var(--ease); }
 .prio { font-family: var(--mono); font-size: 11.5px; color: var(--text-3); }
 .prio.p0 { color: var(--warn); font-weight: 600; }
 .prio.p1 { color: var(--text); }
+.sprint-nav { display: flex; align-items: center; gap: 4px; margin: calc(var(--s3) * -1) 0 var(--s3); }
+.sprint-nav .sprint-label { display: inline-flex; align-items: center; min-width: 120px; justify-content: center; font-weight: 500; font-variant-numeric: tabular-nums; }
+.sprint-nav .icon-btn[disabled] { opacity: .35; cursor: default; }
+/* A board group (a store's epic or team): its colour as a small dot. */
+.chip.group::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--g, var(--text-3)); }
 .who { display: inline-flex; align-items: center; gap: 4px; }
 .popover { position: fixed; z-index: 30; min-width: 180px; padding: 6px; border-radius: var(--r-card); background: var(--surface); border: 1px solid var(--hairline); box-shadow: var(--shadow-pop); display: grid; animation: pop var(--dur-state) var(--ease); }
 .popover .label { padding: 4px 8px 6px; font-size: 12px; }

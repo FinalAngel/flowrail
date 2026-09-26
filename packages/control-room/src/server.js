@@ -104,8 +104,9 @@ function need(v, name) {
 
 /** Build the request handler for a workspace. `getPort` returns the bound port (for the Host check). */
 export function createApp(root, getPort, { auditEnv = process.env, plugins: extra = [] } = {}) {
-  const p = paths(root);
   const exts = plugins.prepare(extra);
+  const p = { ...paths(root), stores: plugins.stores(exts) };
+  const tasks = () => board.storeFor(p);
   const token = crypto.randomBytes(32).toString('hex');
   const tokenOk = (t) => typeof t === 'string' && t.length === token.length && crypto.timingSafeEqual(Buffer.from(t), Buffer.from(token));
   const clients = new Set();
@@ -127,14 +128,13 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
     'GET /api/config': () => ({ ...loadConfig(p), version: VERSION }),
     'POST /api/config': (b) => saveConfig(p, b),
 
-    'GET /api/board': () => board.read(p, loadConfig(p)),
+    'GET /api/board': () => tasks().read(),
     'POST /api/board': (b) => {
-      const config = loadConfig(p);
       switch (b._action) {
-        case 'create': return board.create(p, config, { ...b, createdBy: b.createdBy === 'agent' ? 'agent' : 'human' });
-        case 'update': { const { _action, id, ...fields } = b; return board.update(p, config, need(id, 'id'), fields, 'human'); }
-        case 'note': return board.note(p, need(b.id, 'id'), b.text, b.by || 'you');
-        case 'trash': return board.trash(p, need(b.id, 'id'));
+        case 'create': return tasks().create({ ...b, createdBy: b.createdBy === 'agent' ? 'agent' : 'human' });
+        case 'update': { const { _action, id, ...fields } = b; return tasks().update(need(id, 'id'), fields, 'human'); }
+        case 'note': return tasks().note(need(b.id, 'id'), b.text, b.by || 'you');
+        case 'trash': return tasks().trash(need(b.id, 'id'));
         default: throw new HttpError(400, '_action must be create, update, note or trash');
       }
     },
@@ -144,7 +144,7 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
       const config = loadConfig(p);
       const r = await github.fetchIssues(p, config, { force: q.get('refresh') === '1' });
       if (!r) return { configured: false, issues: [] };
-      return { configured: true, ...r, issues: github.forSprint(r.issues, board.sprints(config).current) };
+      return { configured: true, ...r, issues: github.forSprint(r.issues, tasks().read().config.current) };
     },
 
     'GET /api/docs/tree': () => docs.tree(root),
