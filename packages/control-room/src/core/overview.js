@@ -77,7 +77,8 @@ export function overview(p) {
       : { kind: 'comment', title: `${c.path}: ${clip(c.body, 90)}`, href: docHref(c.path), severity: 'normal', at: c.created, status: 'Waiting for agent' });
   }
   for (const t of b.tasks.filter((x) => x.status === 'Review')) attention.push({ kind: 'task', title: `${t.id} is waiting for your review: ${clip(t.title, 80)}`, href: `#/board?task=${t.id}`, severity: 'normal' });
-  const top = b.config.priorities?.[0] || 'P0';
+  // The priority that means drop everything: P0 on flowrail's own board; a store names its own (`urgent`), or none.
+  const top = b.config.priorities ? b.config.urgent : 'P0';
   for (const t of b.tasks.filter((x) => x.priority === top && x.status !== 'Done' && x.status !== 'Review')) attention.push({ kind: 'task', title: `${t.id} is ${top}: ${clip(t.title, 80)}`, href: `#/board?task=${t.id}`, severity: 'warn' });
   // Failed routines last: they wait for a fix, not for a decision.
   for (const r of failed) attention.push({ kind: 'routine', title: `Routine "${r.title || r.id}" did not finish${r.lastRun.firstLine ? `: ${clip(r.lastRun.firstLine, 90)}` : ''}`, href: '#/routines', severity: 'warn', at: r.lastRun.at });
