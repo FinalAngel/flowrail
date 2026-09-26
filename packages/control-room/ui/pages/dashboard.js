@@ -29,16 +29,17 @@ export function mount(el, ctx) {
   // The audit replays transcripts: fetch it once per visit, not on every live refresh.
   const audit = ctx.api('/audit?days=30').catch(() => null);
   const load = async () => {
-    const [ov, board, rl, today, au] = await Promise.all([
+    const [ov, board, rl, today] = await Promise.all([
       ctx.api('/overview'),
       ctx.api('/board').catch(() => null),
       ctx.api('/redlines').catch(() => null),
       ctx.api('/today' + (since ? '?since=' + encodeURIComponent(since) : '')).catch(() => null),
-      audit,
     ]);
-    return { ov, board, rl, today, audit: au, since };
+    return { ov, board, rl, today, audit: null, since };
   };
-  const reload = loader(root, load, (d) => render(root, d, ctx, reload), 6);
+  // The page draws without the audit; its line fills in when the replay is done.
+  const fill = () => audit.then((a) => { const line = auditLine(a); const slot = root.querySelector('.audit-slot'); if (line && slot) slot.replaceChildren(line); });
+  const reload = loader(root, load, (d) => { render(root, d, ctx, reload); fill(); }, 6);
   ctx.on(null, reload);
   return () => {};
 }
@@ -178,7 +179,7 @@ function railsCard(rl, ov, ctx, audit) {
       h('div.grow', { style: 'flex:1;min-width:0' },
         h('div', { style: 'font-weight:500' }, [off ? `${off} not enforced` : `${armed} armed`, checked && `${checked} checked in CI`].filter(Boolean).join(' · '), h('span.faint', ` · held ${held}× this week`)),
         h('div.meta.one-line', { title: last?.subject || '' }, last ? [`${relTime(last.at)} · `, h('span.mono', last.subject || last.path || '')] : 'Nothing held yet this week.'),
-        auditLine(audit)),
+        h('div.audit-slot', auditLine(audit))),
       icon('chevronRight')));
 }
 

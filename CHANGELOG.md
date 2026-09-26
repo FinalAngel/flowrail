@@ -4,6 +4,10 @@ All notable changes to flowrail are recorded here. The format follows [Keep a Ch
 
 ## [Unreleased]
 
+### Fixed
+
+- The audit runs in a worker thread and is cached for ten minutes: on a repo with months of sessions it took a minute and held every other request; the dashboard now draws first and fills in the audit line when the replay is done.
+
 ### Added
 
 - Routine and run stores (`stores: { routines, runs }`) show routines a repo schedules with its own tooling, run them now and show their runs; `agentsDir` points Team at existing agent status files.

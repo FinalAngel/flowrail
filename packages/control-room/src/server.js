@@ -39,6 +39,7 @@ import { today, parseSince } from './core/today.js';
 import { watch } from './core/events.js';
 import { readJson } from 'flowrail/api';
 import * as plugins from './core/plugins.js';
+import { auditAsync } from './core/audit-worker.js';
 import * as library from './core/library.js';
 
 const UI_DIR = path.join(PKG_ROOT, 'ui');
@@ -128,7 +129,7 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
       const r = today(p, new Date(), { since: seeded || parseSince(q.get('since')) });
       return seeded ? { ...r, away: r.since } : r;
     },
-    'GET /api/audit': (_b, q) => ({ ...auditSummary(root, { days: Number(q.get('days')) || 30, env: auditEnv }), demo: !!loadConfig(p).demo }),
+    'GET /api/audit': async (_b, q) => ({ ...await auditAsync(root, { days: Number(q.get('days')) || 30, env: auditEnv }), demo: !!loadConfig(p).demo }),
     'GET /api/config': () => ({ ...loadConfig(p), version: VERSION }),
     'POST /api/config': (b) => saveConfig(p, b),
 
