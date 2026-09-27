@@ -49,17 +49,17 @@ export function toast(message, kind = 'info') {
 
 /* ---------- Pages ---------- */
 const NAV = [
-  ['Now', [['dashboard', 'Dashboard', '/'], ['board', 'Board', '/board']]],
+  ['Now', [['dashboard', 'Dashboard', '/'], ['board', 'Board', '/board'], ['backlog', 'Backlog', '/backlog']]],
   ['Knowledge', [['docs', 'Docs', '/docs'], ['graph', 'Graph', '/knowledge'], ['library', 'Library', '/library'], ['context', 'Context', '/context'], ['memory', 'Memory', '/memory'], ['artifacts', 'Artifacts', '/artifacts'], ['links', 'Links', '/links']]],
-  ['Automation', [['routines', 'Routines', '/routines'], ['runs', 'Runs', '/runs'], ['workflows', 'Workflows', '/workflows'], ['team', 'Team', '/team']]],
+  ['Automation', [['routines', 'Routines', '/routines'], ['runs', 'Runs', '/runs'], ['workflows', 'Workflows', '/workflows'], ['team', 'Agents', '/team']]],
   ['Safety', [['redlines', 'Red lines', '/redlines'], ['security', 'Security', '/security']]],
 ];
 const SETTINGS = ['settings', 'Settings', '/settings'];
 let PAGES = [...NAV.flatMap(([, items]) => items), SETTINGS];
 const MODULE = {};
 let BRAND = null;
-const ALIAS = { '/graph': '/knowledge', '/dashboard': '/' };
-const ICON = { dashboard: 'dashboard', board: 'board', docs: 'docs', graph: 'graph', memory: 'memory', artifacts: 'artifacts', routines: 'routines', runs: 'terminal', workflows: 'workflows', team: 'team', redlines: 'redlines', security: 'security', settings: 'settings', library: 'library', context: 'context', links: 'link' };
+const ALIAS = { '/graph': '/knowledge', '/dashboard': '/', '/agents': '/team' };
+const ICON = { dashboard: 'dashboard', board: 'board', backlog: 'list', docs: 'docs', graph: 'graph', memory: 'memory', artifacts: 'artifacts', routines: 'routines', runs: 'terminal', workflows: 'workflows', team: 'team', redlines: 'redlines', security: 'security', settings: 'settings', library: 'library', context: 'context', links: 'link' };
 
 /** Plugin pages join their group (a new group sits above Safety); one on a built-in path replaces it. */
 async function loadPlugins() {

@@ -17,8 +17,23 @@ import { oursOnly } from './hooks.js';
 const MAX_FILE = 256 * 1024 * 1024; // transcripts over 256 MB are skipped (they are read whole)
 
 /** Where Claude Code keeps transcripts: $CLAUDE_CONFIG_DIR/projects, else ~/.claude/projects. */
-export function transcriptsDir(env = process.env) {
-  return path.join(env.CLAUDE_CONFIG_DIR || path.join(os.homedir(), '.claude'), 'projects');
+/**
+ * Where Claude Code keeps this project's transcripts: $CLAUDE_CONFIG_DIR/projects when set, else
+ * ~/.claude/projects, else another ~/.claude-* config folder that has this project (a shell alias
+ * that sets CLAUDE_CONFIG_DIR only for claude leaves the dashboard's own environment without it).
+ */
+export function transcriptsDir(env = process.env, root = null) {
+  if (env.CLAUDE_CONFIG_DIR) return path.join(env.CLAUDE_CONFIG_DIR, 'projects');
+  const home = os.homedir();
+  const main = path.join(home, '.claude', 'projects');
+  if (!root || projectDirs(main, rootForms(root)).length) return main;
+  let others = [];
+  try { others = fs.readdirSync(home).filter((n) => n.startsWith('.claude-')).sort(); } catch { /* no home listing */ }
+  for (const n of others) {
+    const base = path.join(home, n, 'projects');
+    if (projectDirs(base, rootForms(root)).length) return base;
+  }
+  return main;
 }
 
 export const encodeProject = (dir) => dir.replace(/[^a-zA-Z0-9]/g, '-');
@@ -152,7 +167,7 @@ export function settingsDecision(perms, tool, input, root) {
 export function auditSummary(root, { days = 30, env = process.env, now = Date.now(), lines: given, settings: vs = true, settingsFrom } = {}) {
   days = Math.min(365, Math.max(1, Math.floor(Number(days)) || 30));
   const p = paths(root);
-  const dir = transcriptsDir(env);
+  const dir = transcriptsDir(env, root);
   const result = { days, sessions: 0, calls: 0, held: [], asked: [], byLine: {}, transcriptsDir: dir };
   const own = vs ? settingsRules(settingsFrom || root, env) : null;
   const { lines, error } = given ? { lines: given, error: null } : loadForHook(p);

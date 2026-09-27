@@ -6,11 +6,14 @@ All notable changes to flowrail are recorded here. The format follows [Keep a Ch
 
 ### Fixed
 
+- The audit finds transcripts in another `~/.claude-*` folder when the dashboard runs without `CLAUDE_CONFIG_DIR` and `~/.claude` has none for the project.
+- The header lines up with the content's side gutter; commands inside alerts are on the page colour, not grey; Context rows stay two lines; the Docs editor fills the height of the screen.
 - The pages use the full width of the window; only prose keeps a reading width.
 - The audit runs in a worker thread and is cached for ten minutes: on a repo with months of sessions it took a minute and held every other request; the dashboard now draws first and fills in the audit line when the replay is done.
 
 ### Added
 
+- Backlog is a page of its own (`#/backlog`, next to Board), no longer a switch on the Board. Team is called Agents. Hovering the centre of the rings map lights its line to every area.
 - The Board has a Backlog view (`#/board?view=backlog`): every open task from every sprint and the unscheduled backlog in one table, highest priority first, with the Board's filters and a Show done switch. Plugin aliases may carry a query.
 - A plugin can pass requests through to a server of its own (`handle`, `prefixes`), redirect old page addresses (`aliases`), and `config.json` `brand` names the sidebar: enough to move an existing local app onto the room page by page.
 - Routine and run stores (`stores: { routines, runs }`) show routines a repo schedules with its own tooling, run them now and show their runs; `agentsDir` points Team at existing agent status files.

@@ -202,7 +202,7 @@ An **event routine** has `on` instead of `schedule`: `{ "event": "github-actions
 | `uninstall` | |
 | `save` | `routines`. Claude routines can be added and changed. A `command` routine can only be kept, rescheduled, disabled or removed: adding one, or changing what an existing one runs, is refused with `403`. Command routines are edited in `flowrail/routines.json`. |
 
-### Team
+### Agents (team)
 
 `GET /api/team` returns `{ agents, skills, commands }`: the agents in `.claude/agents` (`name`, `description`, `model`, `tools`, `source`, `state`, `lastAt`), the skills (`name`, `description`, `path`) and the slash commands (`name`, `description`, `path`).
 

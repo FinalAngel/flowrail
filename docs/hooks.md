@@ -166,7 +166,7 @@ Nothing at all when there is nothing open. It stays silent when `permission_mode
 
 ## `subagent`
 
-Runs on `SubagentStart` and `SubagentStop`. It writes `.flowrail/agents/<agent_type>.json` for the Team page. Nothing else depends on it.
+Runs on `SubagentStart` and `SubagentStop`. It writes `.flowrail/agents/<agent_type>.json` for the Agents page. Nothing else depends on it.
 
 ## Troubleshooting
 

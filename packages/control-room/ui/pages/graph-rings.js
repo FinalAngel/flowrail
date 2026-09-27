@@ -284,12 +284,14 @@ export function rings(el, ctx) {
     // Spokes: centre to each area marker, marker to each of its entries. One faint ink, thinner the
     // more entries a fan has; the hovered fan (its marker, or one of its entries) in the area colour.
     const fanOf = hot ? (hot.kind === 'area' ? hot.area : hot.ring === 'band' ? hot.area : null) : null;
+    // Hovering the centre lights its spoke to every department, each in its own colour.
+    const hubHot = hot?.kind === 'hub';
     for (const m of items.markers) {
       const [mx, my] = xy(m, ease(t));
       const lit = fanOf === m.area;
-      c.strokeStyle = lit ? areaColor(m.area) : colors.text3;
-      c.lineWidth = lit ? 1.4 : 1;
-      c.globalAlpha = lit ? 0.8 : hot ? 0.08 : 0.3;
+      c.strokeStyle = lit || hubHot ? areaColor(m.area) : colors.text3;
+      c.lineWidth = lit || hubHot ? 1.6 : 1;
+      c.globalAlpha = lit || hubHot ? 0.85 : hot ? 0.08 : 0.3;
       c.beginPath(); c.moveTo(cx, cy); c.lineTo(mx, my); c.stroke();
       const fan = m.sector.items;
       const base = Math.min(0.2, 1.6 / Math.sqrt(Math.max(1, fan.length)));
@@ -320,7 +322,7 @@ export function rings(el, ctx) {
     // Area markers and their names along the arc.
     for (const m of items.markers) {
       const [x, y] = xy(m, ease(t));
-      c.globalAlpha = hot && fanOf !== m.area ? 0.4 : 1;
+      c.globalAlpha = hot && !hubHot && fanOf !== m.area ? 0.4 : 1;
       point(c, x, y, size(m), areaColor(m.area));
       if (t === 1) arcLabel(c, m.label, m.sector, items.labelR, areaColor(m.area));
     }

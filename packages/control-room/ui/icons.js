@@ -3,6 +3,7 @@
 const P = {
   mark: '<path d="M4 3v18M20 3v18"/><path d="M4 7h6a4 4 0 0 1 4 4v2a4 4 0 0 0 4 4h2"/>',
   dashboard: '<rect x="3.5" y="3.5" width="7" height="9" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="5" rx="1.5"/><rect x="13.5" y="11.5" width="7" height="9" rx="1.5"/><rect x="3.5" y="15.5" width="7" height="5" rx="1.5"/>',
+  list: '<path d="M9 6.5h11M9 12h11M9 17.5h11"/><circle cx="4.5" cy="6.5" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="17.5" r="1"/>',
   board: '<rect x="3.5" y="3.5" width="17" height="17" rx="2"/><path d="M8.5 7.5v6M12 7.5v9M15.5 7.5v4"/>',
   docs: '<path d="M14 3.5H7A1.5 1.5 0 0 0 5.5 5v14A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5V8z"/><path d="M14 3.5V8h4.5M9 12.5h6M9 16h6"/>',
   graph: '<circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="8" r="2.5"/><circle cx="9" cy="18" r="2.5"/><path d="M8.3 7.2l7.4 0.2M7 8.4l1.4 7.2M16.4 10l-5.6 6.3"/>',

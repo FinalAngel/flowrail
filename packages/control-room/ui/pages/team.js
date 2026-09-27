@@ -13,7 +13,7 @@ export function mount(el, ctx) {
     const agents = Array.isArray(d) ? d : d?.agents || [];
     const skills = d?.skills || [], commands = d?.commands || [];
     const working = agents.filter((a) => a.state === 'running').length;
-    root.append(h('header.page-head', h('div', h('h1', 'Team'), h('p.sub', agents.length ? `${agents.length} agents in .claude/agents${working ? ` · ${working} working` : ''}` : 'Your Claude Code subagents, skills and commands.'))));
+    root.append(h('header.page-head', h('div', h('h1', 'Agents'), h('p.sub', agents.length ? `${agents.length} agents in .claude/agents${working ? ` · ${working} working` : ''}` : 'Your Claude Code subagents, skills and commands.'))));
     if (!agents.length) root.append(empty('Subagents are Markdown files in .claude/agents. Create one from Claude Code.', 'claude /agents', ctx));
     else root.append(h('div.team-grid.stagger', agents.map((a) => h('article.card.agent',
       h('div.row', h('span.name', a.name), h('span', { style: 'margin-left:auto' }, state(a))),

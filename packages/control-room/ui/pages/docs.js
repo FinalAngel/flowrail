@@ -93,6 +93,11 @@ export function mount(el, ctx) {
       !editing && h('span.meta', MD.test(path) ? 'Select text to comment' : '')));
     if (editing) {
       const ta = h('textarea.input.editor', { 'aria-label': `Edit ${path}`, spellcheck: 'true', value: file.text });
+      // The editor fills the height left on screen below it, like the page it replaces.
+      const fit = () => { if (ta.isConnected) ta.style.height = Math.max(320, innerHeight - ta.getBoundingClientRect().top - 88) + 'px'; };
+      requestAnimationFrame(fit);
+      addEventListener('resize', fit);
+      ctx.cleanup(() => removeEventListener('resize', fit));
       const err = h('div', { role: 'alert' });
       let saveBtn;
       const save = () => busy(saveBtn, (async () => {

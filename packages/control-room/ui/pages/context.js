@@ -19,12 +19,14 @@ export function mount(el, ctx) {
     root.append(h('div.card', { style: 'padding:4px 0' }, h('div.table-wrap', h('table.tbl.ctx-tbl',
       h('thead', h('tr', h('th', 'Source'), h('th.ctx-sum', 'Summary'), h('th', 'Notes'), h('th.fig', 'Updated'))),
       h('tbody', entries.map((e) => h('tr',
-        h('td', h('a.lib-title', { href: docHref(e.path) }, e.title), h('div.meta.mono', e.slug),
+        // Two lines at most per entry: the title, then the slug and the source on one line.
+        h('td', h('a.lib-title', { href: docHref(e.path) }, e.title), h('div.meta.ctx-sub', h('span.mono', e.slug),
           e.source && (/^https?:\/\//i.test(e.source)
-            ? h('a.meta.ctx-src', { href: e.source, target: '_blank', rel: 'noopener noreferrer' }, icon('external', 12), new URL(e.source).hostname)
-            : h('div.meta', e.source))),
-        h('td.ctx-sum', e.summary || h('span.faint', 'No summary')),
-        h('td', e.docs.length ? h('ul.ctx-docs', e.docs.map((p) => h('li', h('a', { href: docHref(p) }, p.split('/').pop())))) : h('span.faint', 'None')),
+            ? h('a.ctx-src', { href: e.source, target: '_blank', rel: 'noopener noreferrer' }, icon('external', 12), new URL(e.source).hostname)
+            : h('span', e.source)))),
+        h('td.ctx-sum', h('div.clamp2', { title: e.summary || '' }, e.summary || h('span.faint', 'No summary'))),
+        h('td.ctx-notes', e.docs.length ? h('div.clamp2', { title: e.docs.map((p) => p.split('/').pop()).join('\n') },
+          e.docs.map((p, i) => [i ? h('span.faint', ' · ') : null, h('a', { href: docHref(p) }, p.split('/').pop().replace(/\.md$/, ''))])) : h('span.faint', 'None')),
         h('td.fig', e.changed ? shortDate(e.changed) : ''))))))));
   };
   const reload = loader(root, () => ctx.api('/context'), render, 4);

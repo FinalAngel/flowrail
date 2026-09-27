@@ -101,3 +101,22 @@ test('flowrail audit prints the summary and --json the contract', () => {
 function walk(dir) {
   return fs.readdirSync(dir, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(dir, e.name)) : [path.join(dir, e.name)]));
 }
+
+test('transcripts are found in another ~/.claude-* folder when ~/.claude has none for this project', async () => {
+  const { transcriptsDir, encodeProject } = await import('../src/core/audit.js');
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const os = await import('node:os');
+  const home = fs.realpathSync(fs.mkdtempSync(path.join(os.tmpdir(), 'flowrail-home-')));
+  const root = path.join(home, 'work', 'app');
+  fs.mkdirSync(root, { recursive: true });
+  fs.mkdirSync(path.join(home, '.claude', 'projects', 'other'), { recursive: true });
+  fs.mkdirSync(path.join(home, '.claude-work', 'projects', encodeProject(root)), { recursive: true });
+  const saved = process.env.HOME;
+  process.env.HOME = home;
+  try {
+    assert.equal(transcriptsDir({}, root), path.join(home, '.claude-work', 'projects'));
+    assert.equal(transcriptsDir({ CLAUDE_CONFIG_DIR: '/x' }, root), path.join('/x', 'projects'));
+    assert.equal(transcriptsDir({}, path.join(home, 'nowhere')), path.join(home, '.claude', 'projects'));
+  } finally { process.env.HOME = saved; }
+});

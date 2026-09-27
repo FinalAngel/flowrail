@@ -16,8 +16,9 @@ export function mount(el, ctx) {
   const source = () => data?.config?.source || 'flowrail/board.json';
   // One sprint at a time: the Backlog column plus the tasks of the sprint shown (the current one by default).
   let shown = null;
-  // Board (one sprint in columns) or Backlog (every open task in one table); ?view=backlog, remembered.
-  let view = ctx.params.get('view') === 'backlog' ? 'backlog' : ctx.params.get('view') === 'board' ? 'board' : pref('board-view', 'board');
+  // Board (one sprint in columns) or Backlog (every open task in one table): the Backlog page mounts
+  // this module with ctx.mode = 'backlog'; an old #/board?view=backlog link still opens it too.
+  let view = ctx.mode === 'backlog' || ctx.params.get('view') === 'backlog' ? 'backlog' : 'board';
   const backlogEl = h('div.card.backlog', { style: 'padding:4px 0' });
   const sprintLabel = (start) => (sprintList().find((x) => x.start === start)?.label) || start;
   const sprintList = () => data?.config?.sprints || (data?.config?.current ? [data.config.current] : []);
@@ -150,11 +151,7 @@ export function mount(el, ctx) {
     if (s) s.textContent = `${rows.length} ${f.done ? 'tasks' : 'open tasks'} across every sprint and the backlog`;
   }
 
-  function viewSwitch() {
-    const set = (v) => { view = v; savePref('board-view', v); renderShell(); };
-    return h('div.seg', { role: 'group', 'aria-label': 'View' },
-      ['board', 'backlog'].map((v) => h('button', { type: 'button', 'aria-pressed': String(view === v), onclick: () => set(v) }, v === 'board' ? 'Board' : 'Backlog')));
-  }
+
 
   const sub = () => {
     const cur = shownSprint();
@@ -209,8 +206,8 @@ export function mount(el, ctx) {
   function renderShell() {
     filters();
     clear(root).append(...[
-      h('header.page-head', h('div', h('h1', 'Board'), h('p.sub', view === 'board' ? sub() : '')),
-        h('div.actions', viewSwitch(), h('button.btn.primary', { type: 'button', onclick: () => create(view === 'backlog' ? 'Backlog' : 'Todo') }, icon('plus'), 'New task'))),
+      h('header.page-head', h('div', h('h1', view === 'board' ? 'Board' : 'Backlog'), h('p.sub', view === 'board' ? sub() : '')),
+        h('div.actions', h('button.btn.primary', { type: 'button', onclick: () => create(view === 'backlog' ? 'Backlog' : 'Todo') }, icon('plus'), 'New task'))),
       view === 'board' && sprintNav(), filterRow, view === 'board' ? boardEl : backlogEl].filter(Boolean));
     paint();
   }
@@ -276,6 +273,6 @@ export function mount(el, ctx) {
   loadIssues(false);
   ctx.on(['board'], () => { if (!document.querySelector('dialog[open], .popover')) reload(); });
   const unmount = () => document.querySelector('.popover')?.remove();
-  unmount.update = (params) => { const v = params.get('view'); if ((v === 'backlog' || v === 'board') && v !== view && data) { view = v; renderShell(); } const id = params.get('task'); const t = id && data?.tasks.find((x) => x.id === id); if (t) detail(t); };
+  unmount.update = (params) => { const id = params.get('task'); const t = id && data?.tasks.find((x) => x.id === id); if (t) detail(t); };
   return unmount;
 }
