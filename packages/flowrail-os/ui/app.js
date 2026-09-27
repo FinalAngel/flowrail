@@ -1,11 +1,15 @@
 // flowrail app shell: hash router, API helper, live refresh over SSE, command palette, theme, toasts.
 import { h, icon, clear, copy, cmd, debounce, plural } from './lib/dom.js';
+import { snapshot } from './lib/snapshot.js';
 
 /* ---------- API ---------- */
 // Per-launch token the server writes into index.html. It never touches disk or localStorage.
 const TOKEN = document.querySelector('meta[name="flowrail-token"]')?.content || '';
+// The read-only demo on GitHub Pages: no server, the answers are saved files (lib/snapshot.js).
+const STATIC = !!document.querySelector('meta[name="flowrail-static"]');
 let stale = false;
 export async function api(path, body) {
+  if (STATIC) return snapshot(path, body);
   const headers = { 'X-Flowrail-Token': TOKEN };
   const init = body === undefined
     ? { headers }
@@ -133,6 +137,7 @@ export const navigate = (href) => { location.hash = href.replace(/^#/, ''); };
 const listeners = new Set();
 let es;
 function connectEvents() {
+  if (STATIC) return;
   try {
     es = new EventSource('/api/events?token=' + encodeURIComponent(TOKEN));
     es.addEventListener('change', (e) => {
@@ -275,7 +280,9 @@ function renderBanner() {
   const ov = shell.overview;
   const demo = ov?.workspace?.demo ?? ov?.demo ?? ov?.config?.demo;
   clear(b);
-  if (demo && !document.documentElement.dataset.shot) b.append(h('div.banner', { role: 'note' }, icon('alert', 14), 'Example workspace. Nothing here touches your repo.'));
+  if (demo && !document.documentElement.dataset.shot) b.append(h('div.banner', { role: 'note' }, icon('alert', 14), STATIC
+    ? h('span', 'Read-only demo of an example workspace. Run ', h('code', 'npx @finalangel/flowrail-os demo'), ' to try it on your machine.')
+    : 'Example workspace. Nothing here touches your repo.'));
 }
 
 /* ---------- Mobile nav sheet ---------- */

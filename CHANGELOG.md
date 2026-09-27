@@ -2,6 +2,16 @@
 
 All notable changes to flowrail are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/). Before 1.0, minor versions may change file formats and the HTTP API; any such change is listed here with what to do about it.
 
+## [Unreleased]
+
+### Added
+
+- A read-only demo of flowrailOS on GitHub Pages: `packages/flowrail-os/scripts/static-demo.js` saves what the dashboard answers on the example workspace, and the page reads those files when it carries a `flowrail-static` meta tag. Pushing a version tag publishes both packages (`.github/workflows/release.yml`).
+
+### Fixed
+
+- The quote on a comment card showed the button's default left border.
+
 ## [0.2.0] 2026-09-27
 
 The first release of the dashboard on npm, as flowrailOS (`@finalangel/flowrail-os`, command `flowrail-os`; it was called the control room, `flowrail-room`, before it was published), and the guard's second.

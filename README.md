@@ -165,6 +165,8 @@ npx @finalangel/flowrail-os init   # the guard plus flowrailOS files
 npx @finalangel/flowrail-os        # the dashboard on http://127.0.0.1:4747
 ```
 
+[Try the live demo](https://finalangel.github.io/flowrail/): a read-only copy of the sample workspace, in your browser.
+
 It shows each red line in plain English with its held count, a Try it box and the audit; comments on Markdown files that the next Claude Code session picks up; a board, a memory store with keyword recall, and what happened in the repo today.
 
 It listens on `127.0.0.1` only and keeps everything in `flowrail/` (committed) and `.flowrail/` (per machine). More in [docs/getting-started.md](docs/getting-started.md).

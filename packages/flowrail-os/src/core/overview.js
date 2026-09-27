@@ -120,20 +120,23 @@ export function overview(p) {
 export function search(p, q, limit = 30) {
   const needle = String(q || '').toLowerCase().trim();
   if (!needle) return [];
+  return searchable(p, (text) => text.toLowerCase().includes(needle), limit * 2).slice(0, limit).map(({ text, ...hit }) => hit);
+}
+
+/**
+ * What search looks through, as hits with the `text` they match on, in search order; `keep` picks
+ * them, and the heading scan stops once `enough` are kept. The static demo ships all of them.
+ */
+export function searchable(p, keep = () => true, enough = Infinity) {
   const out = [];
+  const add = (text, hit) => { if (keep(text)) out.push({ ...hit, text }); };
   const docs = listDocs(p.root, 3000);
-  for (const rel of docs) if (rel.toLowerCase().includes(needle)) out.push({ kind: 'doc', title: rel, href: docHref(rel) });
-  for (const t of board.storeFor(p).read().tasks) {
-    if (`${t.id} ${t.title}`.toLowerCase().includes(needle)) out.push({ kind: 'task', title: `${t.id} ${t.title}`, href: `#/board?task=${t.id}`, status: t.status });
-  }
-  for (const m of memory.memoryFor(p).list()) {
-    if (`${m.name} ${m.description}`.toLowerCase().includes(needle)) out.push({ kind: 'memory', title: m.description, href: `#/memory?name=${encodeURIComponent(m.name)}`, name: m.name });
-  }
+  for (const rel of docs) add(rel, { kind: 'doc', title: rel, href: docHref(rel) });
+  for (const t of board.storeFor(p).read().tasks) add(`${t.id} ${t.title}`, { kind: 'task', title: `${t.id} ${t.title}`, href: `#/board?task=${t.id}`, status: t.status });
+  for (const m of memory.memoryFor(p).list()) add(`${m.name} ${m.description}`, { kind: 'memory', title: m.description, href: `#/memory?name=${encodeURIComponent(m.name)}`, name: m.name });
   for (const rel of docs.filter((d) => /\.(md|markdown)$/i.test(d)).slice(0, 800)) {
-    if (out.length >= limit * 2) break;
-    for (const h of headings(readText(path.join(p.root, rel)).slice(0, 200000))) {
-      if (h.text.toLowerCase().includes(needle)) out.push({ kind: 'heading', title: h.text, path: rel, href: docHref(rel) });
-    }
+    if (out.length >= enough) break;
+    for (const h of headings(readText(path.join(p.root, rel)).slice(0, 200000))) add(h.text, { kind: 'heading', title: h.text, path: rel, href: docHref(rel) });
   }
-  return out.slice(0, limit);
+  return out;
 }
