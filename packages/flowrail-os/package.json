@@ -40,7 +40,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/FinalAngel/flowrail.git",
-    "directory": "packages/control-room"
+    "directory": "packages/flowrail-os"
   },
   "bugs": {
     "url": "https://github.com/FinalAngel/flowrail/issues"

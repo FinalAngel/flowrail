@@ -150,7 +150,7 @@ More red lines come from plain-English recipes (`protect-path`, `publish-deploy`
 
 ## flowrailOS (optional)
 
-A separate package, [`@finalangel/flowrail-os`](packages/control-room/), adds a local dashboard on top of the guard. The guard does not need it.
+A separate package, [`@finalangel/flowrail-os`](packages/flowrail-os/), adds a local dashboard on top of the guard. The guard does not need it.
 
 <p align="center">
   <picture>

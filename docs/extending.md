@@ -34,7 +34,7 @@ Write `hook.match` against the normalized command (see [red-lines.md](red-lines.
 The UI is plain JavaScript modules with no build step. A page is one file:
 
 ```js
-// packages/control-room/ui/pages/releases.js
+// packages/flowrail-os/ui/pages/releases.js
 export function mount(el, ctx) {
   const load = async () => {
     const data = await ctx.api('/releases'); // GET /api/releases; ctx.api adds the prefix and the X-Flowrail header
@@ -48,11 +48,11 @@ export function mount(el, ctx) {
 
 `ctx.api(path, body)` sends a `GET`, or a `POST` when you pass a body. `ctx.params` holds the address's query and `ctx.path` the page's path after aliases. The header shows the page's title, taken from the page's own `h1` in a `.page-head` (which stays in the page for screen readers only); `ctx.header({ center, tools })` puts nodes in the middle of the header and next to the search, and they are cleared when the page changes. Then:
 
-1. Add the page to `NAV` in `packages/control-room/ui/app.js` (`['releases', 'Releases', '/releases']` in the right group) and an icon to `ICON`.
-2. If the page needs data, add a `'GET /api/releases'` entry to the routes in `packages/control-room/src/server.js`. Mutations are `POST` with an `_action` field; the server's host, origin and header checks apply to them automatically.
-3. If the page reads a new file, map it to an area in `areaFor()` in `packages/control-room/src/core/events.js` so the page refreshes on change.
+1. Add the page to `NAV` in `packages/flowrail-os/ui/app.js` (`['releases', 'Releases', '/releases']` in the right group) and an icon to `ICON`.
+2. If the page needs data, add a `'GET /api/releases'` entry to the routes in `packages/flowrail-os/src/server.js`. Mutations are `POST` with an `_action` field; the server's host, origin and header checks apply to them automatically.
+3. If the page reads a new file, map it to an area in `areaFor()` in `packages/flowrail-os/src/core/events.js` so the page refreshes on change.
 4. Build DOM with `document.createElement` and `textContent`. Never assign unescaped content to `innerHTML`.
-5. Follow the tokens and components in `packages/control-room/ui/app.css`: one accent color, used for armed and active states only.
+5. Follow the tokens and components in `packages/flowrail-os/ui/app.css`: one accent color, used for armed and active states only.
 
 Every page needs an empty state that says what the page is for, shows the CLI command that fills it, and offers example data.
 
