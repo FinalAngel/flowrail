@@ -2,11 +2,16 @@
 
 All notable changes to flowrail are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/). Before 1.0, minor versions may change file formats and the HTTP API; any such change is listed here with what to do about it.
 
-## [Unreleased]
+## [0.3.0] 2026-09-27
 
 ### Added
 
+- The sidebar collapses to an icon rail from the button at its foot or with ⌘B / Ctrl+B (not while typing in a field, where it means bold). The choice is remembered per browser and applied before the first paint; collapsed, each page name shows as a tooltip and stays readable to screen readers. On a phone the sidebar stays a sheet.
 - A read-only demo of flowrailOS on GitHub Pages: `packages/flowrail-os/scripts/static-demo.js` saves what the dashboard answers on the example workspace, and the page reads those files when it carries a `flowrail-static` meta tag. Pushing a version tag publishes both packages (`.github/workflows/release.yml`).
+
+### Changed
+
+- The sidebar has its own background (`--surface`), set apart from the page, a thin scrollbar that shows only while the pointer or focus is in it, and a divider between Settings and the collapse button.
 
 ### Fixed
 
