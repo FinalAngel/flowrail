@@ -6,3 +6,5 @@ How Paper Plane is built and released.
 - [Release checklist](release-checklist.md): what has to be true before a tag.
 - `flowrail/workflows/`: the release playbook the agents follow.
 - `flowrail/context/crdt-primer/`: background on the merge model.
+- `scripts/`: the small apps on the Runs page (the docs site, the sync watcher).
+- `.claude/`: the agents and commands Claude Code loads for this repo.

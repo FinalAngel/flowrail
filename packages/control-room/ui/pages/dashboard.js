@@ -1,6 +1,6 @@
 import { h, icon, cmd, relTime, loader, plural, shortDate, clock } from '../lib/dom.js';
 
-const KIND = { 'audit-edited': 'security', 'guard-changed': 'shieldOff', drift: 'shieldOff', hooks: 'shieldOff', audit: 'security', check: 'alert', comment: 'comment', routine: 'routines', task: 'board', redline: 'redlines', 'redlines-changed': 'redlines', artifact: 'artifacts', run: 'terminal', held: 'shield', commit: 'branch', memory: 'memory' };
+const KIND = { due: 'routines', duty: 'board', 'audit-edited': 'security', 'guard-changed': 'shieldOff', drift: 'shieldOff', hooks: 'shieldOff', audit: 'security', check: 'alert', comment: 'comment', routine: 'routines', task: 'board', redline: 'redlines', 'redlines-changed': 'redlines', artifact: 'artifacts', run: 'terminal', held: 'shield', commit: 'branch', memory: 'memory' };
 const DISMISS = 'flowrail-setup-dismissed';
 const getDismissed = () => { try { return localStorage.getItem(DISMISS) === '1'; } catch { return false; } };
 const setDismissed = (v) => { try { v ? localStorage.setItem(DISMISS, '1') : localStorage.removeItem(DISMISS); } catch { /* ignore */ } };
@@ -123,9 +123,20 @@ function todayCard(t, since) {
     h('div.card-head', icon('dashboard'), h('h2', { id: 'today-h' }, away ? 'While you were away' : 'Today'),
       h('span.meta', { style: 'margin-left:auto', title: away ? new Date(away).toLocaleString() : '' },
         away ? `since ${Date.parse(since) < midnight ? shortDate(since) + ', ' + clock(since) : clock(since)}` : items.length > 0 && plural(items.length, 'event'))),
+    dueList(t.due || []),
     items.length
       ? [sentence && h('p.today-sum', sentence), h('ul.timeline', items.slice(0, 30).map(line))]
       : h('p.muted', away ? 'Nothing happened while you were away.' : 'Nothing yet today.'));
+}
+
+// Due today or overdue: dates in the repo's documents and recurring duties (see src/core/reminders.js).
+function dueList(due) {
+  if (!due.length) return null;
+  const text = (r) => (r.kind === 'duty' ? r.name : r.title);
+  const when = (r) => (r.days < 0 ? `overdue ${-r.days} d` : 'due today');
+  return h('ul.due-list', { 'aria-label': 'Due' }, due.slice(0, 8).map((r) => h('li',
+    h('a', { href: r.kind === 'duty' ? '#/board' : '#/docs?path=' + encodeURIComponent(r.path), class: r.overdue ? 'overdue' : '' },
+      icon(KIND[r.kind], 14), h('span.t', text(r)), h('span.chip', { class: r.overdue ? 'danger' : 'warn', style: 'height:20px;margin-left:auto' }, when(r))))));
 }
 
 function setupCard(setup, reload, ctx) {

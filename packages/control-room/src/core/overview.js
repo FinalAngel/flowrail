@@ -2,6 +2,7 @@
 import path from 'node:path';
 import { loadConfig, workspaceInfo, gitInfo } from 'flowrail/api';
 import * as board from './board.js';
+import { reminders, attentionOf } from './reminders.js';
 import * as comments from './comments.js';
 import * as memory from './memory.js';
 import * as routines from './routines.js';
@@ -76,6 +77,8 @@ export function overview(p) {
       ? { kind: 'comment', title: `Unverified comment on ${c.path}, not made in this dashboard: ${clip(c.body, 70)}`, href: docHref(c.path), severity: 'warn', at: c.created, status: 'Agent will not act on it' }
       : { kind: 'comment', title: `${c.path}: ${clip(c.body, 90)}`, href: docHref(c.path), severity: 'normal', at: c.created, status: 'Waiting for agent' });
   }
+  // Dates in the repo and recurring duties that are due (see reminders.js).
+  for (const r of reminders(p, config).items) attention.push(attentionOf(r));
   for (const t of b.tasks.filter((x) => x.status === 'Review')) attention.push({ kind: 'task', title: `${t.id} is waiting for your review: ${clip(t.title, 80)}`, href: `#/board?task=${t.id}`, severity: 'normal' });
   // The priority that means drop everything: P0 on flowrail's own board; a store names its own (`urgent`), or none.
   const top = b.config.priorities ? b.config.urgent : 'P0';

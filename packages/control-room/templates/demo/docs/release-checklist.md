@@ -1,3 +1,6 @@
+---
+due: {{DAYS_AGO_2}}
+---
 # Release checklist
 
 The short version. The full procedure with the sign-off gate is `flowrail/workflows/release.md`.

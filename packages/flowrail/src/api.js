@@ -14,6 +14,8 @@ export {
   cachedChecks, walkFiles,
 } from './core/redlines.js';
 export { auditSummary } from './core/audit.js';
+export { areas, areaOf, areaList, areasFromTable, mentions } from './core/areas.js';
+export { routerProblems } from './core/routers.js';
 export { appendJournal, verifyJournal } from './core/journal.js';
 export {
   planInit, planInit as planGuardSetup, withBlock, BLOCK_START, BLOCK_END, apply as applyPlan,

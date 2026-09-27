@@ -218,6 +218,10 @@ An **event routine** has `on` instead of `schedule`: `{ "event": "github-actions
 
 `GET /api/links` returns `flowrail/links.json` normalized: `[{ category, items: [{ title, url, href, external, description, icon? }] }]`. A category may call its list `items` or `links`. An `http`/`https` URL gets `external: true` and its own `href`; a repo path gets `href: "#/docs?path=…"`; any other URL (`javascript:`, `data:`, `file:`, `..`) is dropped, and so is a category left empty. `icon` is kept only when it is an icon name, never markup.
 
+### Reminders
+
+`GET /api/reminders` returns `{ items: [...] }`, soonest first. A date in a document is `{ kind: "due", path, title, field, date, days, overdue }`: a frontmatter field from `reminders.fields` (default `due`, `next_date`) holding `YYYY-MM-DD`, overdue or due within `reminders.within` days (default 7), from files Docs would show. A duty is `{ kind: "duty", name, period, dueDate, days, overdue }` from `duties` in `config.json`. Both also appear in the overview's `attention` (kinds `due` and `duty`, `warn` when overdue) and, due today or overdue, in `GET /api/today` as `due`.
+
 ### Library
 
 `GET /api/library` returns `{ docs: [{ path, title, area, changed, days, state, uncommitted? }], counts: { fresh, aging, stale, unknown }, thresholds: [aging, stale], source, areas: [{ name, router, docs }] }`. Every servable Markdown file in the repo (the same gates as Docs). `changed` comes from one `git log` over the history (`source: "git"`); a file changed since its last commit, or untracked, takes its file time and `uncommitted: true`; outside git every file takes its file time (`source: "mtime"`). `state` is `fresh` below `staleDays[0]` days (default 30), `aging` below `staleDays[1]` (default 90), `stale` after. `area` is the area whose router names the file or a folder above it (see [concepts.md](concepts.md#library-areas-and-context)), or `null`.

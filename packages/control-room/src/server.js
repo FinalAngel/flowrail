@@ -39,6 +39,7 @@ import { today, parseSince } from './core/today.js';
 import { watch } from './core/events.js';
 import { readJson } from 'flowrail/api';
 import * as plugins from './core/plugins.js';
+import { reminders } from './core/reminders.js';
 import { auditAsync } from './core/audit-worker.js';
 import * as library from './core/library.js';
 
@@ -263,6 +264,7 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
       if (b._action === 'trash') return artifacts.trash(p, need(b.name, 'name'));
       throw new HttpError(400, '_action must be trash');
     },
+    'GET /api/reminders': () => reminders(p, loadConfig(p)),
     'GET /api/links': () => library.links(p, readJson),
     'GET /api/library': () => library.library(root, loadConfig(p)),
     'GET /api/context': () => library.context(root, loadConfig(p)),
