@@ -75,7 +75,10 @@ hr.sep { border: 0; border-top: 1px solid var(--hairline); margin: var(--s4) 0; 
 
 /* Shell */
 .shell { display: grid; grid-template-columns: 232px minmax(0, 1fr); min-height: 100dvh; }
-.sidebar { position: sticky; top: 0; height: 100dvh; display: flex; flex-direction: column; padding: 14px 10px 10px; border-right: 1px solid var(--hairline); overflow-y: auto; }
+.sidebar { position: sticky; top: 0; height: 100dvh; display: flex; flex-direction: column; padding: 14px 10px 10px; border-right: 1px solid var(--hairline); background: var(--surface); overflow-y: auto; }
+/* A thin thumb on no track, visible only while the pointer or focus is in the sidebar. Colour changes never move the layout. */
+.sidebar { scrollbar-width: thin; scrollbar-color: transparent transparent; }
+.sidebar:hover, .sidebar:focus-within { scrollbar-color: color-mix(in srgb, var(--text-3) 45%, transparent) transparent; }
 .brand { display: flex; align-items: center; gap: 8px; padding: 6px 10px 14px; text-decoration: none; color: var(--text); font-size: 16px; letter-spacing: -0.01em; }
 .brand .icon { color: var(--accent); }
 .wordmark .f { font-family: var(--mono); font-weight: 500; }
@@ -92,6 +95,18 @@ hr.sep { border: 0; border-top: 1px solid var(--hairline); margin: var(--s4) 0; 
 .nav .rail.off { color: var(--danger); }
 .sidebar-foot { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--hairline); }
 .sidebar-foot .ver { font-size: 12px; color: var(--text-3); padding: 8px 10px 0; font-family: var(--mono); }
+.side-sep { height: 1px; margin: 10px 0; background: var(--hairline); }
+.side-toggle { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 36px; padding: 0 10px; border: 0; border-radius: var(--r-ctl); background: none; color: var(--text-3); font: inherit; cursor: pointer; }
+.side-toggle:hover { color: var(--text); background: color-mix(in srgb, var(--tray) 60%, transparent); }
+/* Collapsed (desktop only; the mobile sheet ignores it): an icon rail, labels kept for screen readers. */
+@media (min-width: 768px) {
+  [data-side="collapsed"] .shell { grid-template-columns: 60px minmax(0, 1fr); }
+  [data-side="collapsed"] .sidebar { padding-inline: 8px; }
+  [data-side="collapsed"] .brand, [data-side="collapsed"] .nav a, [data-side="collapsed"] .side-toggle { justify-content: center; gap: 0; padding-inline: 0; }
+  [data-side="collapsed"] :is(.wordmark, .nav a > span:not(.count, .rail), .side-toggle > span) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  [data-side="collapsed"] :is(.nav-label, .nav .count, .nav .rail, .sidebar-foot .ver) { display: none; }
+  [data-side="collapsed"] .nav-group + .nav-group { border-top: 1px solid var(--hairline); padding-top: 10px; }
+}
 
 .main { min-width: 0; display: flex; flex-direction: column; }
 .main { --gutter: var(--s6); }
@@ -606,6 +621,7 @@ pre.raw { max-width: 100%; overflow-x: auto; background: var(--tray); padding: 1
   .board { grid-template-columns: repeat(5, minmax(240px, 1fr)); }
 }
 @media (max-width: 767px) {
+  .side-toggle { display: none; }
   .shell { grid-template-columns: minmax(0, 1fr); }
   .sidebar { position: fixed; inset: 8px auto 8px 8px; z-index: 35; width: min(280px, calc(100vw - 48px)); height: auto; border-radius: var(--r-tray); background: var(--surface); border: 1px solid var(--hairline); box-shadow: var(--shadow-pop); transform: translateX(calc(-100% - 16px)); visibility: hidden; transition: transform var(--dur-sheet) var(--ease), visibility 0s linear var(--dur-sheet); }
   .shell.nav-open .sidebar { transform: none; visibility: visible; transition: transform var(--dur-sheet) var(--ease); }

@@ -7,6 +7,7 @@ import { snapshot } from './lib/snapshot.js';
 const TOKEN = document.querySelector('meta[name="flowrail-token"]')?.content || '';
 // The read-only demo on GitHub Pages: no server, the answers are saved files (lib/snapshot.js).
 const STATIC = !!document.querySelector('meta[name="flowrail-static"]');
+const MOD = navigator.platform.includes('Mac') ? '⌘' : 'Ctrl ';
 let stale = false;
 export async function api(path, body) {
   if (STATIC) return snapshot(path, body);
@@ -191,13 +192,17 @@ function renderSidebar() {
       : h('span.rail', { 'aria-label': `${armed} armed` }, icon('shield', 13), armed);
     return null;
   };
-  const link = ([id, label, href]) => h('a', { href: '#' + href, 'aria-current': path === href ? 'page' : null, onclick: closeNav }, icon(ICON[id]), h('span', label), badge(id));
+  // Collapsed, the sidebar is an icon rail: the label stays for screen readers and shows as a tooltip.
+  const collapsed = document.documentElement.dataset.side === 'collapsed';
+  const link = ([id, label, href]) => h('a', { href: '#' + href, title: collapsed ? label : null, 'aria-current': path === href ? 'page' : null, onclick: closeNav }, icon(ICON[id]), h('span', label), badge(id));
+  const toggle = h('button.side-toggle', { type: 'button', title: `${collapsed ? 'Expand' : 'Collapse'} sidebar (${MOD}B)`, 'aria-keyshortcuts': 'Meta+B Control+B', 'aria-expanded': String(!collapsed), 'aria-controls': 'sidebar', onclick: () => toggleSidebar(true) },
+    icon(collapsed ? 'chevronRight' : 'chevronLeft'), h('span', collapsed ? 'Expand' : 'Collapse'));
   clear(side).append(
     h('a.brand', { href: '#/', 'aria-label': `${BRAND?.name || 'flowrailOS'} home`, onclick: closeNav }, icon('mark', 20), BRAND
       ? h('span.wordmark', BRAND.mono && BRAND.name.startsWith(BRAND.mono) ? [h('span.f', BRAND.mono), h('span.r', BRAND.name.slice(BRAND.mono.length))] : h('span.r', BRAND.name))
       : h('span.wordmark', h('span.f', 'flow'), h('span.r', 'railOS'))),
     h('nav.nav', { 'aria-label': 'Pages' }, NAV.map(([group, items]) => [group, items.filter(on)]).filter(([, items]) => items.length).map(([group, items]) => h('div.nav-group', { role: 'group', 'aria-label': group }, h('div.nav-label', { 'aria-hidden': 'true' }, group), items.map(link)))),
-    h('div.sidebar-foot.nav', link(SETTINGS), shell.overview?.workspace?.version && h('div.ver', 'v' + shell.overview.workspace.version)),
+    h('div.sidebar-foot.nav', link(SETTINGS), h('div.side-sep', { role: 'separator' }), toggle, shell.overview?.workspace?.version && h('div.ver', 'v' + shell.overview.workspace.version)),
   );
 }
 
@@ -283,6 +288,16 @@ function renderBanner() {
   if (demo && !document.documentElement.dataset.shot) b.append(h('div.banner', { role: 'note' }, icon('alert', 14), STATIC
     ? h('span', 'Read-only demo of an example workspace. Run ', h('code', 'npx @finalangel/flowrail-os demo'), ' to try it on your machine.')
     : 'Example workspace. Nothing here touches your repo.'));
+}
+
+/* ---------- Collapsed sidebar (desktop): an icon rail, remembered per browser ---------- */
+// ⌘B / Ctrl+B or the footer button; only a click moves focus to the button.
+function toggleSidebar(focus) {
+  const d = document.documentElement.dataset;
+  if (d.side === 'collapsed') delete d.side; else d.side = 'collapsed';
+  try { if (d.side) localStorage.setItem('flowrail-sidebar', 'collapsed'); else localStorage.removeItem('flowrail-sidebar'); } catch { /* private mode */ }
+  renderSidebar();
+  if (focus) document.querySelector('.side-toggle')?.focus();
 }
 
 /* ---------- Mobile nav sheet ---------- */
@@ -397,6 +412,8 @@ document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') closeNav();
   const t = e.target;
   const typing = t instanceof HTMLElement && (t.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName));
+  // ⌘B / Ctrl+B collapses the sidebar, except where it would mean bold (a text field or editor).
+  if ((e.metaKey || e.ctrlKey) && !e.altKey && !e.shiftKey && e.key.toLowerCase() === 'b' && !typing) { e.preventDefault(); toggleSidebar(); return; }
   if (e.key === '/' && !typing && !e.metaKey && !e.ctrlKey && !document.querySelector('dialog[open]')) { e.preventDefault(); openPalette(); }
 });
 
