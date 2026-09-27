@@ -57,6 +57,16 @@ const P = {
 
 const NS = 'http://www.w3.org/2000/svg';
 
+/** An icon as one canvas Path2D (its path and circle shapes), for drawing on a canvas at 24px. */
+export function iconPath(name) {
+  const p = new Path2D();
+  for (const m of (P[name] || '').matchAll(/<path d="([^"]+)"|<circle cx="([\d.]+)" cy="([\d.]+)" r="([\d.]+)"/g)) {
+    if (m[1]) p.addPath(new Path2D(m[1]));
+    else { p.moveTo(+m[2] + +m[4], +m[3]); p.arc(+m[2], +m[3], +m[4], 0, 2 * Math.PI); }
+  }
+  return p;
+}
+
 /** @param {keyof typeof P} name */
 export function icon(name, size = 16, label) {
   const svg = document.createElementNS(NS, 'svg');
