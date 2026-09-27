@@ -100,16 +100,19 @@ hr.sep { border: 0; border-top: 1px solid var(--hairline); margin: var(--s4) 0; 
 .topbar { position: sticky; top: 8px; z-index: 20; margin: 8px var(--gutter) 0; height: 56px; display: flex; align-items: center; gap: var(--s2); padding: 0 8px 0 14px; border-radius: var(--r-tray); background: var(--glass); backdrop-filter: saturate(1.4) blur(14px); -webkit-backdrop-filter: saturate(1.4) blur(14px); border: 1px solid var(--hairline); box-shadow: var(--shadow-1); }
 /* The header carries the page's title (the page's own h1 stays for screen readers), and a page may put
    something in its middle (.top-center) and buttons next to the search (.top-tools). */
-.top-title { flex: 1 1 0; min-width: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.top-center { display: flex; align-items: center; justify-content: center; min-width: 0; }
+.top-title { flex: none; max-width: 45%; min-width: 0; font-size: 20px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+/* The page's one-line summary, right after the title: the page's own .sub, or what it hands ctx.header. */
+.top-sub { flex: 1 1 0; min-width: 0; margin-left: 4px; font-size: 13.5px; color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.content .page-head .sub { display: none; }
+/* Something a page centres in the header (the dashboard's wordmark): the exact middle of the bar. */
+.top-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; pointer-events: none; }
+.top-center > * { pointer-events: auto; }
 .top-center:empty { display: none; }
-.top-center:not(:empty) + .top-tools, .top-center:not(:empty) ~ .search-btn { flex: none; }
-.top-center:not(:empty) { flex: 1 1 0; }
-.top-tools { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+.top-tools { display: flex; align-items: center; gap: 4px; }
 .top-tools:empty { display: none; }
 .top-tools:not(:empty) + .search-btn { margin-left: 0; }
 .content .page-head h1 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.content .page-head:not(:has(.sub, .actions > *)) { display: none; }
+.content .page-head:not(:has(.actions > *)) { display: none; }
 .search-btn { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; height: 36px; min-width: 220px; padding: 0 8px 0 12px; border-radius: var(--r-pill); border: 1px solid var(--hairline); background: var(--surface); color: var(--text-3); cursor: pointer; box-shadow: var(--shadow-1); }
 .search-btn:hover { color: var(--text-2); }
 .search-btn kbd { margin-left: auto; }
@@ -137,10 +140,10 @@ button.hooks { border: 0; font: inherit; font-size: 13px; font-weight: 500; curs
 
 /* Buttons & controls */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 36px; padding: 0 16px; border-radius: var(--r-pill); border: 1px solid var(--hairline); background: var(--surface); color: var(--text); font-weight: 500; font-size: 13.5px; cursor: pointer; text-decoration: none; white-space: nowrap; box-shadow: var(--shadow-1); transition: transform var(--dur-state) var(--ease), background var(--dur-state) var(--ease); }
-.btn:hover { background: color-mix(in srgb, var(--surface) 85%, var(--tray)); }
+.btn:hover { background: var(--tray); border-color: color-mix(in srgb, var(--text) 22%, transparent); }
 .btn:active, .icon-btn:active, .chip-btn:active { transform: translateY(1px); }
 .btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
-.btn.primary:hover { background: color-mix(in srgb, var(--accent) 90%, var(--text)); }
+.btn.primary:hover { background: color-mix(in srgb, var(--accent) 82%, var(--text)); }
 .btn.primary .ico-circle { background: rgb(255 255 255/.18); }
 .btn .ico-circle { display: inline-grid; place-items: center; width: 22px; height: 22px; margin-right: -10px; border-radius: 50%; background: var(--tray); transition: transform var(--dur-state) var(--ease); }
 .btn:hover .ico-circle { transform: translateX(1px); }
@@ -151,7 +154,7 @@ button.hooks { border: 0; font: inherit; font-size: 13px; font-weight: 500; curs
 .btn[disabled] { opacity: .55; cursor: not-allowed; }
 .icon-btn { position: relative; display: inline-grid; place-items: center; width: 36px; height: 36px; border-radius: var(--r-pill); border: 0; background: transparent; color: var(--text-2); cursor: pointer; transition: background var(--dur-state) var(--ease); }
 .icon-btn::after { content: ""; position: absolute; inset: -4px; }
-.icon-btn:hover { background: var(--tray); color: var(--text); }
+.icon-btn:hover { background: color-mix(in srgb, var(--text) 10%, transparent); color: var(--text); }
 .link { background: none; border: 0; padding: 0; color: var(--text-2); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--hairline); cursor: pointer; font-size: 13px; min-height: 28px; }
 .link:hover { color: var(--text); text-decoration-color: currentColor; }
 .field { display: grid; gap: 6px; }
@@ -165,7 +168,9 @@ button.hooks { border: 0; font: inherit; font-size: 13px; font-weight: 500; curs
 textarea.input { resize: vertical; line-height: 1.55; }
 /* A field with suggestions (datalist): Chrome's own arrow sits high in a tall field, so it is made
    invisible (still clickable) and a centred chevron is drawn in its place, as on the selects. */
-.input[list] { padding-right: 30px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%236E7377' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 12px; }
+/* Every dropdown: its own chevron with room on the right, the same on every page and browser. */
+select.input { appearance: none; -webkit-appearance: none; padding-right: 34px; cursor: pointer; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%236E7377' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 12px; }
+.input[list] { padding-right: 34px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%236E7377' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 12px; }
 .input[list]::-webkit-calendar-picker-indicator { opacity: 0; cursor: pointer; }
 .input[aria-invalid="true"] { border-color: var(--danger); }
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s3) var(--s4); }
@@ -603,8 +608,8 @@ pre.raw { max-width: 100%; overflow-x: auto; background: var(--tray); padding: 1
   .search-btn { min-width: 0; width: 36px; padding: 0; justify-content: center; }
   .search-btn .lbl, .search-btn kbd { display: none; }
   .hooks .lbl { display: none; }
-  .top-title { font-size: 17px; }
-  .top-center { display: none; }
+  .top-title { font-size: 17px; max-width: none; flex: 1 1 0; }
+  .top-center, .top-sub { display: none; }
   .hooks { width: 36px; padding: 0; justify-content: center; flex: none; }
   .hooks .dot { width: 9px; height: 9px; }
   .page-head h1 { font-size: 20px; }

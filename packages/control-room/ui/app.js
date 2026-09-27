@@ -185,20 +185,29 @@ function renderSidebar() {
 // The title follows the page's own h1 (Board or Backlog, an artifact's name); the h1 stays in the
 // content for screen readers only, so the page does not say its name twice.
 const topTitle = h('div.top-title', { 'aria-hidden': 'true' });
+const topSub = h('div.top-sub');
 const topCenter = h('div.top-center');
+let ownSummary = false;
 const topTools = h('div.top-tools');
 let pageLabel = '';
 function syncTitle() {
   const h1 = content()?.querySelector('.page-head h1, h1.page-title');
   const text = (h1?.textContent || pageLabel || '').trim();
   if (topTitle.textContent !== text) topTitle.textContent = text;
+  // The page's own subtitle moves up beside the title, unless the page handed its own summary.
+  if (!ownSummary) {
+    const sub = (content()?.querySelector('.page-head .sub')?.textContent || '').trim();
+    if (topSub.textContent !== sub) topSub.textContent = sub;
+  }
 }
 let titleQueued = false;
 new MutationObserver(() => { if (titleQueued) return; titleQueued = true; requestAnimationFrame(() => { titleQueued = false; syncTitle(); }); })
   .observe(document.getElementById('content'), { childList: true, subtree: true, characterData: true });
 /** What ctx.header() does: nodes for the middle of the header and next to the search. */
-function setHeader({ center = null, tools = null } = {}) {
-  clear(topCenter); clear(topTools);
+function setHeader({ summary = null, center = null, tools = null } = {}) {
+  clear(topCenter); clear(topTools); clear(topSub);
+  ownSummary = !!summary;
+  if (summary) topSub.append(...[].concat(summary).filter(Boolean));
   if (center) topCenter.append(...[].concat(center).filter(Boolean));
   if (tools) topTools.append(...[].concat(tools).filter(Boolean));
 }
@@ -218,7 +227,7 @@ function renderTopbar() {
           : pill('live', 'Guard live', `The guard runs from ${hi.where || '.claude/settings.json'}${hi.guard?.version ? `, version ${hi.guard.version}, files verified` : ''}`);
   clear(bar).append(
     h('button.icon-btn.menu-btn', { type: 'button', 'aria-label': 'Open menu', 'aria-controls': 'sidebar', 'aria-expanded': String(document.getElementById('shell').classList.contains('nav-open')), onclick: openNav }, icon('menu')),
-    topTitle, topCenter, topTools,
+    topTitle, topSub, topCenter, topTools,
     h('button.search-btn', { type: 'button', onclick: openPalette, 'aria-label': 'Search and commands', 'aria-keyshortcuts': 'Meta+K Control+K' }, icon('search'), h('span.lbl', 'Search…'), h('kbd', navigator.platform.includes('Mac') ? '⌘K' : 'Ctrl K')),
     themeButton(),
     hooksEl,
@@ -400,7 +409,7 @@ async function route() {
   const dispose = [];
   const ctx = {
     api, toast, navigate, params, shell, hooksState, hooksInfo, isArmed, brand: BRAND?.name || 'flowrail',
-    /** Put nodes in the middle of the header (center) and next to the search (tools); cleared on page change. */
+    /** Header parts: summary (beside the title), center (the middle), tools (beside the search); cleared on page change. */
     header: (parts) => { if (my === routeSeq) setHeader(parts); },
     refreshShell: () => refreshShell(),
     /** Subscribe to live changes. areas: array of area names or null for all. Debounced; auto-removed on page change. */

@@ -227,7 +227,7 @@ export function mount(el, ctx) {
       h('div.toolbar', filterRow, h('div.toolbar-actions', view === 'board' && sprintNav(),
         h('button.btn.primary', { type: 'button', onclick: () => create(view === 'backlog' ? 'Backlog' : 'Todo') }, icon('plus'), 'New task'))),
       view === 'board' ? boardEl : backlogEl].filter(Boolean));
-    ctx.header?.({ center: summaryEl });
+    ctx.header?.({ summary: summaryEl });
     paint();
   }
 
