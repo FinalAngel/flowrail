@@ -108,7 +108,7 @@ hr.sep { border: 0; border-top: 1px solid var(--hairline); margin: var(--s4) 0; 
 .top-center { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); display: flex; align-items: center; pointer-events: none; }
 .top-center > * { pointer-events: auto; }
 .top-center:empty { display: none; }
-.top-tools { display: flex; align-items: center; gap: 4px; }
+.top-tools { display: flex; align-items: center; gap: 4px; min-width: 0; }
 .top-tools:empty { display: none; }
 .top-tools:not(:empty) + .search-btn { margin-left: 0; }
 .content .page-head h1 { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -615,6 +615,12 @@ pre.raw { max-width: 100%; overflow-x: auto; background: var(--tray); padding: 1
   .hooks .lbl { display: none; }
   .top-title { font-size: 17px; max-width: none; flex: 1 1 0; }
   .top-center, .top-sub { display: none; }
+  .top-tools { overflow-x: auto; scrollbar-width: none; }
+  .top-tools .btn { display: none; }
+  /* A page's own header controls (a view switch) get a row of their own under the title. */
+  .topbar:has(.top-tools .seg) { height: auto; flex-wrap: wrap; row-gap: 6px; padding-top: 8px; padding-bottom: 8px; }
+  .top-tools:has(.seg) { order: 10; flex-basis: 100%; overflow: visible; }
+  .top-tools .seg { flex-wrap: nowrap; }
   .hooks { width: 36px; padding: 0; justify-content: center; flex: none; }
   .hooks .dot { width: 9px; height: 9px; }
   .page-head h1 { font-size: 20px; }
@@ -788,7 +794,9 @@ table.probes .bad, table.probes tr.fail td:first-child { color: var(--danger); f
 .due-list { list-style: none; margin: 0 0 var(--s3); padding: 0 0 var(--s3); border-bottom: 1px solid var(--hairline); display: grid; gap: 2px; }
 .due-list a { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 6px; border-radius: var(--r-ctl); color: inherit; text-decoration: none; font-size: 13.5px; }
 .due-list a:hover { background: var(--tray); }
-.due-list .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.due-list li, .due-list a { min-width: 0; }
+.due-list .t { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.due-list .chip { flex: none; }
 .due-list a.overdue > .icon { color: var(--danger); }
 
 /* People on the Agents page: an email or link sits on one line with its icon. */

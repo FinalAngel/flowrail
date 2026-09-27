@@ -45,6 +45,7 @@ export function mount(el, ctx) {
   const tools = () => ctx.header?.({ tools: [
     state.editing && h('button.btn.sm.ghost', { type: 'button', onclick: () => { state.layout = readLayout(null); save(); redraw(); } }, 'Reset layout'),
     h('button.btn.sm', { type: 'button', 'aria-pressed': String(state.editing), onclick: () => { state.editing = !state.editing; tools(); redraw(); } }, icon(state.editing ? 'check' : 'settings', 14), state.editing ? 'Done' : 'Edit layout'),
+    !state.editing && h('a.btn.sm', { href: '#/board' }, 'Open board'),
   ].filter(Boolean) });
   tools();
   state.save = save;
@@ -116,8 +117,7 @@ function render(root, { ov, board, rl, today, audit, since }, ctx, reload, state
     cols[ci].map((id) => slot(id, ci)));
   root.append(
     h('header.page-head',
-      h('div', h('h1', greeting()), h('p.sub', summary(c))),
-      h('div.actions', h('a.btn', { href: '#/board' }, 'Open board'))),
+      h('div', h('h1', greeting()), h('p.sub', summary(c)))),
     h('div.bento', { class: state.editing ? 'editing' : '' }, col(0), col(1)),
   );
 }
