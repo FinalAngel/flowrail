@@ -31,7 +31,7 @@ Inside a Claude Code session the `protect-flowrail` red line asks before command
 
 ```json
 {
-  "workspace": { "name": "paper-plane", "root": "/path/to/repo", "version": "0.1.0", "demo": false },
+  "workspace": { "name": "paper-plane", "root": "/path/to/repo", "version": "0.2.0", "demo": false },
   "setup": { "steps": [{ "id": "hooks", "title": "Install hooks", "done": true, "hint": "npx flowrail hooks install" }], "done": 4, "total": 5, "dismissed": false },
   "attention": [{ "kind": "comment", "title": "...", "href": "#/docs?path=flowrail%2FWELCOME.md", "severity": "normal", "at": "2026-01-12T08:40:00.000Z" }],
   "counts": {
