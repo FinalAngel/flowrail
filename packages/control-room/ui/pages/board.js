@@ -3,10 +3,11 @@ import { h, icon, clear, loader, relTime, shortDate, sheet, confirmBox, empty, d
 const parseDate = (s) => { const [y, m, d] = String(s).split('-').map(Number); return new Date(y, m - 1, d); };
 const localDay = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 
+// The Board shows the selected sprint: its tasks start in Backlog (not started) and move to Todo when
+// someone picks one up. Tasks in no sprint live on the Backlog page; "Not in a sprint" moves one there.
 const COLS = ['Backlog', 'Todo', 'In Progress', 'Review', 'Done'];
-// The Board shows the selected sprint only; unscheduled tasks live on the Backlog page (a task can
-// still be moved there from its menu or its detail sheet).
-const SPRINT_COLS = COLS.slice(1);
+const SPRINT_COLS = COLS;
+const UNSCHEDULED = 'Not in a sprint';
 const PRIOS = ['P0', 'P1', 'P2', 'P3'];
 // A store (a plugin's board) can bring its own priorities, groups and source file; see src/core/board.js.
 
@@ -29,18 +30,18 @@ export function mount(el, ctx) {
   const sprintLabel = (start) => (sprintList().find((x) => x.start === start)?.label) || start;
   const sprintList = () => data?.config?.sprints || (data?.config?.current ? [data.config.current] : []);
   const shownSprint = () => sprintList().find((x) => x.start === shown) || data?.config?.current || null;
-  const inView = (t) => !t.sprint || !shownSprint() || t.sprint === shownSprint().start;
+  const inView = (t) => !!t.sprint && (!shownSprint() || t.sprint === shownSprint().start);
   const root = h('div');
   el.append(root);
 
   ctx.api('/team').then((t) => { for (const a of (Array.isArray(t) ? t : t?.agents || [])) agents.add(a.name); if (data) paint(); }).catch(() => {});
 
-  const colOf = (t) => (!t.sprint ? 'Backlog' : COLS.includes(t.status) ? t.status : 'Todo');
+  const colOf = (t) => (!t.sprint ? UNSCHEDULED : COLS.includes(t.status) ? t.status : 'Todo');
   const isAgent = (name) => !!name && (agents.has(name) || /\b(agent|claude|bot)\b/i.test(name));
 
   async function move(t, col) {
     if (colOf(t) === col) return;
-    const patch = col === 'Backlog' ? { sprint: '' } : { status: col, sprint: t.sprint || shownSprint()?.start || '' };
+    const patch = col === UNSCHEDULED ? { sprint: '' } : { status: col, sprint: t.sprint || shownSprint()?.start || '' };
     const before = { status: t.status, sprint: t.sprint };
     Object.assign(t, patch); paint();
     try {
@@ -65,7 +66,7 @@ export function mount(el, ctx) {
       if (e.key === 'ArrowUp') { e.preventDefault(); btns[(i - 1 + btns.length) % btns.length].focus(); }
     } },
       h('div.label', 'Move to…'),
-      COLS.map((c) => h('button', { type: 'button', role: 'menuitem', 'aria-current': c === cur ? 'true' : null, onclick: () => { close(); move(t, c); } }, c === cur ? icon('check') : h('span', { style: 'width:16px' }), c)));
+      [...COLS, UNSCHEDULED].map((c) => h('button', { type: 'button', role: 'menuitem', 'aria-current': c === cur ? 'true' : null, onclick: () => { close(); move(t, c); } }, c === cur ? icon('check') : h('span', { style: 'width:16px' }), c)));
     document.body.append(pop);
     const r = anchor.getBoundingClientRect();
     const w = 200, hgt = pop.offsetHeight;
@@ -155,16 +156,17 @@ export function mount(el, ctx) {
         h('td', h('span.mono.faint', { style: 'margin-right:8px' }, t.id), t.title),
         hasGroups && h('td', groupChip(t.group)),
         h('td', h('span.prio', { class: `p${rank(t.priority)}` }, t.priority)),
-        h('td', t.sprint ? sprintLabel(t.sprint) : h('span.faint', 'Backlog')),
+        h('td', t.sprint ? sprintLabel(t.sprint) : h('span.faint', UNSCHEDULED)),
         h('td', t.status),
         h('td', t.assignee || h('span.faint', 'Unassigned')),
         h('td.meta', relTime(t.updated))))))) : h('p.meta', { style: 'padding:16px' }, 'Nothing open matches.'));
     summaryEl.textContent = `${rows.length} ${f.done ? 'tasks' : 'open tasks'} across every sprint and the backlog`;
     const count = (st) => rows.filter((t) => t.status === st).length;
     statEl.replaceChildren(statbar([
-      { label: 'to do', n: count('Todo'), tone: 'muted' },
-      { label: 'in progress', n: count('In Progress'), tone: 'info' },
-      { label: 'in review', n: count('Review'), tone: 'warn' },
+      { label: 'not started', n: count('Backlog'), tone: 'muted' },
+      { label: 'to do', n: count('Todo'), tone: 'info' },
+      { label: 'in progress', n: count('In Progress'), tone: 'warn' },
+      { label: 'in review', n: count('Review'), tone: 'danger' },
       ...(f.done ? [{ label: 'done', n: count('Done'), tone: 'accent' }] : []),
       { label: 'not in a sprint', n: rows.filter((t) => !t.sprint).length, bar: false },
     ]));
@@ -232,7 +234,7 @@ export function mount(el, ctx) {
       h('header.page-head', h('div', h('h1', view === 'board' ? 'Board' : 'Backlog'))),
       view === 'backlog' && statEl,
       h('div.toolbar', filterRow, h('div.toolbar-actions', view === 'board' && sprintNav(),
-        h('button.btn.primary', { type: 'button', onclick: () => create(view === 'backlog' ? 'Backlog' : 'Todo') }, icon('plus'), 'New task'))),
+        h('button.btn.primary', { type: 'button', onclick: () => create(view === 'backlog' ? UNSCHEDULED : 'Backlog') }, icon('plus'), 'New task'))),
       view === 'board' ? boardEl : backlogEl].filter(Boolean));
     ctx.header?.({ summary: summaryEl });
     paint();
@@ -245,12 +247,12 @@ export function mount(el, ctx) {
       const prio = h('select.input', { id: 'nt-prio' }, prios().map((p) => h('option', { value: p, selected: p === mid }, p)));
       const grp = groups().length ? h('select.input', { id: 'nt-group' }, groups().map((g) => h('option', { value: g.name, selected: g.name === f.group }, g.name))) : null;
       const who = h('input.input', { id: 'nt-who', placeholder: 'you, claude, reviewer…', autocomplete: 'off' });
-      const where = h('select.input', { id: 'nt-where' }, h('option', { value: 'current', selected: col !== 'Backlog' }, 'This sprint'), h('option', { value: 'backlog', selected: col === 'Backlog' }, 'Backlog'));
+      const where = h('select.input', { id: 'nt-where' }, h('option', { value: 'current', selected: col !== UNSCHEDULED }, 'This sprint'), h('option', { value: 'backlog', selected: col === UNSCHEDULED }, UNSCHEDULED));
       const err = h('p.err', { role: 'alert' });
       body.append(h('form', { class: 'stack', onsubmit: async (e) => {
         e.preventDefault();
         if (!title.value.trim()) { title.setAttribute('aria-invalid', 'true'); err.textContent = 'Give the task a title.'; title.focus(); return; }
-        await busy(e.submitter, ctx.api('/board', { _action: 'create', title: title.value.trim(), priority: prio.value, ...(grp ? { group: grp.value } : {}), assignee: who.value.trim(), status: col === 'Backlog' ? 'Todo' : col, sprint: where.value === 'backlog' ? '' : shownSprint()?.start || 'current' })
+        await busy(e.submitter, ctx.api('/board', { _action: 'create', title: title.value.trim(), priority: prio.value, ...(grp ? { group: grp.value } : {}), assignee: who.value.trim(), status: col === UNSCHEDULED ? 'Backlog' : col, sprint: where.value === 'backlog' ? '' : shownSprint()?.start || 'current' })
           .then((t) => { ctx.toast(`Filed ${t?.id || 'task'}`); close(); reload(); }, (x) => { err.textContent = x.message; }));
       } },
         h('div.field', h('label', { for: 'nt-title' }, 'Title'), title),
@@ -275,7 +277,7 @@ export function mount(el, ctx) {
         h('h3', { style: 'font-size:18px;line-height:1.35;overflow-wrap:anywhere' }, t.title),
         h('div.row', t.createdBy === 'agent' && h('span.chip', icon('agent', 12), 'Filed by agent'), groupChip(t.group), (t.labels || []).map((l) => h('span.chip.mono', l)), h('span.meta', `updated ${relTime(t.updated)}`)),
         h('div.form-grid',
-          h('div.field', h('label', { for: 'td-col' }, 'Column'), h('select.input', { id: 'td-col', onchange: (e) => move(t, e.target.value) }, COLS.map((c) => h('option', { value: c, selected: colOf(t) === c }, c)))),
+          h('div.field', h('label', { for: 'td-col' }, 'Column'), h('select.input', { id: 'td-col', onchange: (e) => move(t, e.target.value) }, [...COLS, UNSCHEDULED].map((c) => h('option', { value: c, selected: colOf(t) === c }, c)))),
           h('div.field', h('label', { for: 'td-prio' }, 'Priority'), h('select.input', { id: 'td-prio', onchange: (e) => save({ priority: e.target.value }) }, prios().map((p) => h('option', { value: p, selected: t.priority === p }, p)))),
           groups().length > 0 && h('div.field', h('label', { for: 'td-group' }, 'Group'), h('select.input', { id: 'td-group', onchange: (e) => save({ group: e.target.value }) }, groups().map((g) => h('option', { value: g.name, selected: t.group === g.name }, g.name)))),
           h('div.field.full', h('label', { for: 'td-who' }, 'Assignee'), h('input.input', { id: 'td-who', value: t.assignee || '', onchange: (e) => save({ assignee: e.target.value.trim() }) })),

@@ -2,7 +2,8 @@
 // Unfinished tasks from ended sprints roll into the current one on read, one priority higher.
 import { readJson, writeJson, nowIso, parseDate, localDate, addDays, mondayOf, trashJson, appendLine, loadConfig } from 'flowrail/api';
 
-export const STATUSES = ['Todo', 'In Progress', 'Review', 'Done'];
+// A sprint's tasks start in Backlog (not started) and move to Todo when someone picks one up.
+export const STATUSES = ['Backlog', 'Todo', 'In Progress', 'Review', 'Done'];
 export const PRIORITIES = ['P0', 'P1', 'P2', 'P3'];
 
 const fmt = (d) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -133,7 +134,7 @@ export function create(p, config, fields) {
   const task = {
     id: nextId(board.tasks),
     title: '',
-    status: 'Todo',
+    status: 'Backlog', // not started; Todo once someone picks it up
     priority: 'P2',
     sprint: '',
     assignee: '',
