@@ -8,7 +8,7 @@ const age = (d) => (d === null || d === undefined ? '' : d === 0 ? 'today' : d <
 
 export function mount(el, ctx) {
   let data = null;
-  let q = '', area = ctx.params.get('area') || '', state = ctx.params.get('state') || '', sort = 'days', dir = -1;
+  let q = '', area = ctx.params.get('area') || '', state = ctx.params.get('state') || '', sort = 'days', dir = 1; // newest change first
   const root = h('div');
   el.append(root);
   const body = h('div');
@@ -26,12 +26,14 @@ export function mount(el, ctx) {
         h('span.dot'), `${counts[s]} ${label.toLowerCase()}`))));
   }
 
-  const th = (key, label, cls) => h('th', { class: cls, 'aria-sort': sort === key ? (dir > 0 ? 'ascending' : 'descending') : null },
-    h('button.th-sort', { type: 'button', onclick: () => { dir = sort === key ? -dir : key === 'title' ? 1 : -1; sort = key; paint(); } }, label, sort === key ? (dir > 0 ? ' ↑' : ' ↓') : ''));
+  // For "Changed", dir 1 is the newest first: fewest days since the change, a descending date.
+  const down = (key) => (key === 'days' ? dir > 0 : dir < 0);
+  const th = (key, label, cls) => h('th', { class: cls, 'aria-sort': sort === key ? (down(key) ? 'descending' : 'ascending') : null },
+    h('button.th-sort', { type: 'button', onclick: () => { dir = sort === key ? -dir : 1; sort = key; paint(); } }, label, sort === key ? (down(key) ? ' ↓' : ' ↑') : ''));
 
   function table(docs) {
     const rows = [...docs].sort((a, b) => {
-      const x = sort === 'title' ? a.title.localeCompare(b.title) : (a.days ?? -1) - (b.days ?? -1);
+      const x = sort === 'title' ? a.title.localeCompare(b.title) : (a.days ?? Infinity) - (b.days ?? Infinity);
       return x * dir || a.path.localeCompare(b.path);
     });
     return h('div.table-wrap', h('table.tbl.lib-tbl',

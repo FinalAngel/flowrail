@@ -163,6 +163,10 @@ button.hooks { border: 0; font: inherit; font-size: 13px; font-weight: 500; curs
 .input::placeholder { color: var(--text-3); }
 .input.mono { font-family: var(--mono); font-size: 13px; }
 textarea.input { resize: vertical; line-height: 1.55; }
+/* A field with suggestions (datalist): Chrome's own arrow sits high in a tall field, so it is made
+   invisible (still clickable) and a centred chevron is drawn in its place, as on the selects. */
+.input[list] { padding-right: 30px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' fill='none' stroke='%236E7377' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 12px; }
+.input[list]::-webkit-calendar-picker-indicator { opacity: 0; cursor: pointer; }
 .input[aria-invalid="true"] { border-color: var(--danger); }
 .form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s3) var(--s4); }
 .form-grid .full { grid-column: 1 / -1; }
@@ -716,3 +720,24 @@ table.probes .bad, table.probes tr.fail td:first-child { color: var(--danger); f
 .backlog tr.row-link { cursor: pointer; }
 .backlog tr.row-link:hover td { background: color-mix(in srgb, var(--tray) 60%, transparent); }
 .backlog tr.row-link:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+/* One toolbar row under the header: filters on the left, the page's controls on the right. The Board
+   and list pages share it, so switching between them keeps everything in the same place. */
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s3); margin-bottom: var(--s4); }
+.toolbar > .filters { flex: 1 1 auto; margin-bottom: 0; }
+.toolbar-actions { display: flex; align-items: center; gap: var(--s2); margin-left: auto; }
+.top-summary { font-size: 13.5px; color: var(--text-2); font-variant-numeric: tabular-nums; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sprint-nav .days-left { font-weight: 600; margin-right: 6px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+/* statbar(): a stacked bar and its legend. */
+.statbar { display: grid; gap: 8px; margin-bottom: var(--s4); }
+.statbar-bar { display: flex; gap: 2px; height: 6px; border-radius: var(--r-pill); overflow: hidden; background: var(--tray); }
+.statbar-bar > span { min-width: 3px; }
+.statbar-legend { display: flex; flex-wrap: wrap; gap: 4px 16px; font-size: 13px; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.statbar-legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.statbar-legend .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.statbar-legend b { font-weight: 600; color: var(--text); }
+.tone-accent { color: var(--accent); } .statbar-bar .tone-accent { background: var(--accent); }
+.tone-info { color: var(--info); } .statbar-bar .tone-info { background: var(--info); }
+.tone-warn { color: var(--warn); } .statbar-bar .tone-warn { background: var(--warn); }
+.tone-danger { color: var(--danger); } .statbar-bar .tone-danger { background: var(--danger); }
+.tone-muted { color: var(--text-3); } .statbar-bar .tone-muted { background: color-mix(in srgb, var(--text-3) 55%, transparent); }

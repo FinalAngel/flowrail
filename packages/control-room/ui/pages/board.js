@@ -1,4 +1,7 @@
-import { h, icon, clear, loader, relTime, shortDate, sheet, confirmBox, empty, debounce, busy, pref, savePref, append } from '../lib/dom.js';
+import { h, icon, clear, loader, relTime, shortDate, sheet, confirmBox, empty, debounce, busy, pref, savePref, append, statbar } from '../lib/dom.js';
+
+const parseDate = (s) => { const [y, m, d] = String(s).split('-').map(Number); return new Date(y, m - 1, d); };
+const localDay = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 
 const COLS = ['Backlog', 'Todo', 'In Progress', 'Review', 'Done'];
 const PRIOS = ['P0', 'P1', 'P2', 'P3'];
@@ -118,6 +121,9 @@ export function mount(el, ctx) {
 
   const boardEl = h('div.board');
   const filterRow = h('div.filters', { role: 'search' });
+  // The page's one-line summary lives in the header's middle; the Backlog adds a status bar.
+  const summaryEl = h('span.top-summary');
+  const statEl = h('div');
   function paint() {
     if (view === 'backlog') return paintBacklog();
     const q = f.q.toLowerCase();
@@ -125,8 +131,7 @@ export function mount(el, ctx) {
       && (!f.who || (f.who === '(none)' ? !t.assignee : t.assignee === f.who)) && (!f.group || t.group === f.group) && (!f.agentOnly || t.createdBy === 'agent'));
     const order = (a, b) => rank(a.priority) - rank(b.priority) || (b.updated || '').localeCompare(a.updated || '');
     clear(boardEl).append(...COLS.map((c) => column(c, tasks.filter((t) => colOf(t) === c).sort(order))));
-    const s = root.querySelector('.page-head .sub');
-    if (s) s.textContent = sub();
+    summaryEl.textContent = sub();
     const nav = root.querySelector('.sprint-nav');
     if (nav) nav.replaceWith(sprintNav());
   }
@@ -147,8 +152,15 @@ export function mount(el, ctx) {
         h('td', t.status),
         h('td', t.assignee || h('span.faint', 'Unassigned')),
         h('td.meta', relTime(t.updated))))))) : h('p.meta', { style: 'padding:16px' }, 'Nothing open matches.'));
-    const s = root.querySelector('.page-head .sub');
-    if (s) s.textContent = `${rows.length} ${f.done ? 'tasks' : 'open tasks'} across every sprint and the backlog`;
+    summaryEl.textContent = `${rows.length} ${f.done ? 'tasks' : 'open tasks'} across every sprint and the backlog`;
+    const count = (st) => rows.filter((t) => t.status === st).length;
+    statEl.replaceChildren(statbar([
+      { label: 'to do', n: count('Todo'), tone: 'muted' },
+      { label: 'in progress', n: count('In Progress'), tone: 'info' },
+      { label: 'in review', n: count('Review'), tone: 'warn' },
+      ...(f.done ? [{ label: 'done', n: count('Done'), tone: 'accent' }] : []),
+      { label: 'not in a sprint', n: rows.filter((t) => !t.sprint).length, bar: false },
+    ]));
   }
 
 
@@ -165,7 +177,11 @@ export function mount(el, ctx) {
     const i = list.findIndex((x) => x.start === shownSprint()?.start);
     const go = (j) => { shown = list[j].start; paint(); };
     const cur = data.config?.current?.start;
+    // Days left in the running sprint, counting today; shown only while the current sprint is on screen.
+    const isCur = shownSprint()?.start === cur;
+    const left = isCur && data.config?.current?.end ? Math.round((parseDate(data.config.current.end) - parseDate(localDay())) / 86400000) + 1 : null;
     return h('div.sprint-nav', { role: 'group', 'aria-label': 'Sprint' },
+      left !== null && h('span.days-left', left <= 1 ? 'Last day' : `${left} days left`),
       h('button.icon-btn', { type: 'button', 'aria-label': 'Previous sprint', disabled: i <= 0, onclick: () => go(i - 1) }, icon('chevronLeft')),
       h('span.sprint-label', shownSprint()?.label || 'Sprint', shownSprint()?.start === cur ? h('span.chip.accent', { style: 'height:20px;margin-left:8px' }, 'current') : null),
       h('button.icon-btn', { type: 'button', 'aria-label': 'Next sprint', disabled: i < 0 || i >= list.length - 1, onclick: () => go(i + 1) }, icon('chevronRight')),
@@ -206,9 +222,12 @@ export function mount(el, ctx) {
   function renderShell() {
     filters();
     clear(root).append(...[
-      h('header.page-head', h('div', h('h1', view === 'board' ? 'Board' : 'Backlog'), h('p.sub', view === 'board' ? sub() : '')),
-        h('div.actions', view === 'board' && sprintNav(), h('button.btn.primary', { type: 'button', onclick: () => create(view === 'backlog' ? 'Backlog' : 'Todo') }, icon('plus'), 'New task'))),
-      filterRow, view === 'board' ? boardEl : backlogEl].filter(Boolean));
+      h('header.page-head', h('div', h('h1', view === 'board' ? 'Board' : 'Backlog'))),
+      view === 'backlog' && statEl,
+      h('div.toolbar', filterRow, h('div.toolbar-actions', view === 'board' && sprintNav(),
+        h('button.btn.primary', { type: 'button', onclick: () => create(view === 'backlog' ? 'Backlog' : 'Todo') }, icon('plus'), 'New task'))),
+      view === 'board' ? boardEl : backlogEl].filter(Boolean));
+    ctx.header?.({ center: summaryEl });
     paint();
   }
 

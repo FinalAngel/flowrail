@@ -181,3 +181,17 @@ export function pref(key, fallback) {
 export function savePref(key, value) {
   try { localStorage.setItem(PREF + key, JSON.stringify(value)); } catch { /* private mode: not remembered */ }
 }
+
+/**
+ * A stacked bar with its legend: segments [{ label, n, tone }] (tone: accent, info, warn, danger,
+ * muted) drawn in proportion, and "n label" for each under it; `bar: false` keeps one out of the bar. Shared by list pages (Backlog, and
+ * plugin pages like a leads table) so their summaries look the same.
+ */
+export function statbar(segments) {
+  // A segment with bar: false is only in the legend (a count that overlaps the others).
+  const shown = segments.filter((x) => x.n > 0 && x.bar !== false);
+  return h('div.statbar',
+    h('div.statbar-bar', { role: 'img', 'aria-label': shown.map((x) => `${x.n} ${x.label}`).join(', ') },
+      shown.map((x) => h('span', { class: `tone-${x.tone || 'muted'}`, style: `flex-grow:${x.n}`, title: `${x.n} ${x.label}` }))),
+    h('div.statbar-legend', segments.map((x) => h('span', { class: `tone-${x.tone || 'muted'}` }, h('span.dot'), h('b', x.n), ` ${x.label}`))));
+}
