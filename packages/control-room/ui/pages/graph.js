@@ -39,7 +39,9 @@ export function mount(el, ctx) {
   const sub = h('p.sub');
   const seg = h('div.seg', { role: 'group', 'aria-label': 'View' });
   const host = h('div');
-  el.append(h('header.page-head', h('div', h('h1', 'Graph'), sub), h('div.actions', seg)), host);
+  el.append(h('header.page-head', h('div', h('h1', 'Graph'), sub)), host);
+  // The view switch sits in the header, next to the search.
+  ctx.header?.({ tools: seg });
   const show = (params) => {
     try { child?.(); } catch (e) { console.error(e); }
     try { localStorage.setItem(PREF, view); } catch { /* private mode */ }
@@ -92,6 +94,7 @@ function force(el, ctx) {
     clear(body).append(skeleton(6));
     try { graph = await ctx.api('/graph'); }
     catch (e) { clear(body).append(errorBox(e, load)); return; }
+    if (!body.isConnected) return; // switched to another view while it loaded
     if (graph.nodes.length > MAX_NODES) graph.nodes = graph.nodes.slice(0, MAX_NODES);
     byId = new Map(graph.nodes.map((n) => [n.id, n]));
     adj = new Map(graph.nodes.map((n) => [n.id, { in: [], out: [] }]));

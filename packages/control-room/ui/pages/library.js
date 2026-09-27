@@ -1,4 +1,4 @@
-import { h, icon, clear, loader, debounce, empty, shortDate, plural } from '../lib/dom.js';
+import { h, icon, clear, loader, debounce, empty, shortDate, plural, statbar } from '../lib/dom.js';
 
 // Every Markdown document, grouped by area, with how long ago it last changed.
 const STATES = [['fresh', 'Fresh'], ['aging', 'Aging'], ['stale', 'Stale']];
@@ -18,13 +18,13 @@ export function mount(el, ctx) {
   const stateSel = h('select.input', { 'aria-label': 'State', onchange: (e) => { state = e.target.value; paint(); } },
     h('option', { value: '' }, 'Every state'), STATES.map(([v, l]) => h('option', { value: v }, l)));
 
-  function bar(counts) {
-    const total = STATES.reduce((n, [s]) => n + counts[s], 0) || 1;
-    return h('div.stale-bar', { role: 'group', 'aria-label': 'Documents by staleness' },
-      h('div.stale-track', STATES.map(([s]) => counts[s] ? h('i', { class: s, style: `flex-grow:${counts[s] / total}` }) : null)),
-      h('div.stale-keys', STATES.map(([s, label]) => h('button.stale-key', { type: 'button', class: s, 'aria-pressed': String(state === s), onclick: () => { state = state === s ? '' : s; stateSel.value = state; paint(); } },
-        h('span.dot'), `${counts[s]} ${label.toLowerCase()}`))));
-  }
+  // The same status bar and filter row as Backlog and Leads.
+  const bar = (counts) => statbar([
+    { label: 'fresh', n: counts.fresh, tone: 'accent' },
+    { label: 'aging', n: counts.aging, tone: 'warn' },
+    { label: 'stale', n: counts.stale, tone: 'danger' },
+  ]);
+
 
   // For "Changed", dir 1 is the newest first: fewest days since the change, a descending date.
   const down = (key) => (key === 'days' ? dir > 0 : dir < 0);
@@ -47,7 +47,6 @@ export function mount(el, ctx) {
 
   function paint() {
     if (!data) return;
-    root.querySelectorAll('.stale-key').forEach((b) => b.setAttribute('aria-pressed', String(b.classList.contains(state))));
     const docs = data.docs.filter((d) => (!q || d.title.toLowerCase().includes(q) || d.path.toLowerCase().includes(q)) && (!state || d.state === state));
     clear(body);
     const groups = data.areas.length
@@ -77,7 +76,7 @@ export function mount(el, ctx) {
     areaSel.value = area;
     stateSel.value = state;
     areaSel.hidden = !d.areas.length;
-    root.append(bar(counts), h('div.filters', search, areaSel, stateSel), body);
+    root.append(bar(counts), h('div.toolbar', h('div.filters', { role: 'search' }, search, areaSel, stateSel)), body);
     if (!d.areas.length) root.append(h('p.meta', { style: 'margin-top:12px' }, 'Group documents by area: add "areas" to flowrail/config.json, or a table in CLAUDE.md that links one router file per area.'));
     paint();
   }

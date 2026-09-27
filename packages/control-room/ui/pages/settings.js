@@ -27,7 +27,7 @@ export function mount(el, ctx) {
     const len = h('select.input', { id: 's-len', disabled: !editable }, [7, 14, 21, 28].map((n) => h('option', { value: n, selected: (cfg.sprintLength || 14) === n }, `${n} days`)));
     const toggles = keys.map((m) => h('label.switch', h('input', { type: 'checkbox', name: m, checked: mods[m] !== false, disabled: !editable }), LABEL[m] || m[0].toUpperCase() + m.slice(1)));
     const err = h('p.err', { role: 'alert' });
-    form.append(h('form.stack', { onsubmit: async (e) => {
+    form.append(h('form.settings-form', { onsubmit: async (e) => {
       e.preventDefault();
       const p = Number(port.value);
       if (!(p >= 1024 && p <= 65535)) { err.textContent = 'Port must be between 1024 and 65535.'; port.setAttribute('aria-invalid', 'true'); return; }
@@ -38,9 +38,9 @@ export function mount(el, ctx) {
       !editable && h('div.notice.warn', icon('alert'), h('div.body', h('span', 'This server cannot write the config. Edit flowrail/config.json in your editor; the dashboard picks it up.'))),
       h('div.form-grid', h('div.field', h('label', { for: 's-name' }, 'Name'), name), h('div.field', h('label', { for: 's-port' }, 'Port'), port),
         h('div.field', h('label', { for: 's-len' }, 'Sprint length'), len), h('div.field', h('span.label', 'Sprint starts'), h('span.mono', { style: 'min-height:36px;display:flex;align-items:center' }, cfg.sprintStart || '—'))),
-      h('fieldset', { style: 'border:0;padding:0;margin:0' }, h('legend.label', { style: 'margin-bottom:6px' }, 'Modules'), h('div', { style: 'display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:0 12px' }, toggles)),
+      h('fieldset.settings-modules', h('legend.label', 'Modules'), h('div.settings-toggles', toggles)),
       err, editable && h('div.row', h('button.btn.primary', { type: 'submit' }, 'Save'))),
-      h('hr.sep'), h('div.label', { style: 'margin-bottom:6px' }, 'Remove the guard, its hook entries and the CLAUDE.md block. Your flowrail/ files stay.'), cmd('npx flowrail uninstall', ctx));
+      h('hr.sep'), h('div.label', { style: 'margin-bottom:8px' }, 'Remove the guard, its hook entries and the CLAUDE.md block. Your flowrail/ files stay.'), cmd('npx flowrail uninstall', ctx));
   }
   async function runDoctor() {
     clear(doctor).append(skeleton(4));

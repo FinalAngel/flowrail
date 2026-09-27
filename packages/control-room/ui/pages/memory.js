@@ -18,9 +18,11 @@ export function mount(el, ctx) {
   const results = h('div');
   const browse = h('div');
   el.append(
-    h('header.page-head', h('div', h('h1', 'Memory'), h('p.sub', 'Facts your agents recall before they guess. Plain Markdown, ranked without a model.')),
-      h('div.actions', h('button.btn', { type: 'button', onclick: add }, icon('plus'), 'Remember something'))),
-    h('form.recall', { role: 'search', onsubmit: (e) => { e.preventDefault(); recall(); } }, icon('search', 18), input),
+    h('header.page-head', h('div', h('h1', 'Memory'), h('p.sub', 'Facts your agents recall before they guess. Plain Markdown, ranked without a model.'))),
+    // The question and the button to add a fact share one row.
+    h('div.toolbar.mem-bar',
+      h('form.recall', { role: 'search', onsubmit: (e) => { e.preventDefault(); recall(); } }, icon('search', 18), input),
+      h('div.toolbar-actions', h('button.btn', { type: 'button', onclick: add }, icon('plus'), 'Remember something'))),
     h('div', { style: 'margin-top:24px' }, results),
     browse);
 

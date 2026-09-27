@@ -15,6 +15,7 @@ export function tree(el, ctx) {
   async function load() {
     let graph;
     try { graph = await ctx.api('/graph'); } catch (e) { clear(box).append(errorBox(e, load)); return; }
+    if (!box.isConnected) return;
     areas = graph.areas || [];
     const files = graph.nodes.filter((n) => n.path && n.kind !== 'folder' && n.kind !== 'hub' && !/\.json$/.test(n.path));
     if (!files.length) { clear(box).append(empty('The tree fills as you add Markdown docs to the repo.', 'npx @finalangel/flowrail-room remember "Releases go out on Tuesdays" --type project --name release-day', ctx)); return; }

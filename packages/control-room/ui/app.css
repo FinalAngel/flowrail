@@ -391,6 +391,9 @@ dialog.palette[open] { animation: pop var(--dur-arrive) var(--ease); }
 .tree a .n { overflow: hidden; text-overflow: ellipsis; }
 .tree a .c { margin-left: auto; font-size: 11px; color: var(--text-3); }
 .doc-col { min-width: 0; }
+/* The document on a white card with room around it, like the other pages' content. */
+.viewer .doc-col { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--r-card); box-shadow: var(--shadow-1); padding: var(--s5) var(--s6); }
+@media (max-width: 768px) { .viewer .doc-col { padding: var(--s4); } }
 .crumb { display: flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 12px; color: var(--text-3); margin-bottom: var(--s3); flex-wrap: wrap; }
 .doc-tools { display: flex; align-items: center; gap: 8px; margin-bottom: var(--s4); flex-wrap: wrap; }
 .prose { max-width: 680px; font-size: 15px; line-height: 1.7; position: relative; }
@@ -563,6 +566,8 @@ pre.raw { max-width: 100%; overflow-x: auto; background: var(--tray); padding: 1
 .recall { display: flex; align-items: center; gap: 10px; padding: 0 6px 0 16px; height: 52px; border-radius: var(--r-pill); background: var(--surface); border: 1px solid var(--hairline); box-shadow: var(--shadow-2); color: var(--text-3); max-width: 720px; }
 .recall input { flex: 1; min-width: 0; height: 100%; border: 0; background: transparent; outline: none; font-size: 15px; color: var(--text); }
 .recall:focus-within { outline: 2px solid var(--focus); outline-offset: 2px; }
+.mem-bar { margin-bottom: 0; }
+.mem-bar > .recall { flex: 1 1 360px; margin: 0; }
 .mem-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: var(--s3); }
 .mem { display: grid; gap: 8px; align-content: start; }
 .mem .fact { font-weight: 500; line-height: 1.45; }
@@ -747,3 +752,9 @@ table.probes .bad, table.probes tr.fail td:first-child { color: var(--danger); f
 .tone-warn { color: var(--warn); } .statbar-bar .tone-warn { background: var(--warn); }
 .tone-danger { color: var(--danger); } .statbar-bar .tone-danger { background: var(--danger); }
 .tone-muted { color: var(--text-3); } .statbar-bar .tone-muted { background: color-mix(in srgb, var(--text-3) 55%, transparent); }
+
+/* Settings: room between the fields, and Modules under its own divider with a real label. */
+.settings-form { display: grid; gap: var(--s5); }
+.settings-modules { border: 0; border-top: 1px solid var(--hairline); margin: 0; padding: var(--s4) 0 0; min-width: 0; }
+.settings-modules > legend { float: left; width: 100%; padding: 0; margin-bottom: var(--s3); }
+.settings-toggles { clear: both; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px 16px; }

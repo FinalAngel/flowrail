@@ -32,7 +32,8 @@ export function rings(el, ctx) {
 
   /* ---------- data and layout ---------- */
   async function load() {
-    try { graph = await ctx.api('/graph'); } catch (e) { clear(body).append(errorBox(e, load)); return; }
+    try { graph = await ctx.api('/graph'); } catch (e) { if (alive) clear(body).append(errorBox(e, load)); return; }
+    if (!alive) return; // switched away while it loaded: no second map, no stray animation
     areas = graph.areas || [];
     if (graph.nodes.length <= 1) {
       clear(body).append(empty('The map fills as you add docs, skills, routines and artifacts.', 'npx @finalangel/flowrail-room remember "Releases go out on Tuesdays" --type project --name release-day', ctx));
@@ -46,7 +47,8 @@ export function rings(el, ctx) {
     resize();
     ro.observe(box);
     t0 = performance.now();
-    settled = reduced();
+    // No fly-in in a background tab (its frames are paused): the map is simply there when you look.
+    settled = reduced() || document.hidden;
     raf = requestAnimationFrame(frame);
   }
 
@@ -260,7 +262,8 @@ export function rings(el, ctx) {
   const xy = (x, k = 1) => [cx + Math.cos(x.a) * x.r * k, cy + Math.sin(x.a) * x.r * k];
   function frame(now) {
     const t = settled ? 1 : Math.min(1, (now - t0) / 700);
-    draw(t);
+    // A frame that fails must not freeze the map half-way: settle and draw the finished state.
+    try { draw(t); } catch (e) { console.error(e); settled = true; try { draw(1); } catch { /* nothing to draw */ } return; }
     if (t < 1) raf = requestAnimationFrame(frame);
     else settled = true;
   }
@@ -459,6 +462,7 @@ export function rings(el, ctx) {
   const ro = new ResizeObserver(() => { if (items.length) resize(); });
   const onTheme = () => { readColors(); draw(); };
   window.addEventListener('flowrail:theme', onTheme);
+  let alive = true;
   load();
-  return () => { cancelAnimationFrame(raf); ro.disconnect(); window.removeEventListener('flowrail:theme', onTheme); };
+  return () => { alive = false; cancelAnimationFrame(raf); ro.disconnect(); window.removeEventListener('flowrail:theme', onTheme); };
 }
