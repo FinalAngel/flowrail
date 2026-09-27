@@ -4,6 +4,9 @@ const parseDate = (s) => { const [y, m, d] = String(s).split('-').map(Number); r
 const localDay = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
 
 const COLS = ['Backlog', 'Todo', 'In Progress', 'Review', 'Done'];
+// The Board shows the selected sprint only; unscheduled tasks live on the Backlog page (a task can
+// still be moved there from its menu or its detail sheet).
+const SPRINT_COLS = COLS.slice(1);
 const PRIOS = ['P0', 'P1', 'P2', 'P3'];
 // A store (a plugin's board) can bring its own priorities, groups and source file; see src/core/board.js.
 
@@ -17,7 +20,7 @@ export function mount(el, ctx) {
   const groups = () => data?.config?.groups || [];
   const groupChip = (name) => { const g = groups().find((x) => x.name === name); return name ? h('span.chip.group', { style: `height:20px;${g?.color ? `--g:${g.color}` : ''}` }, name) : null; };
   const source = () => data?.config?.source || 'flowrail/board.json';
-  // One sprint at a time: the Backlog column plus the tasks of the sprint shown (the current one by default).
+  // One sprint at a time: the tasks of the sprint shown (the current one by default).
   let shown = null;
   // Board (one sprint in columns) or Backlog (every open task in one table): the Backlog page mounts
   // this module with ctx.mode = 'backlog'; an old #/board?view=backlog link still opens it too.
@@ -80,8 +83,8 @@ export function mount(el, ctx) {
       onkeydown: (e) => {
         if (!e.altKey || (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft')) return;
         e.preventDefault();
-        const i = COLS.indexOf(colOf(t)) + (e.key === 'ArrowRight' ? 1 : -1);
-        if (i >= 0 && i < COLS.length) move(t, COLS[i]).then(() => root.querySelector(`[data-id="${t.id}"] .title`)?.focus());
+        const i = SPRINT_COLS.indexOf(colOf(t)) + (e.key === 'ArrowRight' ? 1 : -1);
+        if (i >= 0 && i < SPRINT_COLS.length) move(t, SPRINT_COLS[i]).then(() => root.querySelector(`[data-id="${t.id}"] .title`)?.focus());
       } },
       h('div.top', h('span.id', t.id), h('span.prio', { class: `p${rank(t.priority)}`, title: `Priority ${t.priority}` }, t.priority),
         h('button.icon-btn.menu-trigger', { type: 'button', 'aria-label': `Move ${t.id} to…`, 'aria-haspopup': 'menu', onclick: (e) => { e.stopPropagation(); moveMenu(t, e.currentTarget); } }, icon('more'))),
@@ -134,7 +137,7 @@ export function mount(el, ctx) {
     const tasks = data.tasks.filter((t) => inView(t) && (!q || `${t.id} ${t.title} ${(t.labels || []).join(' ')}`.toLowerCase().includes(q))
       && (!f.who || (f.who === '(none)' ? !t.assignee : t.assignee === f.who)) && (!f.group || t.group === f.group) && (!f.agentOnly || t.createdBy === 'agent'));
     const order = (a, b) => rank(a.priority) - rank(b.priority) || (b.updated || '').localeCompare(a.updated || '');
-    clear(boardEl).append(...COLS.map((c) => column(c, tasks.filter((t) => colOf(t) === c).sort(order))));
+    clear(boardEl).append(...SPRINT_COLS.map((c) => column(c, tasks.filter((t) => colOf(t) === c).sort(order))));
     summaryEl.textContent = sub();
     const nav = root.querySelector('.sprint-nav');
     if (nav) nav.replaceWith(sprintNav());
