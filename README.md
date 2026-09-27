@@ -150,7 +150,7 @@ More red lines come from plain-English recipes (`protect-path`, `publish-deploy`
 
 ## flowrailOS (optional)
 
-A separate package, [`@finalangel/flowrail-os`](packages/flowrail-os/), adds a local dashboard on top of the guard. The guard does not need it.
+A separate package, [`@finalangel/flowrail-os`](packages/flowrail-os/), adds a local dashboard on top of the guard ([live demo](https://finalangel.github.io/flowrail/)). The guard does not need it.
 
 <p align="center">
   <picture>
@@ -164,8 +164,6 @@ npx @finalangel/flowrail-os demo   # look around a sample workspace in a temp fo
 npx @finalangel/flowrail-os init   # the guard plus flowrailOS files
 npx @finalangel/flowrail-os        # the dashboard on http://127.0.0.1:4747
 ```
-
-[Try the live demo](https://finalangel.github.io/flowrail/): a read-only copy of the sample workspace, in your browser.
 
 It shows each red line in plain English with its held count, a Try it box and the audit; comments on Markdown files that the next Claude Code session picks up; a board, a memory store with keyword recall, and what happened in the repo today.
 

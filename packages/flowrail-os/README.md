@@ -4,6 +4,8 @@ A local dashboard for the [`flowrail`](https://www.npmjs.com/package/flowrail) g
 
 ![flowrailOS's Red lines page: the Try it box showing git push --force origin main held, and the audit panel.](https://raw.githubusercontent.com/FinalAngel/flowrail/main/assets/hero.png)
 
+[Try the live demo](https://finalangel.github.io/flowrail/): a read-only copy of the sample workspace, in your browser.
+
 ```sh
 npx @finalangel/flowrail-os demo   # look around a sample workspace in a temp folder
 npx @finalangel/flowrail-os init   # the guard plus flowrailOS files
