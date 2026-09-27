@@ -414,6 +414,9 @@ dialog.palette[open] { animation: pop var(--dur-arrive) var(--ease); }
 .prose li.task { list-style: none; margin-left: -1.4em; }
 .prose li.task input { margin: 0 6px 0 0; accent-color: var(--accent); }
 .prose table { border-collapse: collapse; font-size: 14px; width: 100%; }
+/* Long words and URLs break instead of widening the page; a wide table scrolls inside the card. */
+.prose p, .prose li, .prose td, .prose th { overflow-wrap: anywhere; }
+@media (max-width: 768px) { .prose table { display: block; overflow-x: auto; } }
 .prose th, .prose td { padding: 7px 10px; border-bottom: 1px solid var(--hairline); text-align: left; }
 .prose th { font-weight: 500; color: var(--text-2); font-size: 13px; }
 .prose hr { border: 0; border-top: 1px solid var(--hairline); margin: 2em 0; }
