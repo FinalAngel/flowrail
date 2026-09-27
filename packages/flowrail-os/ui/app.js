@@ -49,7 +49,8 @@ export function toast(message, kind = 'info') {
 
 /* ---------- Pages ---------- */
 const NAV = [
-  ['Now', [['dashboard', 'Dashboard', '/'], ['board', 'Board', '/board'], ['backlog', 'Backlog', '/backlog']]],
+  ['Now', [['dashboard', 'Dashboard', '/']]],
+  ['Product', [['board', 'Board', '/board'], ['backlog', 'Backlog', '/backlog']]],
   ['Knowledge', [['docs', 'Docs', '/docs'], ['graph', 'Graph', '/knowledge'], ['library', 'Library', '/library'], ['context', 'Context', '/context'], ['memory', 'Memory', '/memory'], ['artifacts', 'Artifacts', '/artifacts'], ['links', 'Links', '/links']]],
   ['Automation', [['routines', 'Routines', '/routines'], ['runs', 'Runs', '/runs'], ['workflows', 'Workflows', '/workflows'], ['team', 'Agents', '/team']]],
   ['Safety', [['redlines', 'Red lines', '/redlines'], ['security', 'Security', '/security']]],
