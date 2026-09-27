@@ -23,6 +23,7 @@ const P = {
   x: '<path d="M6 6l12 12M18 6L6 18"/>',
   chevronRight: '<path d="M9.5 6l6 6-6 6"/>',
   chevronDown: '<path d="M6 9.5l6 6 6-6"/>',
+  chevronUp: '<path d="M6 14.5l6-6 6 6"/>',
   chevronLeft: '<path d="M14.5 6l-6 6 6 6"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   copy: '<rect x="8.5" y="8.5" width="12" height="12" rx="2"/><path d="M15.5 8.5V5A1.5 1.5 0 0 0 14 3.5H5A1.5 1.5 0 0 0 3.5 5v9A1.5 1.5 0 0 0 5 15.5h3.5"/>',

@@ -1,1 +1,1 @@
-{ "title": "Week in review", "summary": "Five tasks done, search latency down from 140 ms to 11 ms, two pushes held for sign-off.", "created": "{{DAYS_AGO_7}}T07:04:00.000Z", "tags": ["routine", "digest"] }
+{ "title": "Week in review", "summary": "Five tasks done, search latency down from 140 ms to 11 ms, two pushes held for sign-off.", "created": "{{DAYS_AGO_7}}T07:04:00.000Z", "tags": ["routine", "digest"], "kind": "digest", "category": "routine", "svg": "<rect x='4' y='5' width='16' height='15' rx='2'/><path d='M4 10h16M9 3v4M15 3v4'/>" }

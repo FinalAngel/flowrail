@@ -180,6 +180,10 @@ Lists the current sprint's open tasks. An `*` after the assignee marks a task fi
 | `--all` | Include the backlog and finished tasks. |
 | `--json` | Machine-readable. |
 
+### `flowrail-room board export`
+
+Writes the current sprint as one standalone HTML file: inline CSS in flowrail's colours, light and dark from the reader's system, no scripts and nothing fetched. `--backlog` adds the unscheduled tasks as a table; `--out file.html` picks the path (default `.flowrail/exports/board-<date>.html`). The CLI reads `flowrail/board.json`; a workspace whose board comes from a plugin store exports from code with `boardHtml(store.read())` from the room's `src/core/export.js`.
+
 ## Comments
 
 ### `flowrail-room comments`

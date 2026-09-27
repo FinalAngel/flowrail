@@ -1,14 +1,21 @@
-import { h, icon, clear, loader, relTime, empty, confirmBox } from '../lib/dom.js';
+import { h, icon, clear, loader, relTime, empty, confirmBox, shapeIcon, pref, savePref } from '../lib/dom.js';
 
 export function mount(el, ctx) {
   const root = h('div');
   el.append(root);
-  let list = [];
+  let list = [], kind = pref('artifacts-kind', '');
 
   const gallery = () => {
     clear(root).append(h('header.page-head', h('div', h('h1', 'Artifacts'), h('p.sub', 'Reports agents leave for you to read.'))));
     if (!list.length) { root.append(empty('Ask an agent to write a self-contained HTML report into flowrail/artifacts/.', 'ls flowrail/artifacts', ctx)); return; }
-    root.append(h('div.art-grid.stagger', [...list].sort((a, b) => String(b.created).localeCompare(String(a.created))).map((a) => h('a.card.art', { href: '#/artifacts?name=' + encodeURIComponent(a.name) },
+    // A sidecar's kind (report, brief, ...) filters the gallery; its svg is the card's badge.
+    const kinds = [...new Set(list.map((a) => a.kind).filter(Boolean))].sort();
+    if (kind && !kinds.includes(kind)) kind = '';
+    if (kinds.length) root.append(h('div.toolbar', h('div.filters', h('select.input', { 'aria-label': 'Kind', onchange: (e) => { kind = e.target.value; savePref('artifacts-kind', kind); gallery(); } },
+      h('option', { value: '' }, 'Every kind'), kinds.map((k) => h('option', { value: k, selected: k === kind }, k))))));
+    const shown = list.filter((a) => !kind || a.kind === kind);
+    root.append(h('div.art-grid.stagger', [...shown].sort((a, b) => String(b.created).localeCompare(String(a.created))).map((a) => h('a.card.art', { href: '#/artifacts?name=' + encodeURIComponent(a.name) },
+      (a.shapes || a.kind) && h('span.art-top', a.shapes && h('span.art-ic', shapeIcon(a.shapes, 18)), a.kind && h('span.chip', { style: 'height:20px' }, a.kind), a.category && h('span.faint', a.category)),
       h('span.t', a.title || a.name), a.summary && h('span.s', a.summary),
       h('span.m', h('span.mono', a.name), h('span', '·'), h('span', relTime(a.created)), (a.tags || []).map((t) => h('span.chip', { style: 'height:20px' }, t)))))));
   };

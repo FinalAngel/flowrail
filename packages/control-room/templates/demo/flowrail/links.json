@@ -39,6 +39,12 @@
         "url": "https://example.com/paper-plane/nightly",
         "description": "Latest build for every platform",
         "icon": "terminal"
+      },
+      {
+        "title": "Status page",
+        "url": "https://example.com/paper-plane/status",
+        "description": "Uptime of the sync service",
+        "svg": "<circle cx='12' cy='12' r='9'/><path d='M7 12h3l2-4 2 8 2-4h1'/>"
       }
     ]
   },

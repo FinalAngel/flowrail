@@ -1,8 +1,9 @@
 // Artifacts: self-contained HTML reports agents drop into flowrail/artifacts/ for the human.
-// Optional sidecar <name>.json: { title, summary, created, tags }.
+// Optional sidecar <name>.json: { title, summary, created, tags, kind, category, svg } (svg: stroke-only shapes, sanitized).
 import fs from 'node:fs';
 import path from 'node:path';
 import { listFiles, readJson, moveToTrash } from 'flowrail/api';
+import { svgShapes } from './svg.js';
 
 export const NAME_RE = /^[A-Za-z0-9][\w.-]{0,150}\.html$/;
 
@@ -29,6 +30,9 @@ export function list(p) {
       summary: side.summary || '',
       created: side.created || st.mtime.toISOString(),
       tags: Array.isArray(side.tags) ? side.tags : [],
+      ...(typeof side.kind === 'string' && side.kind.trim() ? { kind: side.kind.trim().slice(0, 40) } : {}),
+      ...(typeof side.category === 'string' && side.category.trim() ? { category: side.category.trim().slice(0, 40) } : {}),
+      ...(svgShapes(side.svg).length ? { shapes: svgShapes(side.svg) } : {}),
       ...(side.seed === true ? { seed: true } : {}),
       size: st.size,
       href: `/artifacts/${encodeURIComponent(name)}`,

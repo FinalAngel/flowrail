@@ -58,3 +58,19 @@ test('a changed guard file shows as not enforced in the overview and status', ()
   assert.equal(cli(root, 'upgrade', '--yes').status, 0);
   assert.equal(overview(p).hooks.healthy, true);
 });
+
+test('init offers the add-context skill and never overwrites one that exists', async () => {
+  const fs = await import('node:fs');
+  const path = await import('node:path');
+  const { planInit } = await import('../src/core/init.js');
+  const { tmpdir } = await import('./helpers.js');
+  const fresh = tmpdir();
+  const plan = planInit(fresh, {});
+  const add = plan.changes.find((c) => c.path === '.claude/skills/add-context/SKILL.md');
+  assert.ok(add, 'the skill is in the plan');
+  assert.match(add.after, /^---\nname: add-context/);
+  const mine = tmpdir();
+  fs.mkdirSync(path.join(mine, '.claude', 'skills', 'add-context'), { recursive: true });
+  fs.writeFileSync(path.join(mine, '.claude', 'skills', 'add-context', 'SKILL.md'), 'mine');
+  assert.ok(!planInit(mine, {}).changes.some((c) => c.path === '.claude/skills/add-context/SKILL.md'));
+});

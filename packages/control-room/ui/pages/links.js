@@ -1,4 +1,4 @@
-import { h, icon, loader, empty } from '../lib/dom.js';
+import { h, icon, loader, empty, shapeIcon } from '../lib/dom.js';
 
 // Bookmarks from flowrail/links.json: web links open in a new tab, repo paths open in Docs.
 export function mount(el, ctx) {
@@ -17,7 +17,7 @@ export function mount(el, ctx) {
       root.append(h('h2.section-title', c.category), h('div.links-grid.stagger', c.items.map((l) => h('a.card.link-card', {
         href: l.href, ...(l.external ? { target: '_blank', rel: 'noopener noreferrer' } : {}),
       },
-      h('span.link-ic', icon(l.icon || (l.external ? 'link' : 'docs'), 18)),
+      h('span.link-ic', l.shapes ? shapeIcon(l.shapes, 18) : icon(l.icon || (l.external ? 'link' : 'docs'), 18)),
       h('span.grow', h('span.t', l.title, l.external ? h('span.sr-only', ' (opens in a new tab)') : null),
         l.description && h('span.d', l.description),
         h('span.u.mono', l.external ? new URL(l.href).host : l.url)),
