@@ -77,6 +77,20 @@ async function loadPlugins() {
   PAGES = [...NAV.flatMap(([, items]) => items), SETTINGS];
 }
 
+/** Records collections (config "records"): a table and a board page each, in the collection's group. */
+async function loadRecords() {
+  let r;
+  try { r = await api('/records'); } catch { return; }
+  for (const c of r?.collections || []) {
+    let group = NAV.find(([g]) => g === c.group);
+    if (!group) { group = [c.group, []]; NAV.splice(NAV.length - 1, 0, group); }
+    group[1].push([`rec-${c.id}`, c.title, `/records/${c.id}`], [`rec-${c.id}-board`, `${c.title} board`, `/records/${c.id}/board`]);
+    ICON[`rec-${c.id}`] = 'list'; ICON[`rec-${c.id}-board`] = 'board';
+    MODULE[`rec-${c.id}`] = MODULE[`rec-${c.id}-board`] = './pages/records.js';
+  }
+  PAGES = [...NAV.flatMap(([, items]) => items), SETTINGS];
+}
+
 /**
  * flowrail/config.json "nav": { "Sales": ["board", "library"] } moves pages into named groups, in
  * that order, above the rest (a department sidebar). Unknown ids are ignored; empty groups vanish.
@@ -433,6 +447,6 @@ async function route() {
 window.addEventListener('hashchange', route);
 listeners.add(debounce(() => refreshShell(), 400));
 renderSidebar(); renderTopbar();
-loadPlugins().then(regroupNav).finally(route);
+loadPlugins().then(loadRecords).then(regroupNav).finally(route);
 refreshShell();
 connectEvents();
