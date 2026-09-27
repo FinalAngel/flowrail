@@ -16,7 +16,7 @@ export function mount(el, ctx) {
   const viewer = (name) => {
     const a = list.find((x) => x.name === name) || { name };
     const src = '/artifacts/' + encodeURIComponent(name);
-    document.title = `${a.title || name} · flowrail`;
+    document.title = `${a.title || name} · ${ctx.brand}`;
     clear(root).append(
       h('header.page-head', h('div', h('a.link', { href: '#/artifacts' }, '← All artifacts'), h('h1', { style: 'margin-top:6px' }, a.title || name), h('p.sub', h('span.mono', name), a.created ? ` · ${relTime(a.created)}` : '')),
         h('div.actions', h('a.btn', { href: src, target: '_blank', rel: 'noopener' }, icon('external', 14), 'Open in new tab'),

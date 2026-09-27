@@ -69,7 +69,7 @@ export function mount(el, ctx) {
       const [f, cs] = await Promise.all([ctx.api('/docs/file?path=' + encodeURIComponent(path)), ctx.api('/comments?path=' + encodeURIComponent(path)).catch(() => [])]);
       if (my !== seq) return;
       file = f; comments = Array.isArray(cs) ? cs : cs?.comments || [];
-      document.title = `${path.split('/').pop()} · flowrail`;
+      document.title = `${path.split('/').pop()} · ${ctx.brand}`;
       paintDoc(); paintRail();
       treeNav.querySelectorAll('a').forEach((a) => a.setAttribute('aria-current', a.title === path ? 'page' : 'false'));
     } catch (e) {

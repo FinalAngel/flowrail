@@ -379,7 +379,7 @@ async function route() {
   if (my !== routeSeq) return;
   const dispose = [];
   const ctx = {
-    api, toast, navigate, params, shell, hooksState, hooksInfo, isArmed,
+    api, toast, navigate, params, shell, hooksState, hooksInfo, isArmed, brand: BRAND?.name || 'flowrail',
     refreshShell: () => refreshShell(),
     /** Subscribe to live changes. areas: array of area names or null for all. Debounced; auto-removed on page change. */
     on(areas, fn) {
