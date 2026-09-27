@@ -7,7 +7,7 @@ const PRIOS = ['P0', 'P1', 'P2', 'P3'];
 export function mount(el, ctx) {
   let data = null, gh = null, agents = new Set(['claude']);
   // Filters come back after a reload (per browser); the search box never does.
-  const f = { q: '', who: pref('board-who', ''), group: pref('board-group', ''), agentOnly: pref('board-agent', false), github: pref('board-github', true) };
+  const f = { q: '', who: pref('board-who', ''), group: pref('board-group', ''), done: pref('board-done', false), agentOnly: pref('board-agent', false), github: pref('board-github', true) };
   const setF = (k, v) => { f[k] = v; savePref(`board-${k === 'agentOnly' ? 'agent' : k}`, v); paint(); };
   const prios = () => data?.config?.priorities || PRIOS;
   const rank = (p) => { const i = prios().indexOf(p); return i < 0 ? 9 : i; };
@@ -16,6 +16,10 @@ export function mount(el, ctx) {
   const source = () => data?.config?.source || 'flowrail/board.json';
   // One sprint at a time: the Backlog column plus the tasks of the sprint shown (the current one by default).
   let shown = null;
+  // Board (one sprint in columns) or Backlog (every open task in one table); ?view=backlog, remembered.
+  let view = ctx.params.get('view') === 'backlog' ? 'backlog' : ctx.params.get('view') === 'board' ? 'board' : pref('board-view', 'board');
+  const backlogEl = h('div.card.backlog', { style: 'padding:4px 0' });
+  const sprintLabel = (start) => (sprintList().find((x) => x.start === start)?.label) || start;
   const sprintList = () => data?.config?.sprints || (data?.config?.current ? [data.config.current] : []);
   const shownSprint = () => sprintList().find((x) => x.start === shown) || data?.config?.current || null;
   const inView = (t) => !t.sprint || !shownSprint() || t.sprint === shownSprint().start;
@@ -114,6 +118,7 @@ export function mount(el, ctx) {
   const boardEl = h('div.board');
   const filterRow = h('div.filters', { role: 'search' });
   function paint() {
+    if (view === 'backlog') return paintBacklog();
     const q = f.q.toLowerCase();
     const tasks = data.tasks.filter((t) => inView(t) && (!q || `${t.id} ${t.title} ${(t.labels || []).join(' ')}`.toLowerCase().includes(q))
       && (!f.who || (f.who === '(none)' ? !t.assignee : t.assignee === f.who)) && (!f.group || t.group === f.group) && (!f.agentOnly || t.createdBy === 'agent'));
@@ -124,6 +129,33 @@ export function mount(el, ctx) {
     const nav = root.querySelector('.sprint-nav');
     if (nav) nav.replaceWith(sprintNav());
   }
+  // Every task not done, from every sprint and the unscheduled backlog, highest priority first.
+  function paintBacklog() {
+    const q = f.q.toLowerCase();
+    const rows = data.tasks.filter((t) => (f.done || t.status !== 'Done') && (!q || `${t.id} ${t.title} ${(t.labels || []).join(' ')}`.toLowerCase().includes(q))
+      && (!f.who || (f.who === '(none)' ? !t.assignee : t.assignee === f.who)) && (!f.group || t.group === f.group) && (!f.agentOnly || t.createdBy === 'agent'))
+      .sort((a, b) => rank(a.priority) - rank(b.priority) || (a.sprint || '9999').localeCompare(b.sprint || '9999') || String(a.id).localeCompare(String(b.id)));
+    const hasGroups = groups().length > 0;
+    clear(backlogEl).append(rows.length ? h('div.table-wrap', h('table.tbl',
+      h('thead', h('tr', h('th', 'Task'), hasGroups && h('th', 'Group'), h('th', 'Priority'), h('th', 'Sprint'), h('th', 'Status'), h('th', 'Assignee'), h('th', 'Updated'))),
+      h('tbody', rows.map((t) => h('tr.row-link', { tabindex: '0', onclick: () => detail(t), onkeydown: (e) => { if (e.key === 'Enter') detail(t); } },
+        h('td', h('span.mono.faint', { style: 'margin-right:8px' }, t.id), t.title),
+        hasGroups && h('td', groupChip(t.group)),
+        h('td', h('span.prio', { class: `p${rank(t.priority)}` }, t.priority)),
+        h('td', t.sprint ? sprintLabel(t.sprint) : h('span.faint', 'Backlog')),
+        h('td', t.status),
+        h('td', t.assignee || h('span.faint', 'Unassigned')),
+        h('td.meta', relTime(t.updated))))))) : h('p.meta', { style: 'padding:16px' }, 'Nothing open matches.'));
+    const s = root.querySelector('.page-head .sub');
+    if (s) s.textContent = `${rows.length} ${f.done ? 'tasks' : 'open tasks'} across every sprint and the backlog`;
+  }
+
+  function viewSwitch() {
+    const set = (v) => { view = v; savePref('board-view', v); renderShell(); };
+    return h('div.seg', { role: 'group', 'aria-label': 'View' },
+      ['board', 'backlog'].map((v) => h('button', { type: 'button', 'aria-pressed': String(view === v), onclick: () => set(v) }, v === 'board' ? 'Board' : 'Backlog')));
+  }
+
   const sub = () => {
     const cur = shownSprint();
     const inSprint = data.tasks.filter((t) => t.sprint && inView(t));
@@ -152,6 +184,7 @@ export function mount(el, ctx) {
         h('option', { value: '' }, 'Anyone'), people.map((p) => h('option', { value: p, selected: f.who === p }, p)), h('option', { value: '(none)', selected: f.who === '(none)' }, 'Unassigned')),
       groups().length > 0 && h('select.input', { 'aria-label': 'Group', onchange: (e) => setF('group', e.target.value) },
         h('option', { value: '' }, 'Every group'), groups().map((g) => h('option', { value: g.name, selected: f.group === g.name }, g.name))),
+      view === 'backlog' && h('label.switch', h('input', { type: 'checkbox', checked: f.done, onchange: (e) => setF('done', e.target.checked) }), 'Show done'),
       h('label.switch', h('input', { type: 'checkbox', checked: f.agentOnly, onchange: (e) => setF('agentOnly', e.target.checked) }), 'Filed by agent'),
       gh?.configured && h('label.switch', { title: `Open issues assigned in ${gh.repo}, and those closed this sprint. Read-only.` }, h('input', { type: 'checkbox', checked: f.github, onchange: (e) => setF('github', e.target.checked) }), 'GitHub issues'),
       gh?.configured && !gh.available && h('span.chip.warn', { title: 'The gh CLI is missing, signed out or offline. Your tasks are unaffected.' }, icon('alert', 12), 'GitHub unavailable'),
@@ -168,14 +201,18 @@ export function mount(el, ctx) {
         empty(`The board is ${source()}. You and your agents file tasks into it.`, 'npx @finalangel/flowrail-room task "Write the first test" --priority P2', ctx));
       return;
     }
-    filters();
-    root.append(
-      h('header.page-head', h('div', h('h1', 'Board'), h('p.sub', sub())),
-        h('div.actions', h('button.btn.primary', { type: 'button', onclick: () => create('Todo') }, icon('plus'), 'New task'))),
-      sprintNav(), filterRow, boardEl);
-    paint();
+    renderShell();
     const focusId = ctx.params.get('task');
     if (focusId) { const t = data.tasks.find((x) => x.id === focusId); if (t) detail(t); }
+  }
+
+  function renderShell() {
+    filters();
+    clear(root).append(...[
+      h('header.page-head', h('div', h('h1', 'Board'), h('p.sub', view === 'board' ? sub() : '')),
+        h('div.actions', viewSwitch(), h('button.btn.primary', { type: 'button', onclick: () => create(view === 'backlog' ? 'Backlog' : 'Todo') }, icon('plus'), 'New task'))),
+      view === 'board' && sprintNav(), filterRow, view === 'board' ? boardEl : backlogEl].filter(Boolean));
+    paint();
   }
 
   function create(col) {
@@ -239,6 +276,6 @@ export function mount(el, ctx) {
   loadIssues(false);
   ctx.on(['board'], () => { if (!document.querySelector('dialog[open], .popover')) reload(); });
   const unmount = () => document.querySelector('.popover')?.remove();
-  unmount.update = (params) => { const id = params.get('task'); const t = id && data?.tasks.find((x) => x.id === id); if (t) detail(t); };
+  unmount.update = (params) => { const v = params.get('view'); if ((v === 'backlog' || v === 'board') && v !== view && data) { view = v; renderShell(); } const id = params.get('task'); const t = id && data?.tasks.find((x) => x.id === id); if (t) detail(t); };
   return unmount;
 }

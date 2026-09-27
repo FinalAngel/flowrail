@@ -106,7 +106,11 @@ function parseHash() {
   const raw = decodeURI(location.hash.slice(1)) || '/';
   const q = raw.indexOf('?');
   const path = (q < 0 ? raw : raw.slice(0, q)) || '/';
-  return { path: ALIAS[path] || path, params: new URLSearchParams(q < 0 ? '' : location.hash.slice(location.hash.indexOf('?') + 1)) };
+  const params = new URLSearchParams(q < 0 ? '' : location.hash.slice(location.hash.indexOf('?') + 1));
+  // An alias may carry a query ('/backlog' -> '/board?view=backlog'); the address's own params win.
+  const [to, extra] = String(ALIAS[path] || path).split('?');
+  for (const [k, v] of new URLSearchParams(extra || '')) if (!params.has(k)) params.set(k, v);
+  return { path: to, params };
 }
 export const navigate = (href) => { location.hash = href.replace(/^#/, ''); };
 
