@@ -181,11 +181,30 @@ function renderSidebar() {
   );
 }
 
+/* ---------- Header: the page's title, and a centre and tools a page may fill ---------- */
+// The title follows the page's own h1 (Board or Backlog, an artifact's name); the h1 stays in the
+// content for screen readers only, so the page does not say its name twice.
+const topTitle = h('div.top-title', { 'aria-hidden': 'true' });
+const topCenter = h('div.top-center');
+const topTools = h('div.top-tools');
+let pageLabel = '';
+function syncTitle() {
+  const h1 = content()?.querySelector('.page-head h1, h1.page-title');
+  const text = (h1?.textContent || pageLabel || '').trim();
+  if (topTitle.textContent !== text) topTitle.textContent = text;
+}
+let titleQueued = false;
+new MutationObserver(() => { if (titleQueued) return; titleQueued = true; requestAnimationFrame(() => { titleQueued = false; syncTitle(); }); })
+  .observe(document.getElementById('content'), { childList: true, subtree: true, characterData: true });
+/** What ctx.header() does: nodes for the middle of the header and next to the search. */
+function setHeader({ center = null, tools = null } = {}) {
+  clear(topCenter); clear(topTools);
+  if (center) topCenter.append(...[].concat(center).filter(Boolean));
+  if (tools) topTools.append(...[].concat(tools).filter(Boolean));
+}
+
 function renderTopbar() {
   const bar = document.getElementById('topbar');
-  const ov = shell.overview;
-  const ws = ov?.workspace || {};
-  const git = ov?.git;
   const hi = hooksInfo();
   // Below 768px the pill collapses to its dot; the aria-label keeps the full state.
   const pill = (cls, label, title, fix) => h('a.hooks', { class: cls, href: '#/redlines', title, 'aria-label': label + (fix ? '. Fix' : '') },
@@ -199,9 +218,7 @@ function renderTopbar() {
           : pill('live', 'Guard live', `The guard runs from ${hi.where || '.claude/settings.json'}${hi.guard?.version ? `, version ${hi.guard.version}, files verified` : ''}`);
   clear(bar).append(
     h('button.icon-btn.menu-btn', { type: 'button', 'aria-label': 'Open menu', 'aria-controls': 'sidebar', 'aria-expanded': String(document.getElementById('shell').classList.contains('nav-open')), onclick: openNav }, icon('menu')),
-    h('div.repo',
-      h('span.name', { title: ws.root || '' }, ws.name || 'flowrail'),
-      git && git.branch && h('span.branch', icon('branch', 14), git.branch, git.dirty ? h('span.dirty', { title: `${git.dirty} changed files` }, ` +${git.dirty}`) : null)),
+    topTitle, topCenter, topTools,
     h('button.search-btn', { type: 'button', onclick: openPalette, 'aria-label': 'Search and commands', 'aria-keyshortcuts': 'Meta+K Control+K' }, icon('search'), h('span.lbl', 'Search…'), h('kbd', navigator.platform.includes('Mac') ? '⌘K' : 'Ctrl K')),
     themeButton(),
     hooksEl,
@@ -367,6 +384,9 @@ async function route() {
   document.querySelectorAll('dialog.sheet, .popover').forEach((d) => d.remove());
   const el = content();
   clear(el);
+  setHeader();
+  pageLabel = page ? page[1] : 'Not found';
+  syncTitle();
   if (!page) {
     document.title = `Not found · ${BRAND?.name || 'flowrail'}`;
     el.append(h('div.empty', h('h1', 'This page does not exist'), h('p', `Nothing lives at ${path}.`), h('a.btn', { href: '#/' }, 'Back to the dashboard')));
@@ -380,6 +400,8 @@ async function route() {
   const dispose = [];
   const ctx = {
     api, toast, navigate, params, shell, hooksState, hooksInfo, isArmed, brand: BRAND?.name || 'flowrail',
+    /** Put nodes in the middle of the header (center) and next to the search (tools); cleared on page change. */
+    header: (parts) => { if (my === routeSeq) setHeader(parts); },
     refreshShell: () => refreshShell(),
     /** Subscribe to live changes. areas: array of area names or null for all. Debounced; auto-removed on page change. */
     on(areas, fn) {

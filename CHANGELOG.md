@@ -13,6 +13,7 @@ All notable changes to flowrail are recorded here. The format follows [Keep a Ch
 
 ### Added
 
+- The header shows the page's title instead of the repo and branch, and a page can put its own controls there (`ctx.header`); the Board's sprint switcher sits next to New task.
 - Backlog is a page of its own (`#/backlog`, next to Board), no longer a switch on the Board. Team is called Agents. Hovering the centre of the rings map lights its line to every area.
 - The Board has a Backlog view (`#/board?view=backlog`): every open task from every sprint and the unscheduled backlog in one table, highest priority first, with the Board's filters and a Show done switch. Plugin aliases may carry a query.
 - A plugin can pass requests through to a server of its own (`handle`, `prefixes`), redirect old page addresses (`aliases`), and `config.json` `brand` names the sidebar: enough to move an existing local app onto the room page by page.

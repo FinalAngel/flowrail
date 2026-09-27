@@ -207,8 +207,8 @@ export function mount(el, ctx) {
     filters();
     clear(root).append(...[
       h('header.page-head', h('div', h('h1', view === 'board' ? 'Board' : 'Backlog'), h('p.sub', view === 'board' ? sub() : '')),
-        h('div.actions', h('button.btn.primary', { type: 'button', onclick: () => create(view === 'backlog' ? 'Backlog' : 'Todo') }, icon('plus'), 'New task'))),
-      view === 'board' && sprintNav(), filterRow, view === 'board' ? boardEl : backlogEl].filter(Boolean));
+        h('div.actions', view === 'board' && sprintNav(), h('button.btn.primary', { type: 'button', onclick: () => create(view === 'backlog' ? 'Backlog' : 'Todo') }, icon('plus'), 'New task'))),
+      filterRow, view === 'board' ? boardEl : backlogEl].filter(Boolean));
     paint();
   }
 

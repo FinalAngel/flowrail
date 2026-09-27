@@ -46,7 +46,7 @@ export function mount(el, ctx) {
 }
 ```
 
-`ctx.api(path, body)` sends a `GET`, or a `POST` when you pass a body. Then:
+`ctx.api(path, body)` sends a `GET`, or a `POST` when you pass a body. The header shows the page's title, taken from the page's own `h1` in a `.page-head` (which stays in the page for screen readers only); `ctx.header({ center, tools })` puts nodes in the middle of the header and next to the search, and they are cleared when the page changes. Then:
 
 1. Add the page to `NAV` in `packages/control-room/ui/app.js` (`['releases', 'Releases', '/releases']` in the right group) and an icon to `ICON`.
 2. If the page needs data, add a `'GET /api/releases'` entry to the routes in `packages/control-room/src/server.js`. Mutations are `POST` with an `_action` field; the server's host, origin and header checks apply to them automatically.
