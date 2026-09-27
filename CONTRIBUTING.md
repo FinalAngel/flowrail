@@ -47,6 +47,16 @@ flowrail's files are agent-agnostic; its hooks are not yet. An adapter makes red
 - Use sentence case and plain words in UI text and docs. No exclamation marks, no emoji, and no spaced em or en dashes.
 - Commit messages: a short imperative summary line, then the why if it is not obvious.
 
+## Releasing
+
+Maintainers release both packages together, at one version:
+
+1. Set `version` in `packages/flowrail/package.json` and `packages/flowrail-os/package.json`, and the dashboard's `flowrail` dependency, to the new version; run `npm install` to update the lockfile.
+2. Date the top section of `CHANGELOG.md` as `## [X.Y.Z] YYYY-MM-DD`.
+3. Commit, push to `main`, then `git tag vX.Y.Z && git push origin vX.Y.Z`.
+
+The [release workflow](.github/workflows/release.yml) checks that the tag, both versions and the changelog agree, runs the tests, publishes the guard and then the dashboard to npm with provenance, and opens a GitHub release with that version's changelog section. npm trusts the workflow directly (trusted publishing), so there is no npm token in the repository.
+
 ## Reporting bugs
 
 Use the [bug form](https://github.com/FinalAngel/flowrail/issues/new?template=bug.yml) and include the output of `npx flowrail doctor`. For security issues, see [SECURITY.md](SECURITY.md) instead.

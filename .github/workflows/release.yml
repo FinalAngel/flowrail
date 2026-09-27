@@ -1,0 +1,57 @@
+name: Release
+
+# Push a tag vX.Y.Z to publish both packages at X.Y.Z and open a GitHub release with that version's
+# CHANGELOG section. npm trusts this workflow (trusted publishing), so there is no token to keep.
+on:
+  push:
+    tags: ['v*.*.*']
+
+permissions:
+  contents: write # the GitHub release
+  id-token: write # npm trusted publishing and provenance
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      # Trusted publishing needs npm 11.5.1 or later.
+      - run: npm install -g npm@^11.5.1
+
+      - name: The tag, both versions and the dashboard's pin on the guard agree
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          for f in packages/flowrail/package.json packages/flowrail-os/package.json; do
+            [ "$(node -p "require('./$f').version")" = "$v" ] || { echo "::error::$f is not at $v"; exit 1; }
+          done
+          [ "$(node -p "require('./packages/flowrail-os/package.json').dependencies.flowrail")" = "$v" ] \
+            || { echo "::error::packages/flowrail-os depends on another flowrail than $v"; exit 1; }
+          grep -q "^## \[$v\]" CHANGELOG.md || { echo "::error::CHANGELOG.md has no ## [$v] section"; exit 1; }
+
+      - run: npm ci
+      - run: npm test
+      - run: npm run check
+
+      # The guard first: the dashboard depends on it. A version already on npm is skipped, so a
+      # failed run can be re-run.
+      - name: Publish
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          for p in flowrail flowrail-os; do
+            name=$(node -p "require('./packages/$p/package.json').name")
+            if npm view "$name@$v" version >/dev/null 2>&1; then echo "$name@$v is on npm already"; continue; fi
+            npm publish --workspace "packages/$p" --provenance --access public
+          done
+
+      - name: GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          v="${GITHUB_REF_NAME#v}"
+          awk -v h="## [$v]" 'index($0, h) == 1 { on = 1; next } on && /^## \[/ { exit } on' CHANGELOG.md > notes.md
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 \
+            || gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes-file notes.md
