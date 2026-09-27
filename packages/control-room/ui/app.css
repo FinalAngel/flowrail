@@ -768,3 +768,19 @@ table.probes .bad, table.probes tr.fail td:first-child { color: var(--danger); f
 .done-item .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .done-item:hover { color: var(--text); }
 .done-item:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; border-radius: 4px; }
+
+/* Records board: a card per file; ‹ › change its status; a due date gets a word, a tone and a bar. */
+.rcard { cursor: default; gap: 6px; }
+.rcard .top { color: var(--text); font-size: 13.5px; align-items: flex-start; }
+.rcard .title { flex: 1; min-width: 0; text-decoration: none; }
+.rcard .title::after { content: none; }
+.rcard .rmove { display: inline-flex; gap: 2px; flex: none; margin: -4px -6px 0 0; }
+.rcard .rmove .icon-btn { width: 24px; height: 24px; }
+.rcard .rmove .icon-btn[disabled] { opacity: .3; cursor: default; }
+.rcard .rfields { display: grid; gap: 2px; font-size: 12.5px; color: var(--text-2); overflow-wrap: anywhere; }
+.rcard.due-over { border-left: 3px solid var(--danger); background: color-mix(in srgb, var(--danger-soft) 45%, var(--surface)); }
+.rcard.due-soon { border-left: 3px solid var(--warn); }
+.col-head .tone-accent .dot, .col-head [class^="tone-"] .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.board.rboard { grid-template-columns: repeat(var(--cols, 4), minmax(168px, 1fr)); }
+@media (max-width: 1024px) { .board.rboard { grid-template-columns: repeat(var(--cols, 4), minmax(240px, 1fr)); } }
+@media (max-width: 767px) { .board.rboard { grid-template-columns: minmax(0, 1fr); overflow: visible; } }

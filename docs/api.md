@@ -252,3 +252,8 @@ Local programs listed in `flowrail/config.json` as `"apps": [{ "id", "name", "cm
 | GET | `/api/search?q=` | `[{ kind, title, href }]` across doc names and headings, tasks and memory. Feeds the command palette. |
 | GET | `/api/events?token=` | Server-sent events. Sends `hello` on connect, then `change` with `{ area }`, where `area` is `board`, `comments`, `memory`, `redlines`, `routines`, `artifacts`, `agents` or `docs`. The token goes in the query string. |
 | GET | `/api/doctor` | `{ checks, headless, threatModel, server: { host, port } }`. `checks` are the same checks as `flowrail doctor`: `[{ id, title, status, detail, fix? }]` with `status` `ok`, `warn` or `fail`. |
+
+### Records
+
+`GET /api/records` returns `{ collections: [{ id, title, group, dir, status: { field, values, board, tones }, columns, filters, due, titleField }], errors }` from `records` in `flowrail/config.json` (`errors` names entries that were dropped). `GET /api/records/<id>` returns `{ collection, records: [{ path, name, title, status, due, fields, mtime }], truncated }` (up to 2000 files, cached two seconds). `POST /api/records/<id>` with `{ "_action": "move", "path", "status", "mtime" }` sets one record's status: `400` for a value not in `status.values` or a path that is not a record of this collection, `403` for a path Docs will not serve, `409` when the file changed after `mtime`, `422` when it has no frontmatter. Each move is logged in `.flowrail/activity.log`.
+

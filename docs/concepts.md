@@ -193,3 +193,18 @@ The Agents page lists the subagents defined in `.claude/agents/`, the skills, an
 - It does not run sessions in parallel or manage worktrees.
 - It does not sync anything to a server.
 - It does not replace your permission settings in Claude Code. Red lines add to them.
+
+## Records
+
+A records collection is a folder of Markdown files, one record per file, with its fields in the frontmatter: customers, beta testers, candidates, vendors, incidents. Each collection gets two pages, a table and a board, in the sidebar group you name (default **Records**). Configure them in `flowrail/config.json` (file-only; the settings API ignores it, and the server reads it at start):
+
+```json
+"records": [{
+  "id": "customers", "title": "Customers", "dir": "records/customers", "group": "Sales",
+  "status": { "field": "status", "values": ["lead", "talking", "trial", "won", "lost"], "board": ["talking", "trial", "won"], "tones": { "won": "accent", "lost": "muted" } },
+  "columns": ["company", "contact", "region"], "filters": ["segment", "region"], "due": "next_date", "titleField": "company"
+}]
+```
+
+The **table** (`#/records/customers`) shows a status bar, one filter row (search, status, a select per `filters` field, and a Due soon switch when `due` is set) and sortable columns; a row opens the file in Docs. The **board** (`#/records/customers/board`) has a column per `board` value (default: every value); a card's ‹ › set its status, which rewrites only that frontmatter line (the rest of the file stays byte for byte, and a file changed since the page loaded it is refused). A date in the `due` field puts a chip on the card: overdue in red with a red bar, today to three days out in amber, later quietly. `titleField` names the field used as a record's title (else `title`, the first heading, or the file name). `README.md` and `index.md` in the folder are not records, and files Docs will not serve (secrets, outside `docsRoots`) are skipped.
+

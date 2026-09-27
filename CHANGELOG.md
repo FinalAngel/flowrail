@@ -13,6 +13,7 @@ All notable changes to flowrail are recorded here. The format follows [Keep a Ch
 
 ### Added
 
+- Records: a folder of Markdown files as a table and a board (`records` in `flowrail/config.json`), with a status bar, filters, due-date chips and ‹ › moves that rewrite only the status line of the file.
 - Board and Backlog are compact: the summary sits in the header, filters and controls share one row, the Board shows the days left in the running sprint, and the Backlog has a status bar (`statbar()` in `ui/lib/dom.js`, for plugin pages too). The Library lists the latest change first.
 - The header shows the page's title instead of the repo and branch, and a page can put its own controls there (`ctx.header`); the Board's sprint switcher sits next to New task.
 - Backlog is a page of its own (`#/backlog`, next to Board), no longer a switch on the Board. Team is called Agents. Hovering the centre of the rings map lights its line to every area.

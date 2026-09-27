@@ -209,6 +209,35 @@ function githubIssues(p, today) {
   ] });
 }
 
+// A records collection: beta testers, one Markdown file each (fictional people and companies).
+const DEMO_RECORDS = {
+  id: 'testers', title: 'Beta testers', dir: 'records/testers', group: 'Product',
+  status: { field: 'status', values: ['invited', 'onboarding', 'active', 'feedback', 'dropped'], board: ['invited', 'onboarding', 'active', 'feedback'], tones: { invited: 'muted', onboarding: 'warn', active: 'info', feedback: 'accent', dropped: 'muted' } },
+  columns: ['company', 'platform', 'next_step'], filters: ['platform', 'plan'], due: 'next_date', titleField: 'name',
+};
+const TESTERS = [
+  ['mara-lind', 'Mara Lind', 'Lindwerk Design', 'macOS', 'team', 'active', 'Send the sync build', -2],
+  ['tomas-berg', 'Tomas Berg', 'Northfold', 'iOS', 'solo', 'onboarding', 'Walk through import', 0],
+  ['ines-kovac', 'Ines Kovac', 'Kovac Studio', 'Windows', 'team', 'feedback', 'Read her notes on search', 1],
+  ['leo-marchetti', 'Leo Marchetti', 'Pale Harbor', 'macOS', 'solo', 'invited', 'Nudge once', 3],
+  ['anya-petrova', 'Anya Petrova', 'Birchline', 'Android', 'team', 'active', 'Check offline edits', 6],
+  ['sam-okafor', 'Sam Okafor', 'Okafor & Co', 'iOS', 'solo', 'invited', 'Send the invite again', -5],
+  ['juno-park', 'Juno Park', 'Quiet Lamp', 'macOS', 'team', 'feedback', 'Share the roadmap answer', 9],
+  ['elif-demir', 'Elif Demir', 'Demir Labs', 'Windows', 'team', 'onboarding', 'Fix her sync conflict', 2],
+  ['noah-haas', 'Noah Haas', 'Haas Print', 'Android', 'solo', 'dropped', '', null],
+  ['rita-sol', 'Rita Sol', 'Solstice Books', 'iOS', 'team', 'active', 'Ask for a quote', 12],
+  ['kai-lehto', 'Kai Lehto', 'Lehto Maps', 'macOS', 'solo', 'invited', '', null],
+  ['vera-nunes', 'Vera Nunes', 'Nunes Atelier', 'Windows', 'team', 'feedback', 'Close the loop on export', 4],
+];
+function seedRecords(dir, today) {
+  for (const [slug, name, company, platform, plan, status, next, due] of TESTERS) {
+    const lines = ['---', `name: ${name}`, `company: ${company}`, `platform: ${platform}`, `plan: ${plan}`, `status: ${status}`,
+      ...(next ? [`next_step: ${next}`] : []), ...(due === null ? [] : [`next_date: ${localDate(addDays(today, due))}`]), '---', '',
+      `# ${name}`, '', `${name} tests Paper Plane at ${company} on ${platform}. Notes from calls go here.`, ''];
+    writeText(path.join(dir, 'records', 'testers', `${slug}.md`), lines.join('\n'));
+  }
+}
+
 export function seed(dir, today = new Date()) {
   fs.mkdirSync(dir, { recursive: true });
   const p = paths(dir);
@@ -217,8 +246,10 @@ export function seed(dir, today = new Date()) {
     ...defaultConfig('Paper Plane'), sprintStart: mondayOf(addDays(today, -28)), demo: true, lastVisit: at(today, 1, 18, 30),
     github: { repo: 'paper-plane/app', assignee: '@me' }, apps: DEMO_APPS,
     areas: [{ name: 'Product', router: 'docs/PRODUCT.md' }, { name: 'Engineering', router: 'docs/ENGINEERING.md' }],
+    records: [DEMO_RECORDS],
   };
   writeJson(p.config, config);
+  seedRecords(dir, today);
   writeJson(p.board, boardFor(config, today));
   githubIssues(p, today);
   rebuildIndex(p);

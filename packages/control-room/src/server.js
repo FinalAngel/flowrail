@@ -41,6 +41,7 @@ import { readJson } from 'flowrail/api';
 import * as plugins from './core/plugins.js';
 import { auditAsync } from './core/audit-worker.js';
 import * as library from './core/library.js';
+import * as records from './core/records.js';
 
 const UI_DIR = path.join(PKG_ROOT, 'ui');
 const MIME = {
@@ -285,6 +286,17 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
     'GET /api/plugins': () => plugins.describe(exts),
     'GET /api/doctor': async () => ({ checks: [...await doctor(p, { serving: true }), ...(routines.routinesFor(p) ? [] : routines.doctorChecks(p))], headless: runs.HEADLESS, threatModel: THREAT_MODEL, server: { host: '127.0.0.1', port: getPort() } }),
   };
+
+  // Records (config "records", read at start): GET lists a collection, POST { _action: 'move' } sets a status.
+  const recs = records.collections(loadConfig(p));
+  routes['GET /api/records'] = () => ({ collections: recs.list.map(({ id, title, group, dir, status, columns, filters, due, titleField }) => ({ id, title, group, dir, status, columns, filters, due, titleField })), errors: recs.errors });
+  for (const col of recs.list) {
+    routes[`GET /api/records/${col.id}`] = () => ({ ...records.list(root, col), collection: col.id });
+    routes[`POST /api/records/${col.id}`] = (b) => {
+      if (b._action !== 'move') throw new HttpError(400, '_action must be move');
+      return records.move(p, col, need(b.path, 'path'), need(b.status, 'status'), b.mtime);
+    };
+  }
 
   for (const pl of exts) {
     const ctx = { root, paths: p, broadcast, HttpError };
