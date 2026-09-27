@@ -204,7 +204,7 @@ An **event routine** has `on` instead of `schedule`: `{ "event": "github-actions
 
 ### Agents (team)
 
-`GET /api/team` returns `{ agents, skills, commands }`: the agents in `.claude/agents` (`name`, `description`, `model`, `tools`, `source`, `state`, `lastAt`), the skills (`name`, `description`, `path`) and the slash commands (`name`, `description`, `path`).
+`GET /api/team` returns `{ people, agents, skills, commands }`: the people (`name`, `role`, `email`, `links`, `bio`, `path`, from the `people` folder), the agents in `.claude/agents` (`name`, `description`, `model`, `tools`, `source`, `state`, `lastAt`), the skills (`name`, `description`, `path`) and the slash commands (`name`, `description`, `path`).
 
 ### Artifacts
 
@@ -234,6 +234,15 @@ An **event routine** has `on` instead of `schedule`: `{ "event": "github-actions
 | GET | `/api/runs/<id>` | One run, with its output in `log`. |
 | POST | `/api/run` | `{ prompt }` starts a headless Claude run, if `claude` is installed, and returns the run record. One at a time. The dashboard does not call this; it is there for scripts. |
 | GET | `/api/automation` | The Runs page in one call: `{ runs, headless: { permissionMode, allowed, disallowed }, apps, appsError }`. |
+
+### Actions
+
+Commands with inputs, listed in `flowrail/config.json` as `"actions": [{ "id", "title", "description"?, "cmd": [argv with "{name}" arguments], "inputs": [{ "name", "label"?, "type"?: "text" | "url" | "select", "options"?, "required"?, "max"?, "pattern"? }] }]`. The list is file-only: `POST /api/config` ignores `actions`.
+
+| Method | Path | Does |
+|---|---|---|
+| GET | `/api/actions` | The actions (`id`, `title`, `description`, `inputs`, `cmd`); also in `GET /api/automation` as `actions` (an invalid list comes back as `actionsError`, `422` here). |
+| POST | `/api/actions` | `{ id, inputs: { name: value } }`. Checks every value (`400` with the reason: required, too long, a line break, a leading `-`, not a link, not an option, no match for `pattern`, an unknown input), puts each into its `{name}` argument, and starts the argv as a run without a shell: `{ id, record }`. `404` for an id that is not in `config.json`, `409` while another run is going. |
 
 ### Apps
 

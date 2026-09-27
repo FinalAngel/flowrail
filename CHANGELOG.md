@@ -13,6 +13,7 @@ All notable changes to flowrail are recorded here. The format follows [Keep a Ch
 
 ### Added
 
+- Actions: commands with inputs from `config.json` (`"actions"`), started from the Runs page with a small form. Every input is checked and becomes one whole argument; nothing reaches a shell. People: a folder of profile files (`flowrail/people/` or `"people": { "dir" }`) shown on the Agents page.
 - Board and Backlog are compact: the summary sits in the header, filters and controls share one row, the Board shows the days left in the running sprint, and the Backlog has a status bar (`statbar()` in `ui/lib/dom.js`, for plugin pages too). The Library lists the latest change first.
 - The header shows the page's title instead of the repo and branch, and a page can put its own controls there (`ctx.header`); the Board's sprint switcher sits next to New task.
 - Backlog is a page of its own (`#/backlog`, next to Board), no longer a switch on the Board. Team is called Agents. Hovering the centre of the rings map lights its line to every area.

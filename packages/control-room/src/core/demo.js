@@ -117,6 +117,12 @@ function activity(p, today) {
 }
 
 // Two local programs the Runs page can start. Neither starts on its own; both only print.
+// A harmless action: it only prints the inputs it was given, one per line.
+const DEMO_ACTIONS = [
+  { id: 'meeting-notes', title: 'Start meeting notes', description: 'Opens a notes file for a call from its link.', cmd: ['node', '-e', 'for (const a of process.argv.slice(1)) console.log(a)', '{url}', '{title}', '{kind}'],
+    inputs: [{ name: 'url', label: 'Meeting link', type: 'url', pattern: '^https://', required: true }, { name: 'title', label: 'Title', max: 120 }, { name: 'kind', label: 'Kind', type: 'select', options: ['customer', 'internal'], required: true }] },
+];
+
 const DEMO_APPS = [
   { id: 'docs', name: 'Docs site', cmd: ['node', 'scripts/docs-server.js'], url: 'http://127.0.0.1:4791' },
   { id: 'sync-watcher', name: 'Sync test watcher', cmd: ['node', 'scripts/watch-sync.js'] },
@@ -215,7 +221,7 @@ export function seed(dir, today = new Date()) {
   copyTree(TEMPLATE, dir, today);
   const config = {
     ...defaultConfig('Paper Plane'), sprintStart: mondayOf(addDays(today, -28)), demo: true, lastVisit: at(today, 1, 18, 30),
-    github: { repo: 'paper-plane/app', assignee: '@me' }, apps: DEMO_APPS,
+    github: { repo: 'paper-plane/app', assignee: '@me' }, apps: DEMO_APPS, actions: DEMO_ACTIONS,
     areas: [{ name: 'Product', router: 'docs/PRODUCT.md' }, { name: 'Engineering', router: 'docs/ENGINEERING.md' }],
   };
   writeJson(p.config, config);

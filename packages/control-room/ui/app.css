@@ -758,3 +758,8 @@ table.probes .bad, table.probes tr.fail td:first-child { color: var(--danger); f
 .settings-modules { border: 0; border-top: 1px solid var(--hairline); margin: 0; padding: var(--s4) 0 0; min-width: 0; }
 .settings-modules > legend { float: left; width: 100%; padding: 0; margin-bottom: var(--s3); }
 .settings-toggles { clear: both; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px 16px; }
+
+/* People on the Agents page: an email or link sits on one line with its icon. */
+.card.person .row { gap: 6px 12px; }
+.card.person a.link { display: inline-flex; align-items: center; gap: 4px; }
+.card.person .name { font-weight: 500; color: var(--text); }
