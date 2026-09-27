@@ -21,6 +21,7 @@ Usage: npx @finalangel/flowrail-room <command>   (installed: flowrail-room <comm
   remember "<fact>"       store a memory  --type project|feedback|user|reference --name slug --why --how
   recall "<question>"     find memories and doc sections, no model call  --json
   routines                install | uninstall | status | run <id>
+  board export            the current sprint as one standalone HTML file  --out file.html  --backlog
 
 Guard commands (redlines, check, audit, doctor, hooks, upgrade, uninstall) belong to the guard: npx flowrail --help
 They work here too.
@@ -39,6 +40,7 @@ const COMMANDS = {
   remember: ['./work.js', 'remember'],
   recall: ['./work.js', 'recall'],
   routines: ['./routines.js', 'routines'],
+  board: ['./board.js', 'board_'],
 };
 
 export async function main(argv) {

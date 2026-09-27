@@ -1,4 +1,4 @@
-import { h, icon, cmd, relTime, loader, plural, shortDate, clock } from '../lib/dom.js';
+import { h, icon, cmd, relTime, loader, plural, shortDate, clock, clear, pref, savePref } from '../lib/dom.js';
 
 const KIND = { due: 'routines', duty: 'board', 'audit-edited': 'security', 'guard-changed': 'shieldOff', drift: 'shieldOff', hooks: 'shieldOff', audit: 'security', check: 'alert', comment: 'comment', routine: 'routines', task: 'board', redline: 'redlines', 'redlines-changed': 'redlines', artifact: 'artifacts', run: 'terminal', held: 'shield', commit: 'branch', memory: 'memory' };
 const DISMISS = 'flowrail-setup-dismissed';
@@ -22,9 +22,32 @@ function awayBaseline() {
   } catch { return null; }
 }
 
+// The cards and their default places. The layout (order per column, hidden cards) is kept per browser.
+const CARDS = { needs: 'Needs you', today: 'Today', recent: 'Recent', setup: 'Set up', rails: 'Red lines', sprint: 'Sprint' };
+const DEFAULT = { cols: [['needs', 'today', 'recent'], ['setup', 'rails', 'sprint']], hidden: [] };
+/** A saved layout, repaired: every card exactly once, unknown ids dropped, new cards in their default column. */
+export function readLayout(saved) {
+  const ok = saved && Array.isArray(saved.cols) && saved.cols.length === 2;
+  const cols = ok ? saved.cols.map((c) => (Array.isArray(c) ? c.filter((id) => id in CARDS) : [])) : DEFAULT.cols.map((c) => [...c]);
+  const seen = new Set();
+  for (const c of cols) for (let i = c.length - 1; i >= 0; i--) { if (seen.has(c[i])) c.splice(i, 1); else seen.add(c[i]); }
+  DEFAULT.cols.forEach((c, i) => c.forEach((id) => { if (!seen.has(id)) cols[i].push(id); }));
+  return { cols, hidden: ok && Array.isArray(saved.hidden) ? saved.hidden.filter((id) => id in CARDS) : [] };
+}
+
 export function mount(el, ctx) {
   const root = h('div');
   el.append(root);
+  const state = { editing: false, layout: readLayout(pref('dash-layout', null)), last: null };
+  const save = () => savePref('dash-layout', state.layout);
+  const redraw = () => { if (!state.last) return; clear(root); render(root, state.last, ctx, reload, state, redraw); fill(); };
+  // Edit layout: move cards up, down or across, hide them, or reset. Lives in the header.
+  const tools = () => ctx.header?.({ tools: [
+    state.editing && h('button.btn.sm.ghost', { type: 'button', onclick: () => { state.layout = readLayout(null); save(); redraw(); } }, 'Reset layout'),
+    h('button.btn.sm', { type: 'button', 'aria-pressed': String(state.editing), onclick: () => { state.editing = !state.editing; tools(); redraw(); } }, icon(state.editing ? 'check' : 'settings', 14), state.editing ? 'Done' : 'Edit layout'),
+  ].filter(Boolean) });
+  tools();
+  state.save = save;
   const since = awayBaseline();
   // The audit replays transcripts: fetch it once per visit, not on every live refresh.
   const audit = ctx.api('/audit?days=30').catch(() => null);
@@ -39,22 +62,63 @@ export function mount(el, ctx) {
   };
   // The page draws without the audit; its line fills in when the replay is done.
   const fill = () => audit.then((a) => { const line = auditLine(a); const slot = root.querySelector('.audit-slot'); if (line && slot) slot.replaceChildren(line); });
-  const reload = loader(root, load, (d) => { render(root, d, ctx, reload); fill(); }, 6);
+  const reload = loader(root, load, (d) => { state.last = d; render(root, d, ctx, reload, state, redraw); fill(); }, 6);
   ctx.on(null, reload);
   return () => {};
 }
 
-function render(root, { ov, board, rl, today, audit, since }, ctx, reload) {
+function render(root, { ov, board, rl, today, audit, since }, ctx, reload, state, redraw) {
   const c = ov.counts || {};
   const attention = ov.attention || [];
+  const built = {
+    needs: () => needsYou(attention), today: () => today && todayCard(today, since), recent: () => recentCard(ov.recent || {}),
+    setup: () => setupCard(ov.setup || {}, reload, ctx), rails: () => railsCard(rl, ov, ctx, audit), sprint: () => sprintCard(board),
+  };
+  const { cols, hidden } = state.layout;
+  const move = (id, dc, dr) => {
+    const ci = cols.findIndex((col) => col.includes(id));
+    const ri = cols[ci].indexOf(id);
+    cols[ci].splice(ri, 1);
+    const to = Math.max(0, Math.min(1, ci + dc));
+    cols[to].splice(dc ? Math.min(ri, cols[to].length) : Math.max(0, Math.min(cols[to].length, ri + dr)), 0, id);
+    state.save(); redraw();
+    root.querySelector(`[data-slot="${id}"] .dash-edit button`)?.focus();
+  };
+  const toggle = (id) => { const i = hidden.indexOf(id); if (i >= 0) hidden.splice(i, 1); else hidden.push(id); state.save(); redraw(); };
+  const drop = (id, ci, before) => {
+    const from = cols.findIndex((col) => col.includes(id));
+    if (from < 0) return;
+    cols[from].splice(cols[from].indexOf(id), 1);
+    const at = before ? cols[ci].indexOf(before) : -1;
+    cols[ci].splice(at < 0 ? cols[ci].length : at, 0, id);
+    state.save(); redraw();
+  };
+  const slot = (id, ci) => {
+    const card = built[id]();
+    if (!state.editing) return hidden.includes(id) ? null : card;
+    const off = hidden.includes(id);
+    const b = (label, ic, fn, disabled) => h('button.icon-btn', { type: 'button', 'aria-label': `${label}: ${CARDS[id]}`, title: label, disabled, onclick: fn }, icon(ic, 14));
+    const ri = cols[ci].indexOf(id);
+    return h('div.dash-slot', { class: off ? 'is-hidden' : '', draggable: 'true', dataset: { slot: id },
+      ondragstart: (e) => { e.dataTransfer.setData('text/plain', id); e.dataTransfer.effectAllowed = 'move'; },
+      ondragover: (e) => e.preventDefault(),
+      ondrop: (e) => { e.preventDefault(); e.stopPropagation(); const from = e.dataTransfer.getData('text/plain'); if (from && from !== id) drop(from, ci, id); } },
+      h('div.dash-edit', h('span.grow', CARDS[id], off ? h('span.faint', ' · hidden') : null),
+        b('Move up', 'chevronUp', () => move(id, 0, -1), ri === 0),
+        b('Move down', 'chevronDown', () => move(id, 0, 1), ri === cols[ci].length - 1),
+        b(ci ? 'Move to the left column' : 'Move to the right column', ci ? 'chevronLeft' : 'chevronRight', () => move(id, ci ? -1 : 1, 0)),
+        h('button.btn.sm.ghost', { type: 'button', 'aria-pressed': String(!off), onclick: () => toggle(id) }, off ? 'Show' : 'Hide')),
+      card || h('p.meta', { style: 'padding:12px' }, 'Nothing to show right now.'));
+  };
+  const col = (ci) => h('div.bento-col.stagger', { class: state.editing ? 'editing' : '',
+    ondragover: state.editing ? (e) => e.preventDefault() : null,
+    ondrop: state.editing ? (e) => { e.preventDefault(); const from = e.dataTransfer.getData('text/plain'); if (from) drop(from, ci, null); } : null },
+    cols[ci].map((id) => slot(id, ci)));
   root.append(
     h('header.page-head',
       h('div', h('h1', greeting()), h('p.sub', summary(c))),
       h('div.actions', h('a.btn', { href: '#/board' }, 'Open board'))),
-    h('div.bento',
-      h('div.bento-col.stagger', needsYou(attention), today && todayCard(today, since), recentCard(ov.recent || {})),
-      h('div.bento-col.stagger', setupCard(ov.setup || {}, reload, ctx), railsCard(rl, ov, ctx, audit), sprintCard(board)),
-    ),
+    h('div.bento', { class: state.editing ? 'editing' : '' }, col(0), col(1)),
   );
 }
 

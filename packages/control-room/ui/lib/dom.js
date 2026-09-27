@@ -195,3 +195,16 @@ export function statbar(segments) {
       shown.map((x) => h('span', { class: `tone-${x.tone || 'muted'}`, style: `flex-grow:${x.n}`, title: `${x.n} ${x.label}` }))),
     h('div.statbar-legend', segments.map((x) => h('span', { class: `tone-${x.tone || 'muted'}` }, h('span.dot'), h('b', x.n), ` ${x.label}`))));
 }
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+/** An icon from server-sanitized shapes ([{ tag, attrs }], see src/core/svg.js), stroked on a 24px grid. */
+export function shapeIcon(shapes, size = 18) {
+  const svg = document.createElementNS(SVG_NS, 'svg');
+  for (const [k, v] of Object.entries({ viewBox: '0 0 24 24', width: size, height: size, fill: 'none', stroke: 'currentColor', 'stroke-width': 1.6, 'stroke-linecap': 'round', 'stroke-linejoin': 'round', 'aria-hidden': 'true', class: 'icon' })) svg.setAttribute(k, String(v));
+  for (const s of shapes || []) {
+    const el = document.createElementNS(SVG_NS, s.tag);
+    for (const [k, v] of Object.entries(s.attrs || {})) el.setAttribute(k, v);
+    svg.append(el);
+  }
+  return svg;
+}

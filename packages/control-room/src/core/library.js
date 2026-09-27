@@ -6,6 +6,7 @@
 // (`| Sales | [SALES.md](SALES.md) | ... |`). A document belongs to the area whose router names
 // it, or else names a folder above it (the longest folder wins).
 import fs from 'node:fs';
+import { svgShapes } from './svg.js';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { safePath } from 'flowrail/api';
@@ -154,7 +155,8 @@ export function normalizeLinks(raw) {
         href = '#/docs?path=' + encodeURIComponent(url.replace(/^\.?\//, ''));
       } else return [];
       const icon = str(l.icon, 31);
-      return [{ title, url, href, external, description: str(l.description, 240), ...(ICON_NAME.test(icon) ? { icon } : {}) }];
+      const shapes = svgShapes(l.svg);
+      return [{ title, url, href, external, description: str(l.description, 240), ...(ICON_NAME.test(icon) ? { icon } : {}), ...(shapes.length ? { shapes } : {}) }];
     }),
   })).filter((c) => c.items.length);
 }

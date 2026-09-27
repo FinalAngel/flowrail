@@ -795,3 +795,15 @@ table.probes .bad, table.probes tr.fail td:first-child { color: var(--danger); f
 .card.person .row { gap: 6px 12px; }
 .card.person a.link { display: inline-flex; align-items: center; gap: 4px; }
 .card.person .name { font-weight: 500; color: var(--text); }
+
+/* Artifacts: a sidecar's icon badge, kind and category above the title. */
+.art-top { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+.art-ic { display: inline-grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--tray); color: var(--text-2); }
+
+/* Dashboard, Edit layout: each card gets a bar to move it, hide it or drag it. */
+.bento.editing .dash-slot { border: 1px dashed color-mix(in srgb, var(--text) 22%, transparent); border-radius: var(--r-tray); padding: 6px; cursor: grab; }
+.bento.editing .dash-slot.is-hidden > :not(.dash-edit) { opacity: .4; }
+.dash-edit { display: flex; align-items: center; gap: 2px; padding: 2px 4px 8px 8px; font-size: 13px; font-weight: 500; }
+.dash-edit .icon-btn { width: 30px; height: 30px; }
+.dash-edit .icon-btn[disabled] { opacity: .35; cursor: default; }
+.bento-col.editing { min-height: 80px; }

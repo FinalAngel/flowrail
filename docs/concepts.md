@@ -175,7 +175,11 @@ or put a table in `CLAUDE.md` whose rows link one router file per area (`| Sales
 
 **Context** is the reference shelf: one folder per source under `flowrail/context/` (or `"contextDir"`), each with an `index.md` whose frontmatter gives `title`, `source` and `summary`, plus any notes beside it.
 
-**Links** are the bookmarks in `flowrail/links.json`. Web links open in a new tab, repo paths in Docs.
+**Links** are the bookmarks in `flowrail/links.json`. Web links open in a new tab, repo paths in Docs. A link's icon is an icon name (`"icon": "docs"`) or its own stroke-only `svg` on a 24px grid, which the server cuts down to plain shapes before the page draws it.
+
+**The dashboard's layout** is yours to arrange: Edit layout in the header moves cards up, down or to the other column (drag works too), hides them, and Reset layout brings the default back. It is kept per browser.
+
+**The add-context skill.** `flowrail-room init` offers `.claude/skills/add-context/SKILL.md` (never over a file you have): it tells an agent how to add a source to the Context library, short, cited and in its own words.
 
 **Where things live.** Three more file-only settings point the room at folders a repo already has: `"docsRoots": ["docs", "README.md"]` limits what Docs, the Library, search and the map list, open and write to those folders and files (unset shows the whole repo, minus secrets and dot-folders); `"artifactsDir"`, `"linksFile"` and `"agentsDir"` (where the agent status files are) move artifacts, the link list and the Agents page's live state out of `flowrail/` and `.flowrail/`. A link file may also be `{ "categories": [{ "name", "links" }] }`.
 

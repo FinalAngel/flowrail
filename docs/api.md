@@ -210,13 +210,13 @@ An **event routine** has `on` instead of `schedule`: `{ "event": "github-actions
 
 | Method | Path | Does |
 |---|---|---|
-| GET | `/api/artifacts` | `[{ name, title, summary, created, tags, size, href }]`. `name` is the file name, such as `weekly-digest.html`. |
+| GET | `/api/artifacts` | `[{ name, title, summary, created, tags, kind?, category?, shapes?, size, href }]`. `name` is the file name, such as `weekly-digest.html`. `kind`, `category` and `svg` come from the sidecar `<name>.json`; `shapes` is the sidecar's `svg` after the icon allowlist below. |
 | POST | `/api/artifacts` | `{ _action: "trash", name }` |
 | GET | `/artifacts/<name>` | The artifact itself (the `href` above), served in a sandbox (see [security.md](security.md#artifacts)). |
 
 ### Links
 
-`GET /api/links` returns `flowrail/links.json` normalized: `[{ category, items: [{ title, url, href, external, description, icon? }] }]`. A category may call its list `items` or `links`. An `http`/`https` URL gets `external: true` and its own `href`; a repo path gets `href: "#/docs?path=…"`; any other URL (`javascript:`, `data:`, `file:`, `..`) is dropped, and so is a category left empty. `icon` is kept only when it is an icon name, never markup.
+`GET /api/links` returns `flowrail/links.json` normalized: `[{ category, items: [{ title, url, href, external, description, icon? }] }]`. A category may call its list `items` or `links`. An `http`/`https` URL gets `external: true` and its own `href`; a repo path gets `href: "#/docs?path=…"`; any other URL (`javascript:`, `data:`, `file:`, `..`) is dropped, and so is a category left empty. `icon` is kept only when it is an icon name, never markup. A link's `svg` becomes `shapes`: `[{ tag, attrs }]` with only `path`, `circle`, `rect`, `line`, `polyline`, `polygon` and `ellipse`, only their geometric attributes, and only numbers or path data as values (no entities, events, styles or links); the page draws them itself as a stroke-only 24px icon. Brand logos are not bundled: their licences vary, so a link that wants one carries its own `svg`.
 
 ### Reminders
 

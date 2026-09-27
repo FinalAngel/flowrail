@@ -1,1 +1,1 @@
-{ "title": "Dependency audit", "summary": "One advisory in the Markdown parser; a patch release fixes it. Everything else is current.", "created": "{{DAYS_AGO_3}}T16:20:00.000Z", "tags": ["security", "dependencies"] }
+{ "title": "Dependency audit", "summary": "One advisory in the Markdown parser; a patch release fixes it. Everything else is current.", "created": "{{DAYS_AGO_3}}T16:20:00.000Z", "tags": ["security", "dependencies"], "kind": "audit", "category": "security", "svg": "<path d='M12 3l7 3v5c0 5-3 8-7 10-4-2-7-5-7-10V6z'/>" }
