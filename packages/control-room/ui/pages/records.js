@@ -21,13 +21,16 @@ export function dueOf(iso) {
 }
 
 export function mount(el, ctx) {
-  const m = /^#\/records\/([a-z0-9-]+)(\/board)?/.exec(location.hash) || [];
-  const id = m[1], boardView = !!m[2];
+  // ctx.path is the address after aliases (an old '#/leads' may point here).
+  const m = /^\/records\/([a-z0-9-]+)(\/board)?/.exec(ctx.path || location.hash.slice(1)) || [];
+  const id = m[1];
+  let boardView = !!m[2];
   const key = (k) => `rec-${id}-${k}`;
   const root = h('div');
   el.append(root);
-  let col = null, recs = [], q = '';
-  const f = { status: boardView ? '' : pref(key('status'), ''), due: pref(key('due'), false), sort: pref(key('sort'), 'title'), dir: pref(key('dir'), 1) };
+  // ?q= and ?status= in the address win over the remembered filters (a link to one slice).
+  let col = null, recs = [], q = (ctx.params?.get('q') || '').trim().toLowerCase();
+  const f = { status: boardView ? '' : ctx.params?.get('status') || pref(key('status'), ''), due: pref(key('due'), false), sort: pref(key('sort'), 'title'), dir: pref(key('dir'), 1) };
   const picks = {};
   const summary = h('span');
   const body = h('div');
@@ -58,15 +61,18 @@ export function mount(el, ctx) {
 
   function table(rows) {
     const words = (k) => { const t = k.replace(/[_-]+/g, ' '); return t.charAt(0).toUpperCase() + t.slice(1); };
-    const cols = [['title', 'Record'], ['status', words(col.status.field)], ...col.columns.map((c) => [c, words(c)]), ...(col.due ? [['due', 'Due']] : [])];
+    const cols = [['title', col.titleLabel || 'Record'], ['status', words(col.status.field)], ...col.columns.map((c) => [c.field, c.label || words(c.field), c.sub]), ...(col.due ? [['due', 'Due']] : [])];
     const val = (r, k) => (k === 'title' ? r.title : k === 'status' ? r.status : k === 'due' ? r.due || '' : r.fields[k] || '');
-    const sorted = [...rows].sort((a, b) => String(val(a, f.sort)).localeCompare(String(val(b, f.sort)), undefined, { numeric: true }) * f.dir || a.name.localeCompare(b.name));
+    // Status sorts in the order of its values; blanks go last whichever way.
+    const rank = (v) => { const i = col.status.values.indexOf(v); return i < 0 ? col.status.values.length : i; };
+    const cmp = (a, b) => (f.sort === 'status' ? rank(a.status) - rank(b.status) : String(val(a, f.sort)).localeCompare(String(val(b, f.sort)), undefined, { numeric: true }));
+    const sorted = [...rows].sort((a, b) => (!val(a, f.sort) - !val(b, f.sort)) || cmp(a, b) * f.dir || a.name.localeCompare(b.name));
     const th = ([k, label]) => h('th', { 'aria-sort': f.sort === k ? (f.dir > 0 ? 'ascending' : 'descending') : null },
       h('button.th-sort', { type: 'button', onclick: () => { f.dir = f.sort === k ? -f.dir : 1; f.sort = k; savePref(key('sort'), k); savePref(key('dir'), f.dir); paint(); } }, label, f.sort === k ? (f.dir > 0 ? ' ↑' : ' ↓') : ''));
     return h('div.card.backlog', { style: 'padding:4px 0' }, rows.length ? h('div.table-wrap', h('table.tbl',
       h('thead', h('tr', cols.map(th))),
       h('tbody', sorted.map((r) => h('tr.row-link', { tabindex: '0', onclick: () => ctx.navigate(docHref(r.path)), onkeydown: (e) => { if (e.key === 'Enter') ctx.navigate(docHref(r.path)); } },
-        cols.map(([k]) => h('td', k === 'status' ? h('span', { class: `tone-${toneOf(r.status)}` }, r.status || '—') : k === 'due' ? dueCell(r) : k === 'title' ? h('span', { style: 'font-weight:500' }, r.title) : val(r, k)))))))) : h('p.meta', { style: 'padding:16px' }, 'Nothing matches.'));
+        cols.map(([k, , sub]) => h('td', { style: /^\d{4}-\d{2}-\d{2}$/.test(val(r, k)) ? 'white-space:nowrap' : null }, k === 'status' ? h('span', { class: `tone-${toneOf(r.status)}` }, r.status || '—') : k === 'due' ? dueCell(r) : k === 'title' ? h('span', { style: 'font-weight:500' }, r.title) : [val(r, k), sub && r.fields[sub] && h('span.meta', ` ${r.fields[sub]}`)]))))))) : h('p.meta', { style: 'padding:16px' }, 'Nothing matches.'));
   }
 
   async function move(r, to, btn) {
@@ -88,7 +94,7 @@ export function mount(el, ctx) {
       h('div.top', h('a.title', { href: docHref(r.path) }, r.title),
         h('span.rmove', h('button.icon-btn', { type: 'button', 'aria-label': `Move ${r.title} to ${order[i - 1] || ''}`, disabled: i <= 0, onclick: (e) => move(r, order[i - 1], e.currentTarget) }, icon('chevronLeft', 14)),
           h('button.icon-btn', { type: 'button', 'aria-label': `Move ${r.title} to ${order[i + 1] || ''}`, disabled: i < 0 || i >= order.length - 1, onclick: (e) => move(r, order[i + 1], e.currentTarget) }, icon('chevronRight', 14)))),
-      col.columns.slice(0, 2).some((c) => r.fields[c]) && h('div.rfields', col.columns.slice(0, 2).map((c) => r.fields[c] && h('span', r.fields[c]))),
+      col.columns.slice(0, 2).some((c) => r.fields[c.field]) && h('div.rfields', col.columns.slice(0, 2).map((c) => r.fields[c.field] && h('span', r.fields[c.field]))),
       d && h('div.foot', dueCell(r)));
   }
 
@@ -102,6 +108,17 @@ export function mount(el, ctx) {
       }));
   }
 
+  /** The status bar: one segment per value, or per band when the collection names bands; rates last. */
+  function bar(count) {
+    const sum = (vs) => vs.reduce((n, v) => n + count(v), 0);
+    const segs = col.status.bands.length
+      ? col.status.bands.map((b) => ({ label: b.label, n: sum(b.values), tone: b.tone })).filter((x) => x.n)
+      : col.status.values.map((v) => ({ label: v, n: count(v), tone: toneOf(v) }));
+    // A rate inside one status is not a rate.
+    const rates = f.status ? [] : col.status.rates.filter((r) => sum(r.over)).map((r) => ({ label: r.label, n: `${(100 * sum(r.count) / sum(r.over)).toFixed(1)}%`, bar: false, tone: 'accent' }));
+    return [...segs, ...rates];
+  }
+
   function paint() {
     const rows = shown();
     const count = (v) => rows.filter((r) => r.status === v).length;
@@ -109,7 +126,7 @@ export function mount(el, ctx) {
     summary.textContent = boardView
       ? `${inBoard.length} on the board · ${col.status.board.map((v) => `${count(v)} ${v}`).join(' · ')}`
       : `${rows.length} of ${recs.length} ${col.title.toLowerCase()}`;
-    stat.replaceChildren(boardView ? '' : statbar(col.status.values.map((v) => ({ label: v, n: count(v), tone: toneOf(v) }))));
+    stat.replaceChildren(boardView ? '' : statbar(bar(count)));
     clear(body).append(boardView ? board(rows) : table(rows));
   }
 
@@ -119,6 +136,7 @@ export function mount(el, ctx) {
   }
   const reload = loader(root, load, ({ col: c, data }) => {
     col = c;
+    if (col?.readOnly) boardView = false; // a read-only collection has no board
     if (!col) { root.append(empty('No records collection with this address. Collections live in flowrail/config.json under "records".', 'cat flowrail/config.json', ctx)); return; }
     recs = data.records || [];
     for (const k of col.filters) picks[k] = pref(key(`f-${k}`), '');

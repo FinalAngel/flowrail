@@ -4,7 +4,7 @@ import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
 import { startServer } from '../src/server.js';
-import { collections } from '../src/core/records.js';
+import { collections, list, move } from '../src/core/records.js';
 import { workspace } from './helpers.js';
 
 const p = workspace();
@@ -66,4 +66,28 @@ test('refuses a stale page, unknown values and paths outside the collection', as
 test('the settings API cannot set records', async () => {
   await req('POST', '/api/config', { records: [{ id: 'evil', dir: '.' }], name: 'x' });
   assert.deepEqual(JSON.parse(fs.readFileSync(p.config, 'utf8')).records.map((c) => c.id), ['customers', 'Bad Id', 'out']);
+});
+
+test('a collection may cap its files, name bands and rates, rich columns, and be read-only', () => {
+  const [c] = collections({ records: [{ ...col, id: 'leads', limit: 5000, readOnly: true, titleLabel: 'Company',
+    columns: ['region', { field: 'contact', label: 'Contact', sub: 'role' }, { field: 'bad field!' }],
+    status: { values: ['lead', 'talking', 'won', 'lost'], bands: [{ label: 'open', values: ['lead', 'talking'], tone: 'info' }, { label: 'nothing', values: ['nope'] }],
+      rates: [{ label: 'win rate', count: ['won'], over: ['won', 'lost'] }, { label: 'broken', count: [], over: ['won'] }] } }] }).list;
+  assert.equal(c.limit, 5000);
+  assert.equal(c.readOnly, true);
+  assert.equal(c.titleLabel, 'Company');
+  assert.deepEqual(c.columns, [{ field: 'region' }, { field: 'contact', label: 'Contact', sub: 'role' }]);
+  assert.deepEqual(c.status.bands, [{ label: 'open', values: ['lead', 'talking'], tone: 'info' }]);
+  assert.deepEqual(c.status.rates, [{ label: 'win rate', count: ['won'], over: ['won', 'lost'] }]);
+  assert.equal(collections({ records: [{ ...col, limit: 10 ** 9 }] }).list[0].limit, 20000);
+  assert.equal(collections({ records: [col] }).list[0].limit, 2000);
+});
+
+test('a read-only collection refuses moves; a limit caps the files read', () => {
+  const [ro] = collections({ records: [{ ...col, readOnly: true }] }).list;
+  assert.throws(() => move(p, ro, 'crm/acme.md', 'won'), (e) => e.status === 405);
+  const [one] = collections({ records: [{ ...col, id: 'one', limit: 1 }] }).list;
+  const r = list(p.root, one, 0);
+  assert.equal(r.records.length, 1);
+  assert.equal(r.truncated, true);
 });

@@ -84,7 +84,7 @@ async function loadRecords() {
   for (const c of r?.collections || []) {
     let group = NAV.find(([g]) => g === c.group);
     if (!group) { group = [c.group, []]; NAV.splice(NAV.length - 1, 0, group); }
-    group[1].push([`rec-${c.id}`, c.title, `/records/${c.id}`], [`rec-${c.id}-board`, `${c.title} board`, `/records/${c.id}/board`]);
+    group[1].push([`rec-${c.id}`, c.title, `/records/${c.id}`], ...(c.readOnly ? [] : [[`rec-${c.id}-board`, `${c.title} board`, `/records/${c.id}/board`]]));
     ICON[`rec-${c.id}`] = 'list'; ICON[`rec-${c.id}-board`] = 'board';
     MODULE[`rec-${c.id}`] = MODULE[`rec-${c.id}-board`] = './pages/records.js';
   }
@@ -422,7 +422,7 @@ async function route() {
   if (my !== routeSeq) return;
   const dispose = [];
   const ctx = {
-    api, toast, navigate, params, shell, hooksState, hooksInfo, isArmed, brand: BRAND?.name || 'flowrail',
+    api, toast, navigate, params, path, shell, hooksState, hooksInfo, isArmed, brand: BRAND?.name || 'flowrail',
     /** Header parts: summary (beside the title), center (the middle), tools (beside the search); cleared on page change. */
     header: (parts) => { if (my === routeSeq) setHeader(parts); },
     refreshShell: () => refreshShell(),

@@ -14,6 +14,7 @@ All notable changes to flowrail are recorded here. The format follows [Keep a Ch
 
 ### Added
 
+- Records: `limit` reads more than 2000 files, columns can carry a label and a second field, `status.bands` and `status.rates` shape the status bar, `readOnly` drops the board and its moves, the status column sorts in the order of its values with blanks last, and the table takes `?status=` and `?q=`. Dot-files in a collection's folder are skipped before the limit counts.
 - Duties can count their due date in weekdays, fall on a fixed day (`dueOn`), show ahead of time (`lead`), name months in a locale, close on a looser task title (`match`) and carry a note and a document link.
 - The Board shows the selected sprint: its tasks start in Backlog (a new status: not started), move to Todo when picked up, then In progress, Review and Done (a compact list). Tasks in no sprint are on the Backlog page; "Not in a sprint" in a task's menu moves one there. New tasks start in Backlog.
 - Records: a folder of Markdown files as a table and a board (`records` in `flowrail/config.json`), with a status bar, filters, due-date chips and ‹ › moves that rewrite only the status line of the file.

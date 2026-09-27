@@ -298,7 +298,7 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
 
   // Records (config "records", read at start): GET lists a collection, POST { _action: 'move' } sets a status.
   const recs = records.collections(loadConfig(p));
-  routes['GET /api/records'] = () => ({ collections: recs.list.map(({ id, title, group, dir, status, columns, filters, due, titleField }) => ({ id, title, group, dir, status, columns, filters, due, titleField })), errors: recs.errors });
+  routes['GET /api/records'] = () => ({ collections: recs.list.map(({ id, title, group, dir, status, columns, filters, due, titleField, titleLabel, readOnly, limit }) => ({ id, title, group, dir, status, columns, filters, due, titleField, titleLabel, readOnly, limit })), errors: recs.errors });
   for (const col of recs.list) {
     routes[`GET /api/records/${col.id}`] = () => ({ ...records.list(root, col), collection: col.id });
     routes[`POST /api/records/${col.id}`] = (b) => {

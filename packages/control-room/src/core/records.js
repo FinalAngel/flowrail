@@ -11,6 +11,8 @@ const ID = /^[a-z][a-z0-9-]{0,39}$/;
 const FIELD = /^[A-Za-z0-9_-]{1,40}$/;
 const TONES = ['accent', 'info', 'warn', 'danger', 'muted'];
 const MAX = 2000;
+const MAX_LIMIT = 20000;
+const LABEL = /^[\w .%/&()-]{1,40}$/;
 const bad = (msg, status = 400) => Object.assign(new Error(msg), { status });
 const strs = (v, re = FIELD) => (Array.isArray(v) ? v.filter((x) => typeof x === 'string' && re.test(x)).slice(0, 20) : []);
 
@@ -29,13 +31,27 @@ export function collections(config = {}) {
     const values = strs(st.values, /^[\w .-]{1,40}$/);
     const board = strs(st.board, /^[\w .-]{1,40}$/).filter((v) => values.includes(v));
     const tones = Object.fromEntries(Object.entries(st.tones || {}).filter(([k, v]) => values.includes(k) && TONES.includes(v)));
+    // The status bar: bands sum several values into one segment; rates show count / over as a percentage.
+    const pick = (v) => strs(v, /^[\w .-]{1,40}$/).filter((x) => values.includes(x));
+    const bands = (Array.isArray(st.bands) ? st.bands : []).filter((b) => b && LABEL.test(b.label || '') && pick(b.values).length)
+      .slice(0, 20).map((b) => ({ label: b.label, values: pick(b.values), tone: TONES.includes(b.tone) ? b.tone : 'muted' }));
+    const rates = (Array.isArray(st.rates) ? st.rates : []).filter((r) => r && LABEL.test(r.label || '') && pick(r.count).length && pick(r.over).length)
+      .slice(0, 5).map((r) => ({ label: r.label, count: pick(r.count), over: pick(r.over) }));
+    // A column is a field name, or { field, label, sub } (sub: a second field shown quietly after it).
+    const columns = (Array.isArray(c.columns) ? c.columns : []).map((x) => (typeof x === 'string' ? { field: x } : x))
+      .filter((x) => x && FIELD.test(x.field || '')).slice(0, 20)
+      .map((x) => ({ field: x.field, ...(LABEL.test(x.label || '') ? { label: x.label } : {}), ...(FIELD.test(x.sub || '') ? { sub: x.sub } : {}) }));
+    const limit = Number.isInteger(c.limit) && c.limit > 0 ? Math.min(c.limit, MAX_LIMIT) : MAX;
     out.push({
       id: c.id,
       title: typeof c.title === 'string' && c.title.trim() ? c.title.trim().slice(0, 40) : c.id,
       dir,
       group: typeof c.group === 'string' && c.group.trim() ? c.group.trim().slice(0, 40) : 'Records',
-      status: { field, values, board: board.length ? board : values, tones },
-      columns: strs(c.columns),
+      status: { field, values, board: board.length ? board : values, tones, bands, rates },
+      columns,
+      titleLabel: LABEL.test(c.titleLabel || '') ? c.titleLabel : null,
+      readOnly: c.readOnly === true,
+      limit,
       filters: strs(c.filters),
       due: FIELD.test(c.due || '') ? c.due : null,
       titleField: FIELD.test(c.title_field || c.titleField || '') ? (c.title_field || c.titleField) : null,
@@ -52,9 +68,9 @@ export function list(root, col, now = Date.now()) {
   const hit = cache.get(key);
   if (hit && now - hit.at < 2000) return hit.value;
   let names = [];
-  try { names = fs.readdirSync(path.join(root, col.dir), { withFileTypes: true }).filter((e) => e.isFile() && /\.md$/i.test(e.name) && !/^(readme|index)\.md$/i.test(e.name)).map((e) => e.name).sort(); } catch { names = []; }
+  try { names = fs.readdirSync(path.join(root, col.dir), { withFileTypes: true }).filter((e) => e.isFile() && !e.name.startsWith('.') && /\.md$/i.test(e.name) && !/^(readme|index)\.md$/i.test(e.name)).map((e) => e.name).sort(); } catch { names = []; }
   const records = [];
-  for (const name of names.slice(0, MAX)) {
+  for (const name of names.slice(0, col.limit || MAX)) {
     const rel = `${col.dir}/${name}`;
     let doc;
     try { doc = readDoc(root, rel); } catch { continue; } // secrets, docsRoots, too large: not a record
@@ -72,7 +88,7 @@ export function list(root, col, now = Date.now()) {
       mtime: doc.mtime,
     });
   }
-  const value = { records, truncated: names.length > MAX };
+  const value = { records, truncated: names.length > (col.limit || MAX) };
   cache.set(key, { at: now, value });
   return value;
 }
@@ -83,6 +99,7 @@ export function list(root, col, now = Date.now()) {
  * one of the collection's, or when the path is not a record of this collection.
  */
 export function move(p, col, rel, status, mtime) {
+  if (col.readOnly) throw bad(`${col.title} is read-only here`, 405);
   if (typeof rel !== 'string' || !rel.startsWith(col.dir + '/') || rel.slice(col.dir.length + 1).includes('/') || !/\.md$/i.test(rel)) throw bad('path must be a record in this collection');
   if (!col.status.values.includes(status)) throw bad(`status must be one of ${col.status.values.join(', ')}`);
   const doc = readDoc(p.root, rel);
