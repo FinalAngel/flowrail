@@ -23,6 +23,7 @@ import { pathToFileURL } from 'node:url';
 const ID = /^[a-z][a-z0-9-]{0,39}$/;
 const ROUTE = /^(GET|POST) ([a-z0-9][a-z0-9/_-]*)$/;
 const PAGE_PATH = /^\/[a-z0-9/_-]*$/;
+const ALIAS_TO = /^\/[a-z0-9/_-]*(\?[\w.=&%-]*)?$/;
 const FILE = /^[\w.-]+(\/[\w.-]+)*\.m?js$/;
 const PREFIX = /^\/[a-z0-9][a-z0-9-]*\/$/;
 const RESERVED = ['/api/', '/ui/', '/x/', '/artifacts/'];
@@ -41,7 +42,8 @@ export function validate(pl) {
     if (typeof pre !== 'string' || !PREFIX.test(pre) || RESERVED.includes(pre) || !pl.handle) throw new Error(`${where}: prefix "${pre}" must look like /name/, not ${RESERVED.join(' ')}, and needs handle`);
   }
   for (const [from, to] of Object.entries(pl.aliases || {})) {
-    if (!PAGE_PATH.test(from) || !PAGE_PATH.test(String(to))) throw new Error(`${where}: alias ${from} -> ${to} must be page paths like /old`);
+    // The target may carry a query: '/backlog' -> '/board?view=backlog'.
+    if (!PAGE_PATH.test(from) || !ALIAS_TO.test(String(to))) throw new Error(`${where}: alias ${from} -> ${to} must be page paths like /old`);
   }
   for (const [key, fn] of Object.entries(pl.routes || {})) {
     if (!ROUTE.test(key) || key.includes('..')) throw new Error(`${where}: route "${key}" must look like "GET name" or "POST name/sub"`);

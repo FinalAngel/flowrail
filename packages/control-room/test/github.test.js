@@ -55,3 +55,15 @@ test('a sprint shows open issues and those closed inside it', () => {
   assert.deepEqual(got, [1, 2]);
   assert.deepEqual(forSprint(raw, null), []);
 });
+
+test('assignee "*" lists every assigned issue, whoever has it', async () => {
+  const { settings, fetchIssues } = await import('../src/core/github.js');
+  assert.deepEqual(settings({ github: { repo: 'o/r', assignee: '*' } }), { repo: 'o/r', assignee: '*' });
+  const { workspace } = await import('./helpers.js');
+  const p = workspace();
+  let args;
+  const run = async (a) => { args = a; return JSON.stringify([{ number: 1, title: 'a', assignees: [{ login: 'x' }] }, { number: 2, title: 'b', assignees: [] }]); };
+  const r = await fetchIssues(p, { github: { repo: 'o/r', assignee: '*' } }, { run, force: true });
+  assert.ok(!args.includes('--assignee'));
+  assert.deepEqual(r.issues.map((i) => i.number), [1]);
+});

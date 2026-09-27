@@ -1,5 +1,5 @@
 // GitHub issues on the board, read-only. flowrail/config.json "github": { "repo": "owner/name",
-// "assignee": "@me" } turns it on (file only: the settings API cannot set it). The server asks the
+// "assignee": "@me" } turns it on ("*" for every assigned issue; file only: the settings API cannot set it). The server asks the
 // `gh` CLI (no shell, a timeout, JSON out) and keeps the answer for five minutes in
 // .flowrail/github-issues.json. Nothing is ever written back to GitHub. The demo reads a seeded
 // cache and never runs gh.
@@ -19,7 +19,8 @@ export function settings(config) {
   const g = config && config.github;
   if (!g || typeof g !== 'object' || !REPO_RE.test(String(g.repo || ''))) return null;
   const assignee = g.assignee === undefined ? '@me' : String(g.assignee);
-  return USER_RE.test(assignee) ? { repo: g.repo, assignee } : null;
+  // "*" is every issue someone is assigned to, whoever it is.
+  return assignee === '*' || USER_RE.test(assignee) ? { repo: g.repo, assignee } : null;
 }
 
 /** Run gh and parse its JSON. `run` is injectable for tests. */
@@ -49,8 +50,8 @@ export async function fetchIssues(p, config, { run = ghRunner, now = Date.now(),
   if (fresh) return { available: true, repo: s.repo, issues: cached.issues, at: cached.at };
   if (config.demo) return { available: false, repo: s.repo, issues: [], error: 'GitHub unavailable' };
   try {
-    const out = await run(['issue', 'list', '--repo', s.repo, '--assignee', s.assignee, '--state', 'all', '--limit', '100', '--json', FIELDS]);
-    const issues = JSON.parse(out).map(shape);
+    const out = await run(['issue', 'list', '--repo', s.repo, ...(s.assignee === '*' ? [] : ['--assignee', s.assignee]), '--state', 'all', '--limit', '100', '--json', FIELDS]);
+    const issues = JSON.parse(out).map(shape).filter((i) => s.assignee !== '*' || i.assignees.length);
     const at = new Date(now).toISOString();
     try { writeJson(cacheFile(p), { repo: s.repo, at, issues }); } catch { /* the board still shows them */ }
     return { available: true, repo: s.repo, issues, at };
