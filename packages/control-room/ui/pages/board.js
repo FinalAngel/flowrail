@@ -108,7 +108,11 @@ export function mount(el, ctx) {
 
   function column(name, tasks) {
     const issues = issuesIn(name);
-    const body = h('div.col-body', tasks.map(card), issues.map(issueCard));
+    // Done reads like the pipeline's Lost column: a quiet list of what finished, not a stack of cards.
+    const body = name === 'Done'
+      ? h('ol.done-list', tasks.map((t) => h('li', h('button.done-item', { type: 'button', title: `${t.id} ${t.title}`, onclick: () => detail(t) }, h('span.id', t.id), h('span.t', t.title)))),
+        issues.map((i) => h('li', h('a.done-item', { href: i.url, target: '_blank', rel: 'noopener noreferrer', title: `#${i.number} ${i.title} (GitHub)` }, h('span.id', `#${i.number}`), h('span.t', i.title)))))
+      : h('div.col-body', tasks.map(card), issues.map(issueCard));
     const col = h('section.col', { 'aria-label': `${name}, ${tasks.length} tasks`,
       ondragover: (e) => { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; col.classList.add('drop'); },
       ondragleave: (e) => { if (!col.contains(e.relatedTarget)) col.classList.remove('drop'); },

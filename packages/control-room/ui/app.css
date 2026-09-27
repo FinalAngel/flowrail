@@ -339,8 +339,8 @@ dialog.palette[open] { animation: pop var(--dur-arrive) var(--ease); }
 .filters { display: flex; gap: var(--s2); flex-wrap: wrap; align-items: center; margin-bottom: var(--s4); }
 .filters .input { width: auto; min-width: 140px; }
 .filters .search { flex: 1; min-width: 180px; max-width: 320px; }
-.board { display: grid; grid-template-columns: repeat(5, minmax(168px, 1fr)); gap: var(--s3); align-items: start; overflow-x: auto; padding-bottom: 8px; }
-.col { background: var(--tray); border-radius: var(--r-tray); padding: 4px; min-height: 120px; transition: box-shadow var(--dur-state) var(--ease); }
+.board { display: grid; grid-template-columns: repeat(4, minmax(168px, 1fr)) minmax(150px, 0.8fr); gap: var(--s3); align-items: start; overflow-x: auto; padding-bottom: 8px; }
+.col { min-width: 0; background: var(--tray); border-radius: var(--r-tray); padding: 4px; min-height: 120px; transition: box-shadow var(--dur-state) var(--ease); }
 .col.drop { box-shadow: inset 0 0 0 2px var(--accent); }
 .col-head { display: flex; align-items: center; gap: 8px; padding: 8px 10px; font-size: 13px; font-weight: 500; }
 .col-head .count { color: var(--text-3); font-weight: 400; }
@@ -758,3 +758,13 @@ table.probes .bad, table.probes tr.fail td:first-child { color: var(--danger); f
 .settings-modules { border: 0; border-top: 1px solid var(--hairline); margin: 0; padding: var(--s4) 0 0; min-width: 0; }
 .settings-modules > legend { float: left; width: 100%; padding: 0; margin-bottom: var(--s3); }
 .settings-toggles { clear: both; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px 16px; }
+
+/* Board, Done: a compact list like the pipeline's Lost column. */
+.done-list { list-style: none; margin: 0; padding: 2px 8px 8px; display: grid; min-width: 0; }
+.done-list li { min-width: 0; }
+.done-list li + li { border-top: 1px solid var(--hairline); }
+.done-item { display: flex; gap: 8px; width: 100%; padding: 6px 2px; border: 0; background: none; text-align: left; font: inherit; font-size: 12.5px; color: var(--text-2); text-decoration: none; cursor: pointer; min-width: 0; }
+.done-item .id { flex: none; font-family: var(--mono); font-size: 11px; color: var(--text-3); padding-top: 1px; }
+.done-item .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.done-item:hover { color: var(--text); }
+.done-item:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; border-radius: 4px; }
