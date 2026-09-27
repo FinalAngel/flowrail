@@ -1,6 +1,6 @@
 # Welcome to flowrail
 
-This folder is the state of your project's flowrail control room. Everything in it is a plain file you can read, diff and commit. Delete `flowrail/` and nothing else in your repo changes.
+This folder is the state of your project's flowrailOS. Everything in it is a plain file you can read, diff and commit. Delete `flowrail/` and nothing else in your repo changes.
 
 ## What is here
 

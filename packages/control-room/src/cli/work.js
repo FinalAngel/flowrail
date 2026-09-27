@@ -10,7 +10,7 @@ import * as routines from '../core/routines.js';
 import { loadLines, stats, stateCounts, stateSummary, hooksStatus, verifyJournal } from 'flowrail/api';
 import { today as todayFeed } from '../core/today.js';
 
-const GUARD = 'npx flowrail', CLI = 'npx @finalangel/flowrail-room';
+const GUARD = 'npx flowrail', CLI = 'npx @finalangel/flowrail-os';
 /**
  * A person at a terminal: stdin and stdout are a TTY. That holds even when CLAUDECODE is set, since
  * a shell opened from Claude Code inherits it; the agent's Bash tool never has a TTY.
@@ -70,7 +70,7 @@ export function task(pos, flags) {
   if (flags.label !== undefined || flags.labels !== undefined) fields.labels = String(flags.label ?? flags.labels);
 
   if (pos[0] === 'update') {
-    if (!pos[1]) throw new Error('usage: npx @finalangel/flowrail-room task update <id> --status "In Progress"');
+    if (!pos[1]) throw new Error('usage: npx @finalangel/flowrail-os task update <id> --status "In Progress"');
     if (flags.title) fields.title = flags.title;
     if (!Object.keys(fields).length) throw new Error('nothing to update; pass --status, --priority, --assignee, --sprint, --label or --title');
     const t = board.update(p, config, pos[1], fields, byAgent(flags) ? 'agent' : 'human');
@@ -78,12 +78,12 @@ export function task(pos, flags) {
     return flags.json ? json(t) : out(`${mark.ok} ${t.id} ${c.dim('·')} ${t.status} ${c.dim('·')} ${t.priority} ${c.dim('·')} ${t.title}`);
   }
   if (pos[0] === 'note') {
-    if (!pos[1] || !pos[2]) throw new Error('usage: npx @finalangel/flowrail-room task note <id> "text"');
+    if (!pos[1] || !pos[2]) throw new Error('usage: npx @finalangel/flowrail-os task note <id> "text"');
     const t = board.note(p, pos[1], pos.slice(2).join(' '), byAgent(flags) ? 'agent' : 'you');
     return flags.json ? json(t) : out(`${mark.ok} Note added to ${t.id}.`);
   }
   const title = pos.join(' ').trim();
-  if (!title) throw new Error('usage: npx @finalangel/flowrail-room task "<title>" [--priority P1] [--sprint current|next|backlog]');
+  if (!title) throw new Error('usage: npx @finalangel/flowrail-os task "<title>" [--priority P1] [--sprint current|next|backlog]');
   // New tasks land in the current sprint, so `tasks` shows them. --sprint backlog to park one.
   // Filed by a person at a terminal: theirs unless --assignee says otherwise.
   if (fields.assignee === undefined && atTerminal(flags)) fields.assignee = gitUser(p.root) || 'you';
@@ -145,7 +145,7 @@ export { comments_ as comments };
 
 export function resolve(pos, flags) {
   const p = workspace();
-  if (!pos[0] || !pos[1]) throw new Error('usage: npx @finalangel/flowrail-room resolve <path> <id> [--note "what you did"]');
+  if (!pos[0] || !pos[1]) throw new Error('usage: npx @finalangel/flowrail-os resolve <path> <id> [--note "what you did"]');
   const cm = comments.resolve(p, pos[0], pos[1], flags.note === true ? '' : flags.note, byAgent(flags) ? 'agent' : 'you');
   if (flags.json) return json(cm);
   out(`${mark.ok} Resolved ${cm.id} on ${cm.path}.`);
@@ -154,7 +154,7 @@ export function resolve(pos, flags) {
 export function remember(pos, flags) {
   const p = workspace();
   const fact = pos.join(' ').trim();
-  if (!fact) throw new Error('usage: npx @finalangel/flowrail-room remember "<fact>" [--type project|feedback|user|reference] [--name slug]');
+  if (!fact) throw new Error('usage: npx @finalangel/flowrail-os remember "<fact>" [--type project|feedback|user|reference] [--name slug]');
   const m = memory.store(p, { fact, type: flags.type && flags.type !== true ? flags.type : 'project', name: flags.name, why: flags.why, how: flags.how, force: !!flags.force });
   if (flags.json) return json(m);
   out(`${mark.ok} Stored ${c.bold(m.path)} ${c.dim(`(${m.type})`)}`);
@@ -163,7 +163,7 @@ export function remember(pos, flags) {
 export function recall(pos, flags) {
   const p = workspace();
   const q = pos.join(' ').trim();
-  if (!q) throw new Error('usage: npx @finalangel/flowrail-room recall "<question>"');
+  if (!q) throw new Error('usage: npx @finalangel/flowrail-os recall "<question>"');
   const hits = memory.recall(p, q, Number(flags.limit) || 5);
   if (flags.json) return json({ hits });
   if (!hits.length) return out(`Nothing stored about that. ${c.dim(`Save a fact: ${CLI} remember "..." --type project --name slug`)}`);

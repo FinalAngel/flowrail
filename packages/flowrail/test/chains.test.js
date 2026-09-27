@@ -256,7 +256,7 @@ test('chain: forge a human comment, then start a session', () => {
 
 test('chain: rewrite the managed block in CLAUDE.md', () => {
   const root = tmpdir();
-  apply(root, planInit(root, { room: () => {} }).changes); // the control room writes the block
+  apply(root, planInit(root, { room: () => {} }).changes); // flowrailOS writes the block
   const text = fs.readFileSync(path.join(root, 'CLAUDE.md'), 'utf8');
   assert.equal(call(root, 'Write', { file_path: 'CLAUDE.md', content: '# Just notes\n' }), 'ask');
   assert.equal(call(root, 'Edit', { file_path: 'CLAUDE.md', old_string: 'when one holds a call, stop and ask the human;', new_string: '' }), 'ask');

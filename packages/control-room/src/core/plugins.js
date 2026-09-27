@@ -1,4 +1,4 @@
-// Plugins add pages and API routes to the control room without forking it.
+// Plugins add pages and API routes to flowrailOS without forking it.
 //
 // A plugin is a plain object (or a module whose default export is one):
 //   {

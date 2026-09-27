@@ -209,7 +209,7 @@ export async function githubRuns(p, { exec = ghExec, now = Date.now() } = {}) {
   return out;
 }
 
-const BIN = path.join(PKG_ROOT, 'bin', 'flowrail-room.js');
+const BIN = path.join(PKG_ROOT, 'bin', 'flowrail-os.js');
 const argv = (root, id) => [process.execPath, BIN, 'routines', 'run', id];
 
 export function plistFor(p, r) {
@@ -256,7 +256,7 @@ export function install(p, opts = {}) {
   const errors = validate(load(p));
   if (errors.length) throw bad(errors.join('; '));
   if (opts.http && commandRoutines(p).length) {
-    throw bad(`Command routines (${commandRoutines(p).map((r) => r.id).join(', ')}) are scheduled from the terminal, where you see each command first: npx @finalangel/flowrail-room routines install`, 403);
+    throw bad(`Command routines (${commandRoutines(p).map((r) => r.id).join(', ')}) are scheduled from the terminal, where you see each command first: npx @finalangel/flowrail-os routines install`, 403);
   }
   uninstall(p);
   fs.mkdirSync(p.runs, { recursive: true });
@@ -345,7 +345,7 @@ export async function runNow(p, id, { wait = true } = {}) {
   return wait ? finish : started.record;
 }
 
-/** The control room's doctor check (the guard's doctor knows nothing about routines). */
+/** flowrailOS's doctor check (the guard's doctor knows nothing about routines). */
 export function doctorChecks(p) {
   const check = (status, detail, fix = '') => [{ id: 'routines', title: 'Routines', status, ok: status === 'ok', level: status, detail, ...(fix ? { fix } : {}) }];
   try {

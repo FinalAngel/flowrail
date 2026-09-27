@@ -18,7 +18,7 @@ export function tree(el, ctx) {
     if (!box.isConnected) return;
     areas = graph.areas || [];
     const files = graph.nodes.filter((n) => n.path && n.kind !== 'folder' && n.kind !== 'hub' && !/\.json$/.test(n.path));
-    if (!files.length) { clear(box).append(empty('The tree fills as you add Markdown docs to the repo.', 'npx @finalangel/flowrail-room remember "Releases go out on Tuesdays" --type project --name release-day', ctx)); return; }
+    if (!files.length) { clear(box).append(empty('The tree fills as you add Markdown docs to the repo.', 'npx @finalangel/flowrail-os remember "Releases go out on Tuesdays" --type project --name release-day', ctx)); return; }
     const areaOfDir = new Map(graph.nodes.filter((n) => n.kind === 'folder' && n.area != null).map((n) => [n.path, n.area]));
     root = { name: '', path: '', dirs: new Map(), files: [], count: 0 };
     for (const f of files.sort((a, b) => a.path.localeCompare(b.path))) {

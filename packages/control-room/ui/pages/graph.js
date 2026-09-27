@@ -101,7 +101,7 @@ function force(el, ctx) {
     graph.links = graph.links.filter((l) => byId.has(l.source) && byId.has(l.target));
     for (const l of graph.links) { adj.get(l.source).out.push(l); adj.get(l.target).in.push(l); }
     if (graph.nodes.length <= 1) {
-      clear(body).append(empty('The graph fills as you add docs, memories, agents and red lines.', 'npx @finalangel/flowrail-room remember "Releases go out on Tuesdays" --type project --name release-day', ctx));
+      clear(body).append(empty('The graph fills as you add docs, memories, agents and red lines.', 'npx @finalangel/flowrail-os remember "Releases go out on Tuesdays" --type project --name release-day', ctx));
       return;
     }
     clear(datalist).append(...graph.nodes.slice(0, 400).map((n) => h('option', { value: n.label })));

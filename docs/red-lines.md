@@ -49,7 +49,7 @@ A red line is a seatbelt, not a jail. It holds the ordinary, direct form of an a
 
 ## States
 
-Every red line is in exactly one state. The CLI (`flowrail redlines`, `flowrail-room status`), the dashboard and the API (`state` on each entry of `GET /api/redlines`) use the same four, computed from one function:
+Every red line is in exactly one state. The CLI (`flowrail redlines`, `flowrail-os status`), the dashboard and the API (`state` on each entry of `GET /api/redlines`) use the same four, computed from one function:
 
 | State | Label | When | What it means |
 |---|---|---|---|

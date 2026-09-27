@@ -16,4 +16,4 @@ Propose P0 to P3 with one sentence of reasoning. The human confirms before anyth
 
 ## Step 4: File it
 
-`npx @finalangel/flowrail-room task "<title>" --priority P2 --label bug --sprint backlog` and link the failing test in a note.
+`npx @finalangel/flowrail-os task "<title>" --priority P2 --label bug --sprint backlog` and link the failing test in a note.

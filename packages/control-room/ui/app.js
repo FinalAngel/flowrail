@@ -12,8 +12,8 @@ export async function api(path, body) {
     : { method: 'POST', headers: { ...headers, 'content-type': 'application/json', 'X-Flowrail': '1' }, body: JSON.stringify(body) };
   let res;
   try { res = await fetch('/api' + path, init); }
-  catch { throw new Error('The flowrail server is not reachable. Is `npx @finalangel/flowrail-room` still running?'); }
-  if (res.status === 401) { showStale(); const e = new Error('This tab is from an older flowrail run. Reload.'); e.status = 401; throw e; }
+  catch { throw new Error('The flowrailOS server is not reachable. Is `npx @finalangel/flowrail-os` still running?'); }
+  if (res.status === 401) { showStale(); const e = new Error('This tab is from an older flowrailOS run. Reload.'); e.status = 401; throw e; }
   const txt = await res.text();
   let data = null;
   try { data = txt ? JSON.parse(txt) : null; } catch { data = txt; }
@@ -33,10 +33,10 @@ function showStale() {
   document.querySelectorAll('dialog').forEach((d) => d.remove());
   document.getElementById('shell').replaceChildren(h('div.stale', { role: 'alert' },
     icon('mark', 28),
-    h('h1', 'This tab is from an older flowrail run. Reload.'),
-    h('p.muted', 'flowrail was restarted, so this page lost its connection. Reloading picks up the new run. Nothing was lost.'),
+    h('h1', 'This tab is from an older flowrailOS run. Reload.'),
+    h('p.muted', 'flowrailOS was restarted, so this page lost its connection. Reloading picks up the new run. Nothing was lost.'),
     h('button.btn.primary', { type: 'button', onclick: () => location.reload() }, 'Reload')));
-  document.title = 'Reload · flowrail';
+  document.title = 'Reload · flowrailOS';
 }
 
 /* ---------- Toasts ---------- */
@@ -187,9 +187,9 @@ function renderSidebar() {
   };
   const link = ([id, label, href]) => h('a', { href: '#' + href, 'aria-current': path === href ? 'page' : null, onclick: closeNav }, icon(ICON[id]), h('span', label), badge(id));
   clear(side).append(
-    h('a.brand', { href: '#/', 'aria-label': `${BRAND?.name || 'flowrail'} home`, onclick: closeNav }, icon('mark', 20), BRAND
+    h('a.brand', { href: '#/', 'aria-label': `${BRAND?.name || 'flowrailOS'} home`, onclick: closeNav }, icon('mark', 20), BRAND
       ? h('span.wordmark', BRAND.mono && BRAND.name.startsWith(BRAND.mono) ? [h('span.f', BRAND.mono), h('span.r', BRAND.name.slice(BRAND.mono.length))] : h('span.r', BRAND.name))
-      : h('span.wordmark', h('span.f', 'flow'), h('span.r', 'rail'))),
+      : h('span.wordmark', h('span.f', 'flow'), h('span.r', 'railOS'))),
     h('nav.nav', { 'aria-label': 'Pages' }, NAV.map(([group, items]) => [group, items.filter(on)]).filter(([, items]) => items.length).map(([group, items]) => h('div.nav-group', { role: 'group', 'aria-label': group }, h('div.nav-label', { 'aria-hidden': 'true' }, group), items.map(link)))),
     h('div.sidebar-foot.nav', link(SETTINGS), shell.overview?.workspace?.version && h('div.ver', 'v' + shell.overview.workspace.version)),
   );
@@ -349,11 +349,11 @@ function openPalette() {
     const slug = ql.replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 40) || 'fact';
     const run = q
       ? [
-          { section: 'Run', title: `npx @finalangel/flowrail-room task "${quoted}"`, copy: `npx @finalangel/flowrail-room task "${quoted}"`, icon: 'terminal', mono: true, kind: 'file a task' },
-          { section: 'Run', title: `npx @finalangel/flowrail-room recall "${quoted}"`, copy: `npx @finalangel/flowrail-room recall "${quoted}"`, icon: 'terminal', mono: true, kind: 'recall' },
-          { section: 'Run', title: `npx @finalangel/flowrail-room remember "${quoted}" --type project --name ${slug}`, copy: `npx @finalangel/flowrail-room remember "${quoted}" --type project --name ${slug}`, icon: 'terminal', mono: true, kind: 'remember' },
+          { section: 'Run', title: `npx @finalangel/flowrail-os task "${quoted}"`, copy: `npx @finalangel/flowrail-os task "${quoted}"`, icon: 'terminal', mono: true, kind: 'file a task' },
+          { section: 'Run', title: `npx @finalangel/flowrail-os recall "${quoted}"`, copy: `npx @finalangel/flowrail-os recall "${quoted}"`, icon: 'terminal', mono: true, kind: 'recall' },
+          { section: 'Run', title: `npx @finalangel/flowrail-os remember "${quoted}" --type project --name ${slug}`, copy: `npx @finalangel/flowrail-os remember "${quoted}" --type project --name ${slug}`, icon: 'terminal', mono: true, kind: 'remember' },
         ]
-      : ['npx @finalangel/flowrail-room status', 'npx flowrail doctor', 'npx flowrail redlines test "git push origin main"', 'npx flowrail check'].map((c) => ({ section: 'Run', title: c, copy: c, icon: 'terminal', mono: true }));
+      : ['npx @finalangel/flowrail-os status', 'npx flowrail doctor', 'npx flowrail redlines test "git push origin main"', 'npx flowrail check'].map((c) => ({ section: 'Run', title: c, copy: c, icon: 'terminal', mono: true }));
     items = [...go, ...run];
     active = 0; paint();
     if (q.length < 2) return;
@@ -411,18 +411,18 @@ async function route() {
   pageLabel = page ? page[1] : 'Not found';
   syncTitle();
   if (!page) {
-    document.title = `Not found · ${BRAND?.name || 'flowrail'}`;
+    document.title = `Not found · ${BRAND?.name || 'flowrailOS'}`;
     el.append(h('div.empty', h('h1', 'This page does not exist'), h('p', `Nothing lives at ${path}.`), h('a.btn', { href: '#/' }, 'Back to the dashboard')));
     return;
   }
-  document.title = `${page[1]} · ${BRAND?.name || 'flowrail'}`;
+  document.title = `${page[1]} · ${BRAND?.name || 'flowrailOS'}`;
   let mod;
   try { mod = await import(MODULE[page[0]] || `./pages/${page[0]}.js`); }
   catch (e) { if (my === routeSeq) el.append(h('div.error', { role: 'alert' }, icon('alert'), `Could not load the ${page[1]} page. ${e.message}`)); return; }
   if (my !== routeSeq) return;
   const dispose = [];
   const ctx = {
-    api, toast, navigate, params, path, shell, hooksState, hooksInfo, isArmed, brand: BRAND?.name || 'flowrail',
+    api, toast, navigate, params, path, shell, hooksState, hooksInfo, isArmed, brand: BRAND?.name || 'flowrailOS',
     /** Header parts: summary (beside the title), center (the middle), tools (beside the search); cleared on page change. */
     header: (parts) => { if (my === routeSeq) setHeader(parts); },
     refreshShell: () => refreshShell(),

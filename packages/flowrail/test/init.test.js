@@ -11,7 +11,7 @@ import { describe } from '../src/core/redlines.js';
 import { tmpdir, BIN } from './helpers.js';
 
 const STARTERS = ['no-push-without-asking', 'no-destructive-git', 'no-secrets-in-repo', 'no-rm-rf-outside-project', 'protect-flowrail', 'ask-before-mcp-actions'];
-/** The control room's init hook with no files of its own: guard init plus the CLAUDE.md block. */
+/** flowrailOS's init hook with no files of its own: guard init plus the CLAUDE.md block. */
 const NO_FILES = () => {};
 const sha256 = (text) => createHash('sha256').update(text).digest('hex');
 const read = (root, rel) => fs.readFileSync(path.join(root, rel), 'utf8');

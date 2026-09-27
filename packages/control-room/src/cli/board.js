@@ -1,4 +1,4 @@
-// flowrail-room board export [--out file.html] [--backlog]: the current sprint as a standalone HTML file.
+// flowrail-os board export [--out file.html] [--backlog]: the current sprint as a standalone HTML file.
 // The CLI reads flowrail/board.json; a plugin's board store is exported from code with boardHtml().
 import fs from 'node:fs';
 import path from 'node:path';

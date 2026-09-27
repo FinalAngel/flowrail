@@ -252,16 +252,16 @@ HOLD flowrail redlines accept
 HOLD npx flowrail redlines accept
 ALLOW npx flowrail redlines verify
 ALLOW npx flowrail redlines test "git push"
-# the control room's spellings of the same commands
-HOLD flowrail-room routines install
+# flowrailOS's spellings of the same commands
+HOLD flowrail-os routines install
 HOLD flowrail room routines install
-HOLD npx @finalangel/flowrail-room routines install
-HOLD npx @finalangel/flowrail-room@latest uninstall
-HOLD flowrail-room uninstall
-HOLD npm uninstall @finalangel/flowrail-room
-HOLD node node_modules/@finalangel/flowrail-room/bin/flowrail-room.js routines install
-ALLOW flowrail-room routines status
-ALLOW npx @finalangel/flowrail-room demo
+HOLD npx @finalangel/flowrail-os routines install
+HOLD npx @finalangel/flowrail-os@latest uninstall
+HOLD flowrail-os uninstall
+HOLD npm uninstall @finalangel/flowrail-os
+HOLD node node_modules/@finalangel/flowrail-os/bin/flowrail-os.js routines install
+ALLOW flowrail-os routines status
+ALLOW npx @finalangel/flowrail-os demo
 # globs, loop variables, piped file lists and copied trees (the shell expands them before running)
 HOLD for f in .claude/*/*/*.mjs; do cp /dev/null "$f"; done
 HOLD for f in .claude/flowrail/guard/*.js .claude/flowrail/guard/*/*.js; do : > "$f"; done

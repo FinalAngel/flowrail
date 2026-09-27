@@ -1,4 +1,4 @@
-// `npx @finalangel/flowrail-room init`: the flowrail guard init plus the control room's files (board, docs, memory,
+// `npx @finalangel/flowrail-os init`: the flowrail guard init plus flowrailOS's files (board, docs, memory,
 // workflows, the CLAUDE.md block). Everything else in init lives in the flowrail package.
 import fs from 'node:fs';
 import path from 'node:path';
@@ -11,7 +11,7 @@ import { sprints } from './board.js';
 export { applyPlan as apply, withBlock } from 'flowrail/api';
 
 const TEMPLATE = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..', '..', 'templates', 'init');
-const CLI = 'npx @finalangel/flowrail-room';
+const CLI = 'npx @finalangel/flowrail-os';
 
 function onboardingBoard(config, cli = CLI) {
   const { current } = sprints(config);
@@ -40,7 +40,7 @@ function templateFiles(dir = TEMPLATE, rel = '') {
 }
 
 /**
- * The control room's CLAUDE.md/AGENTS.md block: two lines. Open comments reach the agent through the
+ * flowrailOS's CLAUDE.md/AGENTS.md block: two lines. Open comments reach the agent through the
  * SessionStart hook, so no per-session command; a guard-only install writes no block at all.
  */
 export function roomBlock() {
@@ -53,7 +53,7 @@ ${BLOCK_END}
 
 const BLOCK_FILES = new Set(['CLAUDE.md', 'AGENTS.md']);
 
-/** The control room's files, added by the guard's planInit in its own order. */
+/** flowrailOS's files, added by the guard's planInit in its own order. */
 export function room({ p, config, add, changes }) {
   // The guard's planInit adds its own CLAUDE.md/AGENTS.md block after this runs; swap in ours.
   // Intercepts changes.push until flowrail planInit takes the block as an option.
@@ -66,11 +66,11 @@ export function room({ p, config, add, changes }) {
   add('flowrail/board.json', JSON.stringify(onboardingBoard(config), null, 2) + '\n');
   for (const rel of templateFiles()) add(rel, fs.readFileSync(path.join(TEMPLATE, rel), 'utf8').replaceAll('{{DATE}}', localDate()).replaceAll('{{NAME}}', config.name).replaceAll('{{CLI}}', CLI));
   if (!exists(p.memoryIndex)) {
-    changes.push({ path: 'flowrail/memory/INDEX.md', kind: 'add', internal: true, before: '', after: '# Memory index\n\nOne line per memory. Maintained by `npx @finalangel/flowrail-room remember`; edit the memory files, not this list.\n\n## reference\n\n- [flowrail-basics](flowrail-basics.md): Where flowrail keeps its state and which commands agents use\n' });
+    changes.push({ path: 'flowrail/memory/INDEX.md', kind: 'add', internal: true, before: '', after: '# Memory index\n\nOne line per memory. Maintained by `npx @finalangel/flowrail-os remember`; edit the memory files, not this list.\n\n## reference\n\n- [flowrail-basics](flowrail-basics.md): Where flowrail keeps its state and which commands agents use\n' });
   }
 }
 
-/** Plan a full init (guard + control room). `minimal: true` is the guard only. */
+/** Plan a full init (guard + flowrailOS). `minimal: true` is the guard only. */
 export function planInit(root, opts = {}) {
   return planGuardSetup(root, opts.minimal ? opts : { ...opts, room });
 }

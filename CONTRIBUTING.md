@@ -20,11 +20,11 @@ git clone https://github.com/FinalAngel/flowrail
 cd flowrail
 npm install                  # links the two workspace packages; no dependencies
 npm test                     # node --test in packages/flowrail and packages/control-room
-node packages/control-room/bin/flowrail-room.js demo   # dashboard on a seeded example workspace
+node packages/control-room/bin/flowrail-os.js demo   # dashboard on a seeded example workspace
 npm run check                # the repo's own red lines
 ```
 
-Two packages: `packages/flowrail` (the guard, published as `flowrail`) and `packages/control-room` (the dashboard, published as `@finalangel/flowrail-room`).
+Two packages: `packages/flowrail` (the guard, published as `flowrail`) and `packages/control-room` (the dashboard, published as `@finalangel/flowrail-os`).
 
 ## Contributing a red line
 

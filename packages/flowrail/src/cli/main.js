@@ -24,7 +24,7 @@ ${c.bold('Maintenance')}
   flowrail uninstall              remove the guard and its hooks; flowrail/ stays
 
 ${c.dim(LEGEND)}
-${c.dim('Dashboard, tasks, comments and routines: npx @finalangel/flowrail-room (optional, separate package)')}
+${c.dim('Dashboard, tasks, comments and routines: npx @finalangel/flowrail-os (optional, separate package)')}
 `;
 
 const COMMANDS = {
@@ -40,7 +40,7 @@ const COMMANDS = {
   audit: ['./audit.js', 'audit'],
 };
 
-/** Commands that live in the control room; `flowrail <cmd>` hands them to flowrail-room. */
+/** Commands that live in flowrailOS; `flowrail <cmd>` hands them to flowrail-os. */
 const ROOM_COMMANDS = new Set(['start', 'demo', 'today', 'task', 'tasks', 'comments', 'resolve', 'remember', 'recall', 'routines']);
 
 /** The workspace for the current folder, or exit with a helpful message. */
@@ -49,7 +49,7 @@ export function workspace() {
   if (!root) {
     err('no workspace in this folder or its parents.');
     out(`  ${c.cyan('npx flowrail init')}   set one up here`);
-    out(`  ${c.cyan('npx @finalangel/flowrail-room demo')}   look around a sample workspace first`);
+    out(`  ${c.cyan('npx @finalangel/flowrail-os demo')}   look around a sample workspace first`);
     process.exit(1);
   }
   return paths(root);
@@ -59,7 +59,7 @@ export async function main(argv) {
   const { flags, pos } = parseArgs(argv);
   if (flags.version) return out(VERSION);
   const name = pos[0] && !pos[0].startsWith('-') ? pos[0] : 'help';
-  // Control room commands go to flowrail-room with their raw argv, flags (and --help) included.
+  // flowrailOS commands go to flowrail-os with their raw argv, flags (and --help) included.
   const entry = name === 'room' ? ['./room.js', 'room', argv.filter((a, i) => i !== argv.indexOf('room'))]
     : ROOM_COMMANDS.has(name) ? ['./room.js', 'room', argv] : COMMANDS[name];
   if ((flags.help && entry?.[1] !== 'room') || name === 'help') return out(HELP);

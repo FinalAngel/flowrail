@@ -215,7 +215,7 @@ function setupCard(setup, reload, ctx) {
   }
   const firstOpen = steps.findIndex((s) => !s.done);
   return h('section.setup.tray', { 'aria-labelledby': 'setup-h' },
-    h('div.tray-label', h('h2', { id: 'setup-h', style: 'font-size:13px;font-weight:500' }, 'Set up flowrail'), h('span.count', `${done} of ${steps.length}`),
+    h('div.tray-label', h('h2', { id: 'setup-h', style: 'font-size:13px;font-weight:500' }, 'Set up flowrailOS'), h('span.count', `${done} of ${steps.length}`),
       h('button.link', { type: 'button', style: 'margin-left:auto', onclick: () => dismiss(true) }, 'Dismiss')),
     h('div.card',
       h('div.progress', { role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': steps.length, 'aria-valuenow': done, 'aria-label': 'Setup progress', style: 'margin-bottom:8px' }, h('span', { style: `transform:scaleX(${done / steps.length})` })),
@@ -225,7 +225,7 @@ function setupCard(setup, reload, ctx) {
           !s.done && i === firstOpen && s.hint && hint(s.hint, ctx)))))));
 }
 
-/** A hint may end in a command ("…, then: npx @finalangel/flowrail-room routines install"): show the prose, then a copyable block. */
+/** A hint may end in a command ("…, then: npx @finalangel/flowrail-os routines install"): show the prose, then a copyable block. */
 function hint(text, ctx) {
   const m = /(?:^|:\s*)((?:npx|flowrail|claude|git)\s.+)$/.exec(text);
   if (!m) return h('p.meta', text);

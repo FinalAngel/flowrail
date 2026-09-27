@@ -67,7 +67,7 @@ Inside a Claude Code session the `protect-flowrail` red line asks before command
 }
 ```
 
-What happened in the repo since `since`: local midnight, or the last 24 hours when it is before 06:00. Pass `?since=` (any ISO time, clamped to the last 30 days) for "While you were away": the dashboard sends the time of your last visit. The starter tasks, memory and report that `init` writes carry `seed: true` and never appear here, so a fresh workspace starts with an empty Today. `items` is newest first, at most 50. `kind` is one of `held` (one item per red line, `by: "agent"`), `redlines-changed`, `task` (filed or moved; `by` is `agent` or `human`), `comment` (resolved), `artifact` (a new report), `routine` (a run), `commit` (from `git log --since`; none without git), or `memory` (stored or changed). `detail`, `href` and `by` are optional. `counts.held` counts holds, not rules. Task moves come from `.flowrail/activity.log`, which `flowrail-room task update` and the board write on every status change.
+What happened in the repo since `since`: local midnight, or the last 24 hours when it is before 06:00. Pass `?since=` (any ISO time, clamped to the last 30 days) for "While you were away": the dashboard sends the time of your last visit. The starter tasks, memory and report that `init` writes carry `seed: true` and never appear here, so a fresh workspace starts with an empty Today. `items` is newest first, at most 50. `kind` is one of `held` (one item per red line, `by: "agent"`), `redlines-changed`, `task` (filed or moved; `by` is `agent` or `human`), `comment` (resolved), `artifact` (a new report), `routine` (a run), `commit` (from `git log --since`; none without git), or `memory` (stored or changed). `detail`, `href` and `by` are optional. `counts.held` counts holds, not rules. Task moves come from `.flowrail/activity.log`, which `flowrail-os task update` and the board write on every status change.
 
 ### Audit
 
@@ -198,7 +198,7 @@ An **event routine** has `on` instead of `schedule`: `{ "event": "github-actions
 | `_action` | Body |
 |---|---|
 | `run` | `id`. Starts a routine that is already in `routines.json` and returns without waiting for it. |
-| `install` | Schedules the enabled routines. Refused with `403` while an enabled `command` routine exists: those are scheduled from the terminal with `flowrail-room routines install`, which shows each command first. |
+| `install` | Schedules the enabled routines. Refused with `403` while an enabled `command` routine exists: those are scheduled from the terminal with `flowrail-os routines install`, which shows each command first. |
 | `uninstall` | |
 | `save` | `routines`. Claude routines can be added and changed. A `command` routine can only be kept, rescheduled, disabled or removed: adding one, or changing what an existing one runs, is refused with `403`. Command routines are edited in `flowrail/routines.json`. |
 

@@ -1,4 +1,4 @@
-// flowrail/api: the small, stable surface other packages (the control room) build on.
+// flowrail/api: the small, stable surface other packages (flowrailOS) build on.
 // Everything else under src/ is internal and may change between versions.
 import { paths } from './core/paths.js';
 import { loadConfig } from './core/workspace.js';

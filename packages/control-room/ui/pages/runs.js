@@ -19,7 +19,7 @@ export function mount(el, ctx) {
       h('p.sub', list.length ? `${plural(list.length, 'recorded run')}${failed ? ` · ${failed} failed` : ''}. Headless: they read and report, they do not act.` : 'Headless runs from routines and Run now buttons, with their output.'))));
     root.append(actionsSection(d), appsSection(d));
     root.append(h('h2.section-title', 'Recent runs'));
-    if (!list.length) root.append(empty('A run is a routine or a Run now button working without you. Its output lands here.', 'npx @finalangel/flowrail-room routines run <id>', ctx));
+    if (!list.length) root.append(empty('A run is a routine or a Run now button working without you. Its output lands here.', 'npx @finalangel/flowrail-os routines run <id>', ctx));
     else root.append(h('div.card', { style: 'padding:4px 0' }, h('div.table-wrap', h('table.tbl.stack-sm',
       h('thead', h('tr', h('th', 'Run'), h('th', 'Started by'), h('th', 'Started'), h('th', 'Took'), h('th', 'Result'))),
       h('tbody', list.map((r) => h('tr', { class: r.status === 'failed' ? 'warn' : '' },

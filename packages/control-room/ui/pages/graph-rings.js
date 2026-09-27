@@ -36,7 +36,7 @@ export function rings(el, ctx) {
     if (!alive) return; // switched away while it loaded: no second map, no stray animation
     areas = graph.areas || [];
     if (graph.nodes.length <= 1) {
-      clear(body).append(empty('The map fills as you add docs, skills, routines and artifacts.', 'npx @finalangel/flowrail-room remember "Releases go out on Tuesdays" --type project --name release-day', ctx));
+      clear(body).append(empty('The map fills as you add docs, skills, routines and artifacts.', 'npx @finalangel/flowrail-os remember "Releases go out on Tuesdays" --type project --name release-day', ctx));
       return;
     }
     build();

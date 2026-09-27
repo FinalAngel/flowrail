@@ -1,5 +1,5 @@
 {
-  "name": "@finalangel/flowrail-room",
+  "name": "@finalangel/flowrail-os",
   "version": "0.2.0",
   "description": "A local dashboard for flowrail: red lines, audit, comments your agent acts on, and an optional board. Zero third-party deps, no cloud, MIT.",
   "type": "module",
@@ -10,7 +10,7 @@
     "./reminders": "./src/core/reminders.js"
   },
   "bin": {
-    "flowrail-room": "bin/flowrail-room.js"
+    "flowrail-os": "bin/flowrail-os.js"
   },
   "engines": {
     "node": ">=20"
@@ -27,7 +27,7 @@
     "README.md"
   ],
   "scripts": {
-    "start": "node bin/flowrail-room.js",
+    "start": "node bin/flowrail-os.js",
     "test": "node --test"
   },
   "keywords": [

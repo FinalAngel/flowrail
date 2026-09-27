@@ -1,12 +1,12 @@
 # Concepts
 
-flowrail is two things. First, a hook that makes Claude Code respect your hard rules before a tool runs. Second, and optional, a set of conventions for keeping an agent's working state in your repo, with a CLI and a dashboard that read and write those files: the control room, a separate package (`@finalangel/flowrail-room`, command `flowrail-room`). This page explains the pieces and why they are shaped the way they are.
+flowrail is two things. First, a hook that makes Claude Code respect your hard rules before a tool runs. Second, and optional, a set of conventions for keeping an agent's working state in your repo, with a CLI and a dashboard that read and write those files: flowrailOS, a separate package (`@finalangel/flowrail-os`, command `flowrail-os`). This page explains the pieces and why they are shaped the way they are.
 
 ## The repo is the state
 
 Everything flowrail knows lives in two folders at the root of your project.
 
-`flowrail/` is committed. It holds the things you would want in a code review or on another machine: rules, tasks, memories, workflows, routines, reports. The guard on its own (`flowrail init`) writes only `config.json` and `red-lines.json`; the rest comes with the control room (`flowrail-room init`).
+`flowrail/` is committed. It holds the things you would want in a code review or on another machine: rules, tasks, memories, workflows, routines, reports. The guard on its own (`flowrail init`) writes only `config.json` and `red-lines.json`; the rest comes with flowrailOS (`flowrail-os init`).
 
 ```text
 flowrail/
@@ -28,7 +28,7 @@ flowrail/
   comments/            one JSON file per commented document
   runs/                one record and one log per run, plus routines.log
   redlines.log         every hold and every red-line change made in the dashboard, one JSON line each
-  activity.log         task moves and who made them, for `flowrail-room today`
+  activity.log         task moves and who made them, for `flowrail-os today`
   check-results.json   the last `flowrail check` result
   agents/              subagent status written by the hooks
   trash/               everything the dashboard deleted, with a timestamp prefix
@@ -44,7 +44,7 @@ One more folder lives outside the repo, per user: `$XDG_STATE_HOME/flowrail/` (e
   ports.json                   the ports a running dashboard listens on
 ```
 
-It exists because the agent works inside the repo. Every hook decision and every red-line change goes to `.flowrail/redlines.log` and to the journal, each journal entry carrying the SHA-256 of the one before it. `flowrail-room status` and the dashboard compare the two: a log line that was deleted or changed, a line the journal never wrote, or a broken chain shows as **Audit log edited** in Needs attention. Comments added in the dashboard are signed with the key; the session-start briefing gives Claude only signed comments as instructions and lists the rest as unverified. Neither is a vault: an agent that can run arbitrary code as you could rewrite both. They make a quiet edit visible, which is the point.
+It exists because the agent works inside the repo. Every hook decision and every red-line change goes to `.flowrail/redlines.log` and to the journal, each journal entry carrying the SHA-256 of the one before it. `flowrail-os status` and the dashboard compare the two: a log line that was deleted or changed, a line the journal never wrote, or a broken chain shows as **Audit log edited** in Needs attention. Comments added in the dashboard are signed with the key; the session-start briefing gives Claude only signed comments as instructions and lists the rest as unverified. Neither is a vault: an agent that can run arbitrary code as you could rewrite both. They make a quiet edit visible, which is the point.
 
 There is no database and no server-side state. The dashboard, the CLI and Claude all read the same files, so a change made in one shows up in the others, and `git diff` shows what any of them did. If you remove flowrail, the files stay and remain readable.
 
@@ -60,7 +60,7 @@ Each red line has up to three parts, which the dashboard draws as a chain:
 - **Check**: a pattern that `flowrail check` looks for in files, locally or in CI.
 - **Hook**: a built-in matcher (`git-push`, `git-destructive`, `rm-dangerous`, `secret-files`, `flowrail-tamper`, `mcp-actions` and others, see [red-lines.md](red-lines.md#built-in-matchers)) or a regular expression that Claude Code's `PreToolUse` hook tests against each tool call. The builtins parse a shell command into argv and read its flags, so `git push -uf` and `git clean -nf` get the decisions you would expect.
 
-Every red line is in exactly one of four states. The dashboard, `flowrail redlines`, `flowrail-room status` and the API (`state` on each line of `GET /api/redlines`) all use the same four.
+Every red line is in exactly one of four states. The dashboard, `flowrail redlines`, `flowrail-os status` and the API (`state` on each line of `GET /api/redlines`) all use the same four.
 
 | State | When | Shown as |
 |---|---|---|
@@ -81,7 +81,7 @@ The details, including exactly what the hook can and cannot see, are in [red-lin
 
 Open any Markdown file in the dashboard, select a passage and leave a comment. The comment is stored in `.flowrail/comments/`, anchored to the quoted text.
 
-At the start of each Claude Code session the session-start hook lists open comments and tells Claude to treat them as instructions. Claude reads the file, acts on the comment, and runs `flowrail-room resolve <path> <id> --note "..."`. You see the comment turn to "Resolved" with the note underneath.
+At the start of each Claude Code session the session-start hook lists open comments and tells Claude to treat them as instructions. Claude reads the file, acts on the comment, and runs `flowrail-os resolve <path> <id> --note "..."`. You see the comment turn to "Resolved" with the note underneath.
 
 This works well for the kind of instruction that is easier to point at than to describe: "this paragraph is out of date", "split this section", "turn this list into a table".
 
@@ -91,7 +91,7 @@ This works well for the kind of instruction that is easier to point at than to d
 
 Sprints are fixed-length periods (14 days by default) counted from `sprintStart` in `config.json`. A task's `sprint` field is the start date of the sprint it belongs to; an empty string means the backlog. When a sprint has ended, the next read of the board moves its unfinished tasks into the current sprint, raises each one priority level, and adds a note saying so. Nothing is silently dropped, and work that keeps slipping gets louder.
 
-Agents file tasks with `flowrail-room task "..."`, which puts them in the current sprint (`--sprint backlog` parks one). Those tasks record `createdBy: "agent"` and the board marks them "Filed by agent", so you can tell what you asked for from what Claude decided needed doing.
+Agents file tasks with `flowrail-os task "..."`, which puts them in the current sprint (`--sprint backlog` parks one). Those tasks record `createdBy: "agent"` and the board marks them "Filed by agent", so you can tell what you asked for from what Claude decided needed doing.
 
 ## Memory
 
@@ -112,7 +112,7 @@ How to apply: when asked to prepare a release, check out `release` first. See [[
 
 There are four types. `user` is about you (preferences, role). `feedback` is a correction you gave an agent that should stick. `project` is a fact or decision about the work. `reference` points to where something lives.
 
-`flowrail-room recall "question"` ranks memories and the sections of Markdown documents (split at headings) by keyword overlap, BM25 style, and prints the best matches with their file. It calls no model and sends nothing anywhere, so it is fast, free and repeatable. It also means recall matches words, not meaning. Light stemming and a short synonym list (deploy, release and ship, for example) close some of the gap, so "how do we ship" finds a memory that says "release", but not all of it. Write memories with the words you will search for.
+`flowrail-os recall "question"` ranks memories and the sections of Markdown documents (split at headings) by keyword overlap, BM25 style, and prints the best matches with their file. It calls no model and sends nothing anywhere, so it is fast, free and repeatable. It also means recall matches words, not meaning. Light stemming and a short synonym list (deploy, release and ship, for example) close some of the gap, so "how do we ship" finds a memory that says "release", but not all of it. Write memories with the words you will search for.
 
 ## Workflows
 
@@ -143,11 +143,11 @@ A routine is an agent run on a schedule, defined in `flowrail/routines.json`:
 }
 ```
 
-`every` is `hour`, `day`, `weekday` or a day name. `run` is either a Claude prompt, run headless with read-only tools plus writing into `flowrail/artifacts/` (see [security.md](security.md#headless-runs)), or a command (`{ "type": "command", "cmd": ["npm", "run", "report"] }`). Command routines are written in the file only; the dashboard API refuses to create or change them. `flowrail-room routines install` lists each command routine's argv and asks before handing the schedule to launchd on macOS or crontab on Linux, so a `routines.json` from a cloned repo never schedules anything silently. Each run is logged in `.flowrail/runs/`, and a failed run shows up on the dashboard until the next one succeeds.
+`every` is `hour`, `day`, `weekday` or a day name. `run` is either a Claude prompt, run headless with read-only tools plus writing into `flowrail/artifacts/` (see [security.md](security.md#headless-runs)), or a command (`{ "type": "command", "cmd": ["npm", "run", "report"] }`). Command routines are written in the file only; the dashboard API refuses to create or change them. `flowrail-os routines install` lists each command routine's argv and asks before handing the schedule to launchd on macOS or crontab on Linux, so a `routines.json` from a cloned repo never schedules anything silently. Each run is logged in `.flowrail/runs/`, and a failed run shows up on the dashboard until the next one succeeds.
 
 ## Today
 
-`flowrail-room today`, `GET /api/today` and the Today card on the dashboard list what happened in the repo since midnight: red lines held, tasks filed and moved (by you or an agent), comments resolved, new artifacts, routine runs, memories stored and git commits. It reads files flowrail already keeps, and calls no model.
+`flowrail-os today`, `GET /api/today` and the Today card on the dashboard list what happened in the repo since midnight: red lines held, tasks filed and moved (by you or an agent), comments resolved, new artifacts, routine runs, memories stored and git commits. It reads files flowrail already keeps, and calls no model.
 
 ## Artifacts
 
@@ -179,7 +179,7 @@ or put a table in `CLAUDE.md` whose rows link one router file per area (`| Sales
 
 **The dashboard's layout** is yours to arrange: Edit layout in the header moves cards up, down or to the other column (drag works too), hides them, and Reset layout brings the default back. It is kept per browser.
 
-**The add-context skill.** `flowrail-room init` offers `.claude/skills/add-context/SKILL.md` (never over a file you have): it tells an agent how to add a source to the Context library, short, cited and in its own words.
+**The add-context skill.** `flowrail-os init` offers `.claude/skills/add-context/SKILL.md` (never over a file you have): it tells an agent how to add a source to the Context library, short, cited and in its own words.
 
 **Where things live.** Three more file-only settings point the room at folders a repo already has: `"docsRoots": ["docs", "README.md"]` limits what Docs, the Library, search and the map list, open and write to those folders and files (unset shows the whole repo, minus secrets and dot-folders); `"artifactsDir"`, `"linksFile"` and `"agentsDir"` (where the agent status files are) move artifacts, the link list and the Agents page's live state out of `flowrail/` and `.flowrail/`. A link file may also be `{ "categories": [{ "name", "links" }] }`.
 

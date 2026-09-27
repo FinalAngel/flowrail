@@ -3,7 +3,7 @@
 flowrail ships two command-line tools:
 
 - `flowrail` (the `flowrail` package) is the guard: setup, red lines, checks and the audit. Run it as `npx flowrail <command>`.
-- `flowrail-room` (the optional `@finalangel/flowrail-room` package) is the control room: the dashboard, board, comments, memory and routines. Run it as `npx @finalangel/flowrail-room <command>`, or `flowrail-room <command>` once it is installed. It also runs every guard command. `flowrail <command>` hands a control room command to `flowrail-room` when it is installed, and otherwise prints how to start it.
+- `flowrail-os` (the optional `@finalangel/flowrail-os` package) is flowrailOS: the dashboard, board, comments, memory and routines. Run it as `npx @finalangel/flowrail-os <command>`, or `flowrail-os <command>` once it is installed. It also runs every guard command. `flowrail <command>` hands a flowrailOS command to `flowrail-os` when it is installed, and otherwise prints how to start it.
 
 Only people run these: the guard that enforces red lines is copied into the repo and runs with plain `node`, so nothing security-relevant depends on the npm packages. Commands find the workspace by walking up from the current directory until they reach `flowrail/config.json`.
 
@@ -17,7 +17,7 @@ When a task is filed from inside a Claude Code session (the `CLAUDECODE` environ
 
 ## Dashboard
 
-### `flowrail-room` / `flowrail-room start`
+### `flowrail-os` / `flowrail-os start`
 
 Starts the dashboard on `http://127.0.0.1:4747` and opens it in your browser.
 
@@ -26,9 +26,9 @@ Starts the dashboard on `http://127.0.0.1:4747` and opens it in your browser.
 | `--port N` | Use port `N`. Without it: `port` from `flowrail/config.json`, else 4747. If the port is busy, flowrail tries the next 10 and says which one it took. |
 | `--no-open` | Do not open a browser. |
 
-### `flowrail-room demo`
+### `flowrail-os demo`
 
-Creates a throwaway workspace at `flowrail-demo` in your system's temp directory (replacing the previous demo there), seeds it with an example project ("Paper Plane", a small note app), starts the dashboard on it and prints the path. Nothing in your current repo is touched. The dashboard shows a banner while you are in it. Takes `--port N` and `--no-open` like `flowrail-room start`.
+Creates a throwaway workspace at `flowrail-demo` in your system's temp directory (replacing the previous demo there), seeds it with an example project ("Paper Plane", a small note app), starts the dashboard on it and prints the path. Nothing in your current repo is touched. The dashboard shows a banner while you are in it. Takes `--port N` and `--no-open` like `flowrail-os start`.
 
 ## Setup
 
@@ -95,9 +95,9 @@ Without a terminal and without `--yes`, init says so on its second line ("Non-in
 | `--yes` | Do not ask. |
 | `--diff` | Show the full JSON diff for `.claude/settings.json` instead of the list of added hooks. |
 
-### `flowrail-room init`
+### `flowrail-os init`
 
-The guard plus the control room: everything `flowrail init` does, plus starter content in `flowrail/` (a board with four onboarding tasks, a welcome doc and artifact, a workflow, a memory, a disabled routine) and a two-line marked block in `CLAUDE.md` that tells future sessions to stop and ask when a red line holds, and where reports go. Takes the same options as `flowrail init`, plus:
+The guard plus flowrailOS: everything `flowrail init` does, plus starter content in `flowrail/` (a board with four onboarding tasks, a welcome doc and artifact, a workflow, a memory, a disabled routine) and a two-line marked block in `CLAUDE.md` that tells future sessions to stop and ask when a red line holds, and where reports go. Takes the same options as `flowrail init`, plus:
 
 | Option | Meaning |
 |---|---|
@@ -109,7 +109,7 @@ Checks the guard's setup and prints a fix for each problem: Node version, `git` 
 
 ### `flowrail status`
 
-The guard on one screen: whether it is live (every guard file verified, hooks in place), red lines by state, rules changed outside flowrail, and what it held this week, by red line. Exit 1 when the guard is not live. `--json` for scripts. The control room's `flowrail-room status` (sprint, backlog, routines) is a separate command.
+The guard on one screen: whether it is live (every guard file verified, hooks in place), red lines by state, rules changed outside flowrail, and what it held this week, by red line. Exit 1 when the guard is not live. `--json` for scripts. flowrailOS's `flowrail-os status` (sprint, backlog, routines) is a separate command.
 
 ### `flowrail upgrade`
 
@@ -121,13 +121,13 @@ Installs (the guard and its hooks, without the `CLAUDE.md` block), removes or re
 
 ### `flowrail uninstall`
 
-Removes the guard, its hooks and, if the control room added them, the `CLAUDE.md` and `AGENTS.md` blocks. Previewed. It leaves `flowrail/` and `.flowrail/` in place and tells you so; delete them yourself if you want them gone. Scheduled routines stay scheduled until you run `flowrail-room routines uninstall`.
+Removes the guard, its hooks and, if flowrailOS added them, the `CLAUDE.md` and `AGENTS.md` blocks. Previewed. It leaves `flowrail/` and `.flowrail/` in place and tells you so; delete them yourself if you want them gone. Scheduled routines stay scheduled until you run `flowrail-os routines uninstall`.
 
 ## Status
 
-These and the sections down to Memory, plus Routines, are control room commands: `npx @finalangel/flowrail-room <command>` or `flowrail-room <command>`.
+These and the sections down to Memory, plus Routines, are flowrailOS commands: `npx @finalangel/flowrail-os <command>` or `flowrail-os <command>`.
 
-### `flowrail-room status`
+### `flowrail-os status`
 
 One screen: the current sprint (done, in progress, in review), the backlog, open comments, red lines by state and how often they held this week, whether the hooks are live, not installed or broken, and failed routines. `--json` for scripts (`hooks` is `true` only when they are healthy; `hooksProblem` says why not).
 
@@ -135,7 +135,7 @@ One screen: the current sprint (done, in progress, in review), the backlog, open
   Red lines  8 armed · held 1 time this week · hooks live
 ```
 
-### `flowrail-room today`
+### `flowrail-os today`
 
 What happened in this repo since local midnight (or in the last 24 hours, before 06:00), one line each, newest first: red lines held (one line per rule, with the last thing held), red-line changes made in the dashboard, tasks filed and moved (by you or an agent), comments resolved, new reports in `flowrail/artifacts/`, routine runs, memories stored and git commits. Read from files flowrail already keeps; no model, no network. `--json` prints the same shape as `GET /api/today`.
 
@@ -148,7 +148,7 @@ Today since Sat 00:00
 
 ## Board
 
-### `flowrail-room task "<title>"`
+### `flowrail-os task "<title>"`
 
 Files a task and prints its id (`T-0042`).
 
@@ -157,21 +157,21 @@ Files a task and prints its id (`T-0042`).
 | `--status S` | `Todo` (default), `In Progress`, `Review`, `Done` |
 | `--priority P` | `P0` to `P3` (default `P2`) |
 | `--assignee NAME` | who owns it, for example `claude` |
-| `--sprint current\|next\|backlog\|YYYY-MM-DD` | where it goes (default `current`, so `flowrail-room tasks` shows it) |
+| `--sprint current\|next\|backlog\|YYYY-MM-DD` | where it goes (default `current`, so `flowrail-os tasks` shows it) |
 | `--label a,b` | comma-separated labels |
 | `--note "text"` | add a first note |
 | `--agent` | record it as filed by an agent |
 | `--json` | print the task as JSON |
 
-### `flowrail-room task update <id> --status "In Progress"`
+### `flowrail-os task update <id> --status "In Progress"`
 
-Changes a task. Takes the same options as `task`, plus `--title "..."`. Labels given here replace the old ones. A status change is recorded in `.flowrail/activity.log` (with who made it) for `flowrail-room today`.
+Changes a task. Takes the same options as `task`, plus `--title "..."`. Labels given here replace the old ones. A status change is recorded in `.flowrail/activity.log` (with who made it) for `flowrail-os today`.
 
-### `flowrail-room task note <id> "text"`
+### `flowrail-os task note <id> "text"`
 
 Appends a note to a task, stamped with the time and who wrote it.
 
-### `flowrail-room tasks`
+### `flowrail-os tasks`
 
 Lists the current sprint's open tasks. An `*` after the assignee marks a task filed by an agent.
 
@@ -180,23 +180,23 @@ Lists the current sprint's open tasks. An `*` after the assignee marks a task fi
 | `--all` | Include the backlog and finished tasks. |
 | `--json` | Machine-readable. |
 
-### `flowrail-room board export`
+### `flowrail-os board export`
 
 Writes the current sprint as one standalone HTML file: inline CSS in flowrail's colours, light and dark from the reader's system, no scripts and nothing fetched. `--backlog` adds the unscheduled tasks as a table; `--out file.html` picks the path (default `.flowrail/exports/board-<date>.html`). The CLI reads `flowrail/board.json`; a workspace whose board comes from a plugin store exports from code with `boardHtml(store.read())` from the room's `src/core/export.js`.
 
 ## Comments
 
-### `flowrail-room comments`
+### `flowrail-os comments`
 
 Lists open comments: file, quoted passage, comment, id. `--json` for scripts. Agents run this at the start of a session (the session-start hook does it for them).
 
-### `flowrail-room resolve <path> <id>`
+### `flowrail-os resolve <path> <id>`
 
 Marks a comment resolved. `--note "..."` records what was done; the dashboard shows the note under the comment. `--json` prints the comment.
 
 ## Memory
 
-### `flowrail-room remember "<fact>"`
+### `flowrail-os remember "<fact>"`
 
 Stores one fact as `flowrail/memory/<name>.md` and adds a line to `flowrail/memory/INDEX.md`.
 
@@ -209,7 +209,7 @@ Stores one fact as `flowrail/memory/<name>.md` and adds a line to `flowrail/memo
 | `--force` | overwrite an existing memory with the same name |
 | `--json` | print the stored memory as JSON |
 
-### `flowrail-room recall "<question>"`
+### `flowrail-os recall "<question>"`
 
 Ranks memories and document headings against the question and prints the best matches with their source. It is keyword ranking (BM25-style) and calls no model, so the same question always gives the same answer. `--limit N` changes how many hits (default 5); `--json` for scripts.
 
@@ -290,13 +290,13 @@ held = blocked, it never runs; asked = Claude Code asks you first.
 
 ## Routines
 
-### `flowrail-room routines install | uninstall | status`
+### `flowrail-os routines install | uninstall | status`
 
 Installs the enabled routines (`"enabled": true`) from `flowrail/routines.json` into the system scheduler (launchd on macOS, crontab on Linux), removes them, or reports their state (`status` is the default; `--json` for scripts). On other systems `install` prints what to schedule by hand.
 
 `install` first lists every routine it will schedule, with the exact argv of each command routine, and asks (`[y/N]`). `--yes` skips the question; without a terminal and without `--yes` nothing is scheduled and it exits 2. A `routines.json` that arrived with a clone never installs silently. The dashboard can schedule claude routines, but refuses while an enabled command routine exists.
 
-### `flowrail-room routines run <id>`
+### `flowrail-os routines run <id>`
 
 Runs one routine now and records the run in `.flowrail/runs/`. Exit 1 if the routine fails.
 
@@ -314,8 +314,8 @@ With no subcommand: the pre-tool-use hook run from the installed package, for a 
 
 ### `flowrail room [args]`
 
-Runs `flowrail-room` with the given arguments if `@finalangel/flowrail-room` is installed (in the project's `node_modules`, next to `flowrail`, or on the PATH); otherwise prints one line with the `npx @finalangel/flowrail-room …` command and exits 1. The control room's own commands (`flowrail start`, `demo`, `today`, `task`, `tasks`, `comments`, `resolve`, `remember`, `recall`, `routines`) are handed over the same way.
+Runs `flowrail-os` with the given arguments if `@finalangel/flowrail-os` is installed (in the project's `node_modules`, next to `flowrail`, or on the PATH); otherwise prints one line with the `npx @finalangel/flowrail-os …` command and exits 1. flowrailOS's own commands (`flowrail start`, `demo`, `today`, `task`, `tasks`, `comments`, `resolve`, `remember`, `recall`, `routines`) are handed over the same way.
 
 ### `flowrail --version`, `flowrail help`
 
-Print the version, or a summary of commands (`-v`, `-h` and `--help` work too). `flowrail-room --version` and `flowrail-room help` do the same for the control room.
+Print the version, or a summary of commands (`-v`, `-h` and `--help` work too). `flowrail-os --version` and `flowrail-os help` do the same for flowrailOS.

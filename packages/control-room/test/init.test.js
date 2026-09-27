@@ -25,7 +25,7 @@ test('init never overwrites flowrail files that exist', () => {
   assert.equal(fs.readFileSync(path.join(root, 'flowrail', 'board.json'), 'utf8'), '{"tasks":[{"id":"T-0042"}]}');
 });
 
-test('the full init adds the control room files and the CLAUDE.md block on top of the guard', () => {
+test('the full init adds flowrailOS files and the CLAUDE.md block on top of the guard', () => {
   const root = project();
   apply(root, planInit(root, {}).changes);
   for (const f of ['flowrail/board.json', 'flowrail/WELCOME.md', 'flowrail/memory/INDEX.md', 'flowrail/red-lines.json', `${GUARD_REL}/hook.mjs`]) assert.ok(fs.existsSync(path.join(root, f)), f);

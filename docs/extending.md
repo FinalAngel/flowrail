@@ -58,7 +58,7 @@ Every page needs an empty state that says what the page is for, shows the CLI co
 
 ## Plugins: your own pages without a fork
 
-A plugin adds pages and API routes to the control room from your own repo. It is an object:
+A plugin adds pages and API routes to flowrailOS from your own repo. It is an object:
 
 ```js
 // room/crm.mjs
@@ -76,11 +76,11 @@ export default {
 
 Load it one of two ways:
 
-- **From config.** Add `"plugins": ["room/crm.mjs"]` to `flowrail/config.json` (paths inside the repo). `npx @finalangel/flowrail-room` imports them at start. The dashboard's settings API cannot set this field, and the guard asks before an agent edits `config.json`.
+- **From config.** Add `"plugins": ["room/crm.mjs"]` to `flowrail/config.json` (paths inside the repo). `npx @finalangel/flowrail-os` imports them at start. The dashboard's settings API cannot set this field, and the guard asks before an agent edits `config.json`.
 - **From code.** Start the server yourself, for example to load TypeScript through `tsx`:
 
   ```js
-  import { startServer } from '@finalangel/flowrail-room/server';
+  import { startServer } from '@finalangel/flowrail-os/server';
   import crm from './room/crm.ts';
   await startServer({ root: process.cwd(), port: 4747, plugins: [crm] });
   ```
@@ -132,7 +132,7 @@ The interface will change once the first adapter meets a real CLI. Open a discus
 
 ## The flowrail package from code
 
-`flowrail` exports one module, `flowrail/api` (also the package root): the surface the control room builds on, and the only one with a stability promise. Everything else under `src/` is internal.
+`flowrail` exports one module, `flowrail/api` (also the package root): the surface flowrailOS builds on, and the only one with a stability promise. Everything else under `src/` is internal.
 
 ```js
 import { testCommand, verifyRedlines, describeRedlines, loadLines, hooksStatus, driftStatus, auditSummary, stateDir } from 'flowrail/api';
@@ -141,4 +141,4 @@ testCommand('/path/to/repo', { subject: 'git push --force' }); // { decision: 'd
 verifyRedlines('/path/to/repo');                               // { ok, lines, held, allowedAsExpected, failed, probes }
 ```
 
-`testCommand` asks the guard what it would do with one call, as the hook would, without logging it. The rest: red-line helpers (`loadLines`, `validateLines`, `weakenings`, `logChange`, `holds`, `changes`, `stats`, `runChecks`), setup (`planInit`/`planGuardSetup`, `applyPlan`, `freshEpoch`), the journal (`appendJournal`, `verifyJournal`, `journalPath`), comment signatures, and the small file and CLI helpers the control room shares. `decision` is Claude Code's word (`deny`); people read it as "block".
+`testCommand` asks the guard what it would do with one call, as the hook would, without logging it. The rest: red-line helpers (`loadLines`, `validateLines`, `weakenings`, `logChange`, `holds`, `changes`, `stats`, `runChecks`), setup (`planInit`/`planGuardSetup`, `applyPlan`, `freshEpoch`), the journal (`appendJournal`, `verifyJournal`, `journalPath`), comment signatures, and the small file and CLI helpers flowrailOS shares. `decision` is Claude Code's word (`deny`); people read it as "block".

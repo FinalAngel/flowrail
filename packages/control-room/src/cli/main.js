@@ -1,14 +1,14 @@
-// The control room's commands; anything else goes to the flowrail (guard) CLI.
+// flowrailOS's commands; anything else goes to the flowrail (guard) CLI.
 import { parseArgs, out, err } from 'flowrail/api';
 import { cliMain as guardMain } from 'flowrail/api';
 import { VERSION } from '../core/pkg.js';
 
-export const HELP = `flowrail Control Room ${VERSION}
+export const HELP = `flowrailOS ${VERSION}
 
-Usage: npx @finalangel/flowrail-room <command>   (installed: flowrail-room <command>)
+Usage: npx @finalangel/flowrail-os <command>   (installed: flowrail-os <command>)
 
   (no command)            dashboard on http://127.0.0.1:4747  --port N  --no-open
-  init                    the guard plus the control room (board, docs, memory)  --yes  --agents-md
+  init                    the guard plus flowrailOS (board, docs, memory)  --yes  --agents-md
   demo                    open a sample workspace in a temp folder  --port N  --no-open
   status                  one-screen summary
   today                   what happened since this morning  --json
@@ -52,7 +52,7 @@ export async function main(argv) {
   if (!entry) return guardMain(argv);
   try {
     const mod = await import(entry[0]);
-    // init is the guard's init with the control room's files on top.
+    // init is the guard's init with flowrailOS's files on top.
     const room = name === 'init' ? (await import('../core/init.js')).room : undefined;
     await mod[entry[1]](pos.slice(name === pos[0] ? 1 : 0), flags, room);
   } catch (e) {

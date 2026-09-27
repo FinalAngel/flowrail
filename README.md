@@ -148,21 +148,21 @@ Run it on your own sessions: npx flowrail audit (read-only, local, no model).
 
 More red lines come from plain-English recipes (`protect-path`, `publish-deploy`, `infra-destructive`, `db-destructive`, `no-payments` and others): `npx flowrail redlines add --list` shows them, and [docs/red-lines.md](docs/red-lines.md#recipes) explains each.
 
-## Control Room (optional)
+## flowrailOS (optional)
 
-A separate package, [`@finalangel/flowrail-room`](packages/control-room/), adds a local dashboard on top of the guard. The guard does not need it.
+A separate package, [`@finalangel/flowrail-os`](packages/control-room/), adds a local dashboard on top of the guard. The guard does not need it.
 
 <p align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/hero-dark.png">
-    <img alt="The Control Room's Red lines page: the Try it box showing git push --force origin main held by no-destructive-git, and the audit panel listing what these rules would have held or asked about." src="assets/hero.png" width="1280">
+    <img alt="flowrailOS's Red lines page: the Try it box showing git push --force origin main held by no-destructive-git, and the audit panel listing what these rules would have held or asked about." src="assets/hero.png" width="1280">
   </picture>
 </p>
 
 ```sh
-npx @finalangel/flowrail-room demo   # look around a sample workspace in a temp folder
-npx @finalangel/flowrail-room init   # the guard plus the control room files
-npx @finalangel/flowrail-room        # the dashboard on http://127.0.0.1:4747
+npx @finalangel/flowrail-os demo   # look around a sample workspace in a temp folder
+npx @finalangel/flowrail-os init   # the guard plus flowrailOS files
+npx @finalangel/flowrail-os        # the dashboard on http://127.0.0.1:4747
 ```
 
 It shows each red line in plain English with its held count, a Try it box and the audit; comments on Markdown files that the next Claude Code session picks up; a board, a memory store with keyword recall, and what happened in the repo today.
@@ -188,7 +188,7 @@ More in [docs/faq.md](docs/faq.md). To have an agent do the setup, point it at [
 - [Getting started](docs/getting-started.md), [concepts](docs/concepts.md) and the [CLI](docs/cli.md)
 - [Red lines](docs/red-lines.md): schema, built-in matchers, the shell parser, known gaps, recipes, CI
 - [Tamper model](docs/tamper-model.md), [hooks](docs/hooks.md) and the [security model](docs/security.md)
-- [HTTP API](docs/api.md) and [extending](docs/extending.md) (Control Room)
+- [HTTP API](docs/api.md) and [extending](docs/extending.md) (flowrailOS)
 - [Roadmap](ROADMAP.md) and [changelog](CHANGELOG.md)
 
 ## Contributing

@@ -20,7 +20,7 @@ export { BLOCK_START, BLOCK_END };
 const CLI = 'npx flowrail';
 
 /**
- * The marked CLAUDE.md/AGENTS.md block the Control Room adds (the guard alone writes none: its
+ * The marked CLAUDE.md/AGENTS.md block flowrailOS adds (the guard alone writes none: its
  * hooks need no instructions). Two lines; open comments arrive through the SessionStart hook.
  */
 export function claudeBlock() {
@@ -290,7 +290,7 @@ const foundRecipes = (found) => [...found.claudeMd.matches, ...found.agentsMd.ma
  * @param {string} root
  * @param {{room?:Function, agentsMd?:boolean, accept?:string[], mcp?:boolean, home?:string}} opts
  *   Without `room` this is the guard only: guard, red lines, hooks; no CLAUDE.md, board or docs.
- *   room({root, p, config, add, changes}) = the control room's extra files (and the CLAUDE.md block).
+ *   room({root, p, config, add, changes}) = flowrailOS's extra files (and the CLAUDE.md block).
  *   accept = recipe ids to add as red lines; mcp: false leaves ask-before-mcp-actions out.
  */
 export function planInit(root, opts = {}) {
@@ -358,7 +358,7 @@ export function planInit(root, opts = {}) {
     if (extra.length) changes.push({ path: 'flowrail/red-lines.json', kind: 'change', internal: true, before: readText(p.redlines), after: JSON.stringify([...current, ...extra], null, 2) + '\n' });
   }
 
-  // The control room (@finalangel/flowrail-room) adds its files here: board, docs, memory, workflows.
+  // flowrailOS (@finalangel/flowrail-os) adds its files here: board, docs, memory, workflows.
   if (opts.room) opts.room({ root, p, config, add, changes });
 
   // The guard itself, copied into the repo so the hooks need no npm.

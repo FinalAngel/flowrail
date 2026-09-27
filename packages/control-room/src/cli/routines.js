@@ -16,7 +16,7 @@ export async function routines_(pos, flags) {
       out(`  ${c.bold(r.id.padEnd(20))} ${r.scheduleText.padEnd(22)} ${inst.padEnd(22)} ${last}${r.next && r.installed ? c.dim(`  next ${when(r.next)}`) : ''}`);
       if (r.lastRun && r.lastRun.exit !== 0 && r.lastRun.firstLine) out(`  ${' '.repeat(20)} ${c.dim(r.lastRun.firstLine)}`);
     }
-    if (list.some((r) => r.enabled && r.installed === false)) out(c.dim('\nSchedule them: npx @finalangel/flowrail-room routines install'));
+    if (list.some((r) => r.enabled && r.installed === false)) out(c.dim('\nSchedule them: npx @finalangel/flowrail-os routines install'));
     return;
   }
   if (sub === 'install') {
@@ -47,7 +47,7 @@ export async function routines_(pos, flags) {
     return out(r.removed.length ? `${mark.ok} Unscheduled: ${r.removed.join(', ')}` : 'Nothing was scheduled.');
   }
   if (sub === 'run') {
-    if (!pos[1]) throw new Error('usage: npx @finalangel/flowrail-room routines run <id>');
+    if (!pos[1]) throw new Error('usage: npx @finalangel/flowrail-os routines run <id>');
     if (!flags.json) out(c.dim(`Running ${pos[1]}...`));
     const rec = await routines.runNow(p, pos[1]);
     if (flags.json) return json(rec);
@@ -55,6 +55,6 @@ export async function routines_(pos, flags) {
     if (rec.exit !== 0) process.exitCode = 1;
     return;
   }
-  throw new Error('usage: npx @finalangel/flowrail-room routines install|uninstall|status|run <id>');
+  throw new Error('usage: npx @finalangel/flowrail-os routines install|uninstall|status|run <id>');
 }
 export { routines_ as routines };

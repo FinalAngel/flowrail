@@ -32,7 +32,7 @@ async function serve(p, flags, banner, auditEnv) {
   await registerPort(s.port).catch(() => {});
   const o = overview(p);
   if (s.port !== want) out(`${mark.warn} Port ${want} is busy, using ${s.port}`);
-  out(`${c.bold('flowrail')} ${c.dim('·')} ${config.name}${banner ? c.dim(`  ${banner}`) : ''}`);
+  out(`${c.bold('flowrailOS')} ${c.dim('·')} ${config.name}${banner ? c.dim(`  ${banner}`) : ''}`);
   out(`  ${c.cyan(s.url)}`);
   const bits = [];
   bits.push(`${o.counts.commentsOpen} open comment${o.counts.commentsOpen === 1 ? '' : 's'}`);

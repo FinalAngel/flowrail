@@ -74,7 +74,7 @@ export function mount(el, ctx) {
       treeNav.querySelectorAll('a').forEach((a) => a.setAttribute('aria-current', a.title === path ? 'page' : 'false'));
     } catch (e) {
       if (my !== seq) return;
-      clear(docCol).append(crumb(), e.status === 404 ? h('div.empty', h('p', `${path} does not exist or flowrail may not read it.`), h('a.link', { href: '#/docs' }, 'Open the first doc')) : errorBox(e, () => loadDoc()));
+      clear(docCol).append(crumb(), e.status === 404 ? h('div.empty', h('p', `${path} does not exist or flowrailOS may not read it.`), h('a.link', { href: '#/docs' }, 'Open the first doc')) : errorBox(e, () => loadDoc()));
       clear(rail);
     }
   }

@@ -4,7 +4,7 @@ All notable changes to flowrail are recorded here. The format follows [Keep a Ch
 
 ## [0.2.0] 2026-09-27
 
-The first release of the control room on npm (`@finalangel/flowrail-room`), and the guard's second.
+The first release of the dashboard on npm, as flowrailOS (`@finalangel/flowrail-os`, command `flowrail-os`; it was called the control room, `flowrail-room`, before it was published), and the guard's second.
 
 ### Fixed
 
@@ -23,7 +23,7 @@ The first release of the control room on npm (`@finalangel/flowrail-room`), and 
 - Reminders: frontmatter dates (`due`, `next_date`, or your own fields) and recurring duties from `config.json` show under "Needs you" and on Today when they come due; a duty closes when a Done task carries its name (`GET /api/reminders`).
 - `flowrail check` lints the area routers when a workspace has areas: routers under a page, pointers that resolve, every folder reachable. The areas reading moved into the flowrail package (`flowrail/api`), shared with the room.
 - Actions: commands with inputs from `config.json` (`"actions"`), started from the Runs page with a small form. Every input is checked and becomes one whole argument; nothing reaches a shell. People: a folder of profile files (`flowrail/people/` or `"people": { "dir" }`) shown on the Agents page; a profile may name the person in `title` or its heading and keep role, email and other facts in a two-column table.
-- The dashboard's layout can be edited (move, hide, reset; kept per browser); links and artifact sidecars can carry their own stroke-only `svg` icon, sanitized to plain shapes; artifacts show their sidecar kind and category with a kind filter; `flowrail-room board export` writes a standalone HTML snapshot of the sprint; `init` offers an `add-context` skill.
+- The dashboard's layout can be edited (move, hide, reset; kept per browser); links and artifact sidecars can carry their own stroke-only `svg` icon, sanitized to plain shapes; artifacts show their sidecar kind and category with a kind filter; `flowrail-os board export` writes a standalone HTML snapshot of the sprint; `init` offers an `add-context` skill.
 - Board and Backlog are compact: the summary sits in the header, filters and controls share one row, the Board shows the days left in the running sprint, and the Backlog has a status bar (`statbar()` in `ui/lib/dom.js`, for plugin pages too). The Library lists the latest change first.
 - The header shows the page's title instead of the repo and branch, and a page can put its own controls there (`ctx.header`); the Board's sprint switcher sits next to New task.
 - Backlog is a page of its own (`#/backlog`, next to Board), no longer a switch on the Board. Team is called Agents. Hovering the centre of the rings map lights its line to every area.
@@ -40,7 +40,7 @@ The first release of the control room on npm (`@finalangel/flowrail-room`), and 
 
 ### Added
 
-- Runs page in the control room: every headless run with who started it (a routine or Run now), how long it took, its result and its output, plus what an unattended run may do (the allowed and refused tools). The sidebar counts runs that failed in the last day.
+- Runs page in flowrailOS: every headless run with who started it (a routine or Run now), how long it took, its result and its output, plus what an unattended run may do (the allowed and refused tools). The sidebar counts runs that failed in the last day.
 - Apps: local programs in `flowrail/config.json` (`"apps"`) that the Runs page starts and stops (detached, no shell, output in `.flowrail/apps/`). File-only, like command routines.
 - Event routines: `"on": { "event": "github-actions", "repo", "workflow" }` shows a GitHub Actions workflow's last runs on the Routines page through `gh` (read-only, cached five minutes); `"on": { "event": "hook" }` lists a routine something else runs. Neither is ever scheduled.
 - Workflows: `workflowsDir` in `config.json` points the Workflows page at a folder of your own, and `## Action:` / `## Sub-command:` headings group the steps of a file with several routines in it. MANDATORY in a step heading marks a gate too.
@@ -50,7 +50,7 @@ The first release of the control room on npm (`@finalangel/flowrail-room`), and 
 
 ## [0.1.0]
 
-First public release. On npm as `flowrail`, the guard and its CLI; the optional dashboard, `@finalangel/flowrail-room` (command `flowrail-room`), was not published with it.
+First public release. On npm as `flowrail`, the guard and its CLI; the optional dashboard, `@finalangel/flowrail-os` (command `flowrail-os`), was not published with it.
 
 ### Added
 
@@ -66,16 +66,16 @@ First public release. On npm as `flowrail`, the guard and its CLI; the optional 
 - `flowrail redlines verify`: probes every red line with calls it must hold and calls it must allow, including the commands and paths your own rules quote, and ends with a one-line legend. `init` runs it at the end.
 - Drift detection: a change to `red-lines.json` or `config.json` that flowrail did not make or the human did not approve makes every tool call ask until `flowrail redlines accept` is run in the human's own terminal; meanwhile the last accepted red lines still apply, so a blocked call stays blocked.
 - Honest guard state: the CLI, the API and the dashboard share one check, and a guard that is missing, changed or not called shows every hooked red line as "not enforced".
-- `flowrail init`: the guard alone, with no `CLAUDE.md` block. `flowrail-room init`: the guard plus the control room and a two-line `CLAUDE.md` block. Both detect an existing setup, preview every change, list every rule found in `CLAUDE.md` and `AGENTS.md` as covered, partial or not covered (probing the commands and paths the rule quotes, and naming what is not held), list the lines they skipped, and write uncovered rules as declared-only lines. Without a terminal and without `--yes`, it shows the plan and changes nothing.
+- `flowrail init`: the guard alone, with no `CLAUDE.md` block. `flowrail-os init`: the guard plus flowrailOS and a two-line `CLAUDE.md` block. Both detect an existing setup, preview every change, list every rule found in `CLAUDE.md` and `AGENTS.md` as covered, partial or not covered (probing the commands and paths the rule quotes, and naming what is not held), list the lines they skipped, and write uncovered rules as declared-only lines. Without a terminal and without `--yes`, it shows the plan and changes nothing.
 - Eighteen red-line recipes (`flowrail redlines add --list`, also in `packages/flowrail/examples/red-lines/`) and a tester (`flowrail redlines test`) that never writes to the log and works without a workspace.
 - Local dashboard on `127.0.0.1:4747`: overview with a Today card, board, document viewer with comments, knowledge graph, memory, red lines with plain-English summaries, routines, workflows, team, artifacts, security and settings. Every API call needs a per-launch token; red-line changes made in the dashboard are logged and shown.
-- `flowrail-room today` and `GET /api/today`: what happened in the repo since midnight.
-- Board with fixed-length sprints and rollover of unfinished tasks. `flowrail-room task` files into the current sprint.
+- `flowrail-os today` and `GET /api/today`: what happened in the repo since midnight.
+- Board with fixed-length sprints and rollover of unfinished tasks. `flowrail-os task` files into the current sprint.
 - Comments on Markdown documents that agents pick up at session start, act on and resolve.
-- Memory store and deterministic recall (`flowrail-room remember`, `flowrail-room recall`), with no model call.
-- Routines on launchd (macOS) and crontab (Linux), run headless with read-only tools. Command routines are file-only, and `flowrail-room routines install` shows each command before scheduling it.
+- Memory store and deterministic recall (`flowrail-os remember`, `flowrail-os recall`), with no model call.
+- Routines on launchd (macOS) and crontab (Linux), run headless with read-only tools. Command routines are file-only, and `flowrail-os routines install` shows each command before scheduling it.
 - Agent-written reports served in a sandbox with `connect-src 'none'`.
 - Hold counts come from real sessions: hook calls without a session are marked as probes and not counted. Commands in the log are redacted (URL credentials, tokens, keys) and paths shown relative to the project.
-- `flowrail doctor`, `flowrail hooks`, `flowrail upgrade`, `flowrail uninstall`, `flowrail-room demo`, `flowrail-room status`.
+- `flowrail doctor`, `flowrail hooks`, `flowrail upgrade`, `flowrail uninstall`, `flowrail-os demo`, `flowrail-os status`.
 
 [0.1.0]: https://github.com/FinalAngel/flowrail/releases/tag/v0.1.0

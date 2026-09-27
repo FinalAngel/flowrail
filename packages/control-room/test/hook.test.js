@@ -7,7 +7,7 @@ import { createRequire } from 'node:module';
 import { workspace } from './helpers.js';
 import * as comments from '../src/core/comments.js';
 
-// The SessionStart hook lives in the guard (flowrail); the comments it lists are the control room's.
+// The SessionStart hook lives in the guard (flowrail); the comments it lists are flowrailOS's.
 const FLOWRAIL_BIN = path.join(path.dirname(createRequire(import.meta.url).resolve('flowrail/package.json')), 'bin', 'flowrail.js');
 const env = { ...process.env, CLAUDE_PROJECT_DIR: '' };
 const run = (kind, input) => spawnSync(process.execPath, [FLOWRAIL_BIN, 'hook', kind], { input: JSON.stringify(input), encoding: 'utf8', env });
@@ -18,7 +18,7 @@ test('session-start lists open comments and stays silent in bypass modes', () =>
   comments.add(p, { path: 'flowrail/WELCOME.md', quote: 'line', body: 'Please fix the intro' });
   const out = run('session-start', { cwd: p.root }).stdout;
   assert.match(out, /1 open comment[\s\S]*Please fix the intro/);
-  assert.match(out, /npx @finalangel\/flowrail-room resolve/);
+  assert.match(out, /npx @finalangel\/flowrail-os resolve/);
   assert.equal(run('session-start', { cwd: p.root, permission_mode: 'bypassPermissions' }).stdout, '');
 });
 

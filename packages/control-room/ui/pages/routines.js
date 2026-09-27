@@ -25,9 +25,9 @@ export function mount(el, ctx) {
       list.length && !managed ? h('div.actions', installed
         ? h('button.btn', { type: 'button', onclick: () => sched('uninstall') }, 'Unschedule all')
         : h('button.btn.primary', { type: 'button', onclick: () => sched('install') }, 'Schedule routines')) : null));
-    if (!list.length) { root.append(empty('A routine is a prompt or a command on a schedule, for example a Monday review of the board.', 'npx @finalangel/flowrail-room routines install', ctx)); return; }
+    if (!list.length) { root.append(empty('A routine is a prompt or a command on a schedule, for example a Monday review of the board.', 'npx @finalangel/flowrail-os routines install', ctx)); return; }
     if (managed && list.some((r) => r.installed === false)) root.append(h('div.notice.warn', { style: 'margin-bottom:16px' }, icon('alert'), h('div.body', h('span', 'Some routines are not scheduled on this machine.'), cmd(managed.command, ctx))));
-    else if (!installed && !managed) root.append(h('div.notice.warn', { style: 'margin-bottom:16px' }, icon('alert'), h('div.body', h('span', 'Nothing is scheduled yet. flowrail uses launchd on macOS and crontab on Linux.'), cmd('npx @finalangel/flowrail-room routines install', ctx))));
+    else if (!installed && !managed) root.append(h('div.notice.warn', { style: 'margin-bottom:16px' }, icon('alert'), h('div.body', h('span', 'Nothing is scheduled yet. flowrailOS uses launchd on macOS and crontab on Linux.'), cmd('npx @finalangel/flowrail-os routines install', ctx))));
     root.append(h('div.card', { style: 'padding:4px 0' }, h('div.table-wrap', h('table.tbl.stack-sm',
       h('thead', h('tr', h('th', 'Routine'), h('th', 'Schedule'), h('th', 'Last run'), h('th', 'Next'), h('th', h('span.sr-only', 'Actions')))),
       h('tbody', list.map((r) => {

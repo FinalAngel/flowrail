@@ -38,7 +38,7 @@ export function overview(p) {
   const current = b.tasks.filter((t) => t.sprint === b.config.current.start);
   const checks = cachedChecks(p);
   // What a person types; the dashboard never shows agent-only forms.
-  const cli = 'npx flowrail', room = 'npx @finalangel/flowrail-room';
+  const cli = 'npx flowrail', room = 'npx @finalangel/flowrail-os';
 
   const steps = [
     { id: 'workspace', title: 'Workspace found', done: true, hint: `flowrail/ in ${path.basename(p.root)}` },

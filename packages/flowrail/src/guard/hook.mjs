@@ -24,7 +24,7 @@ export const VENDORED_ROOT = path.basename(HERE) === 'guard'
   && path.basename(up(HERE, 1)) === 'flowrail' && path.basename(up(HERE, 2)) === '.claude'
   ? up(HERE, 3) : null;
 const CLI = 'npx flowrail';
-const ROOM_CLI = 'npx @finalangel/flowrail-room';
+const ROOM_CLI = 'npx @finalangel/flowrail-os';
 
 /** Read all of stdin, however slowly it arrives. Never a sync read: that races a slow writer. */
 export async function readStdin(stream = process.stdin) {

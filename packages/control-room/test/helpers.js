@@ -18,4 +18,4 @@ export function workspace(opts = {}) {
   return paths(root);
 }
 
-export const BIN = path.resolve(import.meta.dirname ?? path.dirname(new URL(import.meta.url).pathname), '..', 'bin', 'flowrail-room.js');
+export const BIN = path.resolve(import.meta.dirname ?? path.dirname(new URL(import.meta.url).pathname), '..', 'bin', 'flowrail-os.js');

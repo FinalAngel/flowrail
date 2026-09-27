@@ -358,7 +358,7 @@ function copiesTree(bin, args, sources, dest, cwd, kind) {
 
 /** The arguments after a flowrail binary, however it is invoked; null when this is not flowrail. */
 export function flowrailArgs(argv) {
-  const isPkg = (w) => /^(flowrail|@finalangel\/flowrail-room)(@[\w.^~<>=*-]+)?$/.test(w)
+  const isPkg = (w) => /^(flowrail|@finalangel\/flowrail-os)(@[\w.^~<>=*-]+)?$/.test(w)
     || /(^|\/)flowrail-[\w.-]*\.tgz$/.test(w);
   const afterPkg = (list) => {
     for (let i = 0; i < list.length; i++) {
@@ -367,24 +367,24 @@ export function flowrailArgs(argv) {
       if (['-p', '--package', '-c', '--call', '-w', '--workspace'].includes(a)) { i++; continue; }
       if (a.startsWith('-')) continue;
       const base = path.posix.basename(a);
-      return isPkg(a) || base === 'flowrail' || base === 'flowrail-room' ? list.slice(i + 1) : null;
+      return isPkg(a) || base === 'flowrail' || base === 'flowrail-os' ? list.slice(i + 1) : null;
     }
     return null;
   };
   const [bin, ...rest] = argv;
   const binName = path.posix.basename(bin || '');
-  const own = ['flowrail', 'flowrail.js', 'flowrail-room', 'flowrail-room.js'];
+  const own = ['flowrail', 'flowrail.js', 'flowrail-os', 'flowrail-os.js'];
   if (own.includes(binName)) return rest;
   if (NPX.has(bin)) return afterPkg(rest);
   if (['npm', 'pnpm', 'yarn'].includes(bin)) {
     if (['exec', 'x', 'dlx'].includes(rest[0])) return afterPkg(rest.slice(1));
-    if (bin === 'yarn' && ['flowrail', 'flowrail-room'].includes(rest[0])) return rest.slice(1);
+    if (bin === 'yarn' && ['flowrail', 'flowrail-os'].includes(rest[0])) return rest.slice(1);
     return null;
   }
   if (['node', 'bun', 'deno'].includes(bin)) {
     const script = rest.find((a) => !a.startsWith('-'));
-    const cli = new RegExp('(^|/)flowrail(/bin/flowrail)?\\.js$|(^|/)bin/flowrail(-room)?\\.js$'
-      + '|(^|/)\\.bin/flowrail(-room)?$');
+    const cli = new RegExp('(^|/)flowrail(/bin/flowrail)?\\.js$|(^|/)bin/flowrail(-os)?\\.js$'
+      + '|(^|/)\\.bin/flowrail(-os)?$');
     if (script && cli.test(toPosix(script))) return rest.slice(rest.indexOf(script) + 1);
   }
   return null;
@@ -393,14 +393,14 @@ export function flowrailArgs(argv) {
 function tamperCli(argv) {
   const [bin, sub, ...more] = argv;
   const removes = ['uninstall', 'remove', 'rm', 'un', 'r', 'unlink'].includes(sub);
-  const ours = more.some((a) => /^(flowrail|@finalangel\/flowrail-room)(@.*)?$/.test(a));
+  const ours = more.some((a) => /^(flowrail|@finalangel\/flowrail-os)(@.*)?$/.test(a));
   if (['npm', 'pnpm', 'yarn', 'bun'].includes(bin) && removes && ours) {
     return 'uninstalling flowrail';
   }
   const args = flowrailArgs(argv);
   if (!args) return null;
   const pos = args.filter((a) => !a.startsWith('-'));
-  if (pos[0] === 'room') pos.shift(); // `flowrail room <args>` delegates to the control room
+  if (pos[0] === 'room') pos.shift(); // `flowrail room <args>` delegates to flowrailOS
   if (pos[0] === 'uninstall') return 'flowrail uninstall';
   if (pos[0] === 'hooks' && ['install', 'uninstall'].includes(pos[1])) {
     return `flowrail hooks ${pos[1]}`;

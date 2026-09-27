@@ -87,7 +87,7 @@ export async function guard(pos, flags) {
   return init([], flags);
 }
 
-/** The guard init. The control room passes `room` (its files, see planInit) for the full init. */
+/** The guard init. flowrailOS passes `room` (its files, see planInit) for the full init. */
 export async function init(_pos, flags, room) {
   const root = process.cwd();
   const found = detect(root);
@@ -203,7 +203,7 @@ function printNext(guardOnly) {
   out(`\n${c.bold('Next')}`);
   out(`  ${c.cyan('claude'.padEnd(w))} ask it to "git push". The red line holds it and it asks you instead.`);
   out(`  ${c.cyan(`${CLI} redlines`.padEnd(w))} what is armed, in plain English`);
-  if (!guardOnly) out(`  ${c.cyan('npx @finalangel/flowrail-room'.padEnd(w))} dashboard on http://127.0.0.1:4747`);
+  if (!guardOnly) out(`  ${c.cyan('npx @finalangel/flowrail-os'.padEnd(w))} dashboard on http://127.0.0.1:4747`);
   out(`  ${c.cyan(`${CLI} doctor`.padEnd(w))} if anything looks off`);
 }
 

@@ -101,13 +101,13 @@ Separately, `hooksStatus().drift` and `doctor` report **Rules changed outside fl
 
 Any mismatch shows as **not enforced** with the reason, for example "Guard files changed (hook.mjs). Run npx flowrail upgrade to restore". A guard vendored by another flowrail version cannot be verified by this one until you run `upgrade`. Red lines with a hook show as armed only when the guard is live.
 
-`npx flowrail upgrade` rewrites the guard from the package, refreshes the hook commands and matcher (a new guard version means a new pinned hash) and, where one exists, the two-line `CLAUDE.md` block the Control Room adds, and shows the diff first. The guard alone writes no `CLAUDE.md` block: the hooks need no instructions.
+`npx flowrail upgrade` rewrites the guard from the package, refreshes the hook commands and matcher (a new guard version means a new pinned hash) and, where one exists, the two-line `CLAUDE.md` block flowrailOS adds, and shows the diff first. The guard alone writes no `CLAUDE.md` block: the hooks need no instructions.
 
 ### Bring your own settings
 
 `flowrail guard` (no subcommand) is the pre-tool-use hook run from the installed package, for a `settings.json` you maintain yourself. The vendored command above is the better choice: it needs no install, and `doctor` can verify it.
 
-Remove everything with `flowrail uninstall` (the guard, its hooks and the Control Room's `CLAUDE.md` block if there is one; your `flowrail/` data stays). The `protect-flowrail` floor asks before an agent runs it.
+Remove everything with `flowrail uninstall` (the guard, its hooks and flowrailOS's `CLAUDE.md` block if there is one; your `flowrail/` data stays). The `protect-flowrail` floor asks before an agent runs it.
 
 ## `pre-tool-use`
 

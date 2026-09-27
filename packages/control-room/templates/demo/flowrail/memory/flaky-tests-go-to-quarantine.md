@@ -8,4 +8,4 @@ Quarantined tests still run nightly, so a fix shows up as green there first.
 
 **Why:** retries hid a real race in the merge code for two weeks.
 
-**How to apply:** when a test fails once and passes on rerun, quarantine it and file `npx @finalangel/flowrail-room task "Flaky: <name>" --label flaky`.
+**How to apply:** when a test fails once and passes on rerun, quarantine it and file `npx @finalangel/flowrail-os task "Flaky: <name>" --label flaky`.

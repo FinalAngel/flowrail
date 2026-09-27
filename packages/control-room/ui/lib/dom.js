@@ -65,7 +65,7 @@ export function empty(purpose, command, ctx, extra) {
     h('p', purpose),
     command && cmd(command, ctx),
     extra,
-    h('button.link', { type: 'button', onclick: () => copy('npx @finalangel/flowrail-room demo', (m) => ctx?.toast?.(m === 'Copied to clipboard' ? 'Copied npx @finalangel/flowrail-room demo. Run it to open the example workspace.' : m)) }, 'Load example'));
+    h('button.link', { type: 'button', onclick: () => copy('npx @finalangel/flowrail-os demo', (m) => ctx?.toast?.(m === 'Copied to clipboard' ? 'Copied npx @finalangel/flowrail-os demo. Run it to open the example workspace.' : m)) }, 'Load example'));
 }
 
 /** Skeleton shaped like rows. */

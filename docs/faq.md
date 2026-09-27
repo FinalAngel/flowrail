@@ -18,7 +18,7 @@ Not without asking you. `protect-flowrail` is compiled into the guard and always
 
 ## Can the agent erase what it did, or fake a comment from me?
 
-Not quietly. Every hold is written to `.flowrail/redlines.log` and to a hash-chained journal outside the repo; if the log loses or changes a line, `flowrail doctor`, `flowrail-room status` and the dashboard say **Audit log edited**. Comments you add in the dashboard are signed with a key that lives outside the repo, and Claude is only told to act on signed ones. A comment the agent writes into `.flowrail/comments/` itself shows as unverified. Both live in your user account, so code running as you could still rewrite them; they turn a silent edit into a visible one.
+Not quietly. Every hold is written to `.flowrail/redlines.log` and to a hash-chained journal outside the repo; if the log loses or changes a line, `flowrail doctor`, `flowrail-os status` and the dashboard say **Audit log edited**. Comments you add in the dashboard are signed with a key that lives outside the repo, and Claude is only told to act on signed ones. A comment the agent writes into `.flowrail/comments/` itself shows as unverified. Both live in your user account, so code running as you could still rewrite them; they turn a silent edit into a visible one.
 
 ## What would flowrail have caught in my last month?
 
@@ -26,7 +26,7 @@ Run `npx flowrail audit`. It replays the tool calls from your recent Claude Code
 
 ## What happens when the hook itself breaks?
 
-Inside a flowrail workspace it fails closed. A `red-lines.json` that does not parse, a regex that does not compile, or hook input it cannot read turns every affected call into an `ask` with the reason, and prints the same line to stderr. If the guard itself is gone, emptied, garbled or changed (even together with its manifest), or `node` is missing, the hook command exits with code 2, which Claude Code treats as a block: every tool call is refused with a message that says to run `npx flowrail upgrade`. `flowrail doctor`, `flowrail status`, `flowrail-room status` and the dashboard also show every hooked red line as "Not enforced".
+Inside a flowrail workspace it fails closed. A `red-lines.json` that does not parse, a regex that does not compile, or hook input it cannot read turns every affected call into an `ask` with the reason, and prints the same line to stderr. If the guard itself is gone, emptied, garbled or changed (even together with its manifest), or `node` is missing, the hook command exits with code 2, which Claude Code treats as a block: every tool call is refused with a message that says to run `npx flowrail upgrade`. `flowrail doctor`, `flowrail status`, `flowrail-os status` and the dashboard also show every hooked red line as "Not enforced".
 
 ## How is this different from a hook I write myself?
 
@@ -48,7 +48,7 @@ Mostly. The dashboard, board, document viewer, comments, memory, recall, workflo
 
 ## Does memory use a model or embeddings?
 
-No. `flowrail-room recall` ranks memories and document sections by keyword overlap, with light stemming and a short list of synonyms. It is deterministic, instant and free, and it finds words, not meanings. Write memories with the words you will search for.
+No. `flowrail-os recall` ranks memories and document sections by keyword overlap, with light stemming and a short list of synonyms. It is deterministic, instant and free, and it finds words, not meanings. Write memories with the words you will search for.
 
 ## Why zero dependencies?
 
@@ -56,7 +56,7 @@ A tool that sits in front of every command your agent runs should be small enoug
 
 ## Will it mess up my repo?
 
-`flowrail init` shows every change before making it and asks. It adds the guard in `.claude/flowrail/guard/`, `flowrail/config.json`, `flowrail/red-lines.json`, a `.flowrail/` line in `.gitignore` and hook entries in `.claude/settings.json`. It does not touch `package.json` and installs nothing with npm. `flowrail-room init` (the optional `@finalangel/flowrail-room` package) adds the control room on top: the rest of `flowrail/` and a two-line marked block in `CLAUDE.md`. Both keep your existing hooks and never overwrite an existing file.
+`flowrail init` shows every change before making it and asks. It adds the guard in `.claude/flowrail/guard/`, `flowrail/config.json`, `flowrail/red-lines.json`, a `.flowrail/` line in `.gitignore` and hook entries in `.claude/settings.json`. It does not touch `package.json` and installs nothing with npm. `flowrail-os init` (the optional `@finalangel/flowrail-os` package) adds flowrailOS on top: the rest of `flowrail/` and a two-line marked block in `CLAUDE.md`. Both keep your existing hooks and never overwrite an existing file.
 
 `flowrail uninstall` removes the guard, its hooks and the `CLAUDE.md` block, again with a preview. It leaves `flowrail/` in place, because those are your tasks, memories and rules; delete the folder yourself if you want them gone.
 
@@ -66,7 +66,7 @@ Commit `.claude/flowrail/guard/`, `.claude/settings.json` and `flowrail/`. They 
 
 ## Does it work on Windows?
 
-Best effort. The CLI, dashboard and hooks are plain Node and should work. Routines are installed with launchd on macOS and crontab on Linux; on Windows, `flowrail-room routines install` prints what to set up in Task Scheduler. Reports from Windows users are welcome.
+Best effort. The CLI, dashboard and hooks are plain Node and should work. Routines are installed with launchd on macOS and crontab on Linux; on Windows, `flowrail-os routines install` prints what to set up in Task Scheduler. Reports from Windows users are welcome.
 
 ## Can several people use one workspace?
 
