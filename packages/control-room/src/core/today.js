@@ -6,6 +6,8 @@ import path from 'node:path';
 import { execFileSync } from 'node:child_process';
 import { readJsonl } from 'flowrail/api';
 import * as board from './board.js';
+import { reminders } from './reminders.js';
+import { loadConfig } from 'flowrail/api';
 import * as comments from './comments.js';
 import * as artifacts from './artifacts.js';
 import * as memory from './memory.js';
@@ -116,5 +118,8 @@ export function today(p, now = new Date(), opts = {}) {
   }
 
   items.sort((a, b2) => String(b2.at).localeCompare(String(a.at)));
-  return { since: since.toISOString(), items: items.slice(0, MAX), counts };
+  // What is due today or overdue, shown above the timeline.
+  let due = [];
+  try { due = reminders(p, loadConfig(p), now).items.filter((r) => r.days <= 0); } catch { /* nothing due */ }
+  return { since: since.toISOString(), items: items.slice(0, MAX), counts, due };
 }

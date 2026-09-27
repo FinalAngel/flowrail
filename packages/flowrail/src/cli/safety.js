@@ -14,6 +14,7 @@ import { RECIPES, asRedLine, starterLines } from '../core/recipes.js';
 import { hooksStatus, hooksSummary, cliName } from '../core/hooks.js';
 import { portRange } from '../guard/builtins.js';
 import { loadConfig } from '../core/workspace.js';
+import { routerProblems } from '../core/routers.js';
 import { readJson, writeJson } from '../core/util.js';
 
 export async function doctor(_pos, flags) {
@@ -66,7 +67,15 @@ export function check(_pos, flags) {
   }
   const withChecks = lines.filter((l) => l.check);
   const { results, files } = runChecks(p, lines);
-  if (flags.json) return json({ results, files });
+  // Router lint: only when the workspace has areas (config "areas" or a CLAUDE.md router table).
+  const routers = routerProblems(p.root, root ? loadConfig(p) : {});
+  if (flags.json) return json({ results, files, routers });
+  if (routers) {
+    out(`  ${routers.length ? (flags.warn ? mark.warn : mark.fail) : mark.ok} routers  ${c.dim(routers.length ? `${routers.length} problem${routers.length === 1 ? '' : 's'}` : 'every router under a page, every pointer resolves, every folder reachable')}`);
+    for (const r of routers.slice(0, 30)) out(`      ${c.cyan(r.file)}  ${c.dim(r.message)}`);
+    if (routers.length > 30) out(c.dim(`      ...and ${routers.length - 30} more`));
+    if (routers.length && !flags.warn) process.exitCode = 1;
+  }
   if (!withChecks.length) return out(`No red line has a check yet. ${c.dim('Add "check": {"glob": "**/*.md", "pattern": "..."} to one.')}`);
   const blocks = results.filter((r) => r.severity === 'block');
   for (const l of withChecks) {

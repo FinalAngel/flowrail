@@ -22,6 +22,7 @@ function copyTree(src, dest, today) {
     if (e.isDirectory()) { fs.mkdirSync(d, { recursive: true }); copyTree(s, d, today); continue; }
     const text = fs.readFileSync(s, 'utf8')
       .replace(/\{\{DAYS_AGO_(\d+)\}\}/g, (_, n) => localDate(addDays(today, -Number(n))))
+      .replace(/\{\{IN_DAYS_(\d+)\}\}/g, (_, n) => localDate(addDays(today, Number(n))))
       .replaceAll('{{DATE}}', localDate(today));
     writeText(d, text);
   }
@@ -247,6 +248,7 @@ export function seed(dir, today = new Date()) {
     github: { repo: 'paper-plane/app', assignee: '@me' }, apps: DEMO_APPS,
     areas: [{ name: 'Product', router: 'docs/PRODUCT.md' }, { name: 'Engineering', router: 'docs/ENGINEERING.md' }],
     records: [DEMO_RECORDS],
+    duties: [{ name: 'Monthly dependency review', every: 'month', due: 10 }],
   };
   writeJson(p.config, config);
   seedRecords(dir, today);

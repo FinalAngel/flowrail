@@ -181,6 +181,10 @@ or put a table in `CLAUDE.md` whose rows link one router file per area (`| Sales
 
 `"brand": { "name": "Acme ops", "mono": "Acme" }` names the sidebar and the tab titles (the `mono` start of the name is set in the mono face).
 
+**Reminders.** A date a document already carries in its frontmatter (`due: 2026-10-15`, `next_date: …`) shows under "Needs you" once it is overdue or due within a week, and on Today when it is due today or overdue. Choose the fields and the window with `"reminders": { "fields": ["due", "next_date", "renewal_date"], "within": 7 }`. Work that comes back every period is a duty: `"duties": [{ "name": "Monthly close", "every": "month", "due": 7 }, { "name": "VAT return", "every": "quarter", "due": 60 }]`. When a period ends its instance opens, named with the period ("Monthly close September 2026", "VAT return Q3/2026"), and turns overdue `due` days later; a Done task on the board whose title holds that name closes it. Only the last ended period shows unless the duty has `"from": "2026-01-01"`.
+
+**Router lint.** With areas set, `flowrail check` also checks the routers: each under a page, every pointer in them resolving, every folder reachable from `CLAUDE.md` or a router. See [cli.md](cli.md#flowrail-check).
+
 These settings are file-only: the dashboard's settings API cannot change them.
 
 ## Agents

@@ -1,3 +1,6 @@
+---
+next_date: {{IN_DAYS_3}}
+---
 # Roadmap
 
 What we plan to ship, in order. Dates are targets, not promises.

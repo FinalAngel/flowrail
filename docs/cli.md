@@ -261,6 +261,8 @@ held (ask first)  flowrail red line no-push-without-asking: Never push without a
 
 Runs every red line's `check` over the repo, and, when `secret-files` is armed, scans every file for high-confidence secrets (AWS, GitHub, Slack, Stripe, Anthropic and OpenAI keys, Google API keys, private keys) the way the hook scans every Write and Edit. Prints each hit with file and line, secrets redacted. Exit 1 if any `block` severity check has a hit, else 0. Without a workspace it checks with the starter red lines. `--json` for scripts. Suitable for CI; see [red-lines.md](red-lines.md#in-ci).
 
+When the workspace has areas (`areas` in `config.json`, or a table in `CLAUDE.md` that links one router per area), `check` also lints the routers: every router exists and stays under a page (`"routers": { "maxWords": 600 }`), every link and every path-like `code` span in a router resolves (from the repo root or the router's folder), and every top-level folder, plus every folder under `"routers": { "roots": ["company"] }`, is reachable from `CLAUDE.md` or a router: named itself, by a path inside it, or by a folder above it. Problems exit 1; `--warn` prints them and exits 0.
+
 ### `flowrail audit`
 
 Replays the tool calls in this project's recent Claude Code transcripts (`~/.claude/projects/`, or `$CLAUDE_CONFIG_DIR/projects`) through the red lines you have now, with the guard's own decision code, and prints what would have been held and asked. Read-only and local: it writes nothing and calls no model. `--days 30` (1 to 365), `--all` for every row, `--json` for scripts; output closed early (`--json | head`) is fine.

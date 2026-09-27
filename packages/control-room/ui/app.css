@@ -784,3 +784,9 @@ table.probes .bad, table.probes tr.fail td:first-child { color: var(--danger); f
 .board.rboard { grid-template-columns: repeat(var(--cols, 4), minmax(168px, 1fr)); }
 @media (max-width: 1024px) { .board.rboard { grid-template-columns: repeat(var(--cols, 4), minmax(240px, 1fr)); } }
 @media (max-width: 767px) { .board.rboard { grid-template-columns: minmax(0, 1fr); overflow: visible; } }
+/* Today: what is due today or overdue, above the timeline. */
+.due-list { list-style: none; margin: 0 0 var(--s3); padding: 0 0 var(--s3); border-bottom: 1px solid var(--hairline); display: grid; gap: 2px; }
+.due-list a { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 6px; border-radius: var(--r-ctl); color: inherit; text-decoration: none; font-size: 13.5px; }
+.due-list a:hover { background: var(--tray); }
+.due-list .t { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.due-list a.overdue > .icon { color: var(--danger); }
