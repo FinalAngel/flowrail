@@ -189,7 +189,21 @@ These settings are file-only: the dashboard's settings API cannot change them.
 
 ## Agents
 
-The Agents page lists the subagents defined in `.claude/agents/`, the skills, and the slash commands. The subagent hooks record when each agent starts and stops, so you can see who is working.
+The Agents page lists the people first, then the subagents defined in `.claude/agents/`, the skills, and the slash commands. The subagent hooks record when each agent starts and stops, so you can see who is working.
+
+**People** are one Markdown file per person in `flowrail/people/` (or the folder `"people": { "dir": "team" }` names in `config.json`), with `name`, `role`, `email` and `links` in the frontmatter and a short bio as the first paragraph. The card links to the file in Docs.
+
+## Actions
+
+An action is a command you start from the Runs page with a few inputs: record a meeting from its link, build a report for one client. Actions are listed in `flowrail/config.json` only:
+
+```json
+"actions": [{ "id": "record-meeting", "title": "Record a meeting", "cmd": ["node", "scripts/record.js", "--url", "{url}", "--kind", "{kind}"],
+  "inputs": [{ "name": "url", "label": "Meeting link", "type": "url", "pattern": "^https://", "required": true },
+             { "name": "kind", "type": "select", "options": ["sales", "general"] }] }]
+```
+
+Run opens a form for the inputs. Each `{name}` in `cmd` must be a whole argument; it is replaced by the checked value as one argument, so nothing reaches a shell and a value is never split or read as an option. Inputs are `text` (the default), `url` (http or https) or `select` (one of `options`), with `required`, `max` (characters, default 500) and `pattern` (a regular expression the value must match). A text or link value may not start with `-` or contain line breaks. The run is recorded on the Runs page like every other run, one at a time.
 
 ## What flowrail does not do
 

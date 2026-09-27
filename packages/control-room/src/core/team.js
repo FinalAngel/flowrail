@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { parseFrontmatter } from './frontmatter.js';
-import { listFiles, readText, readJson } from 'flowrail/api';
+import { listFiles, readText, readJson, loadConfig } from 'flowrail/api';
 
 const WORKING_FOR = 30 * 60000;
 const DONE_RECENTLY = 60 * 60000;
@@ -54,6 +54,24 @@ export function commands(p) {
   });
 }
 
+/**
+ * People: one Markdown profile per person in the folder config "people": { "dir" } names (inside the
+ * repo), else flowrail/people/. Frontmatter name, role, email and links; the first paragraph is the bio.
+ */
+export function people(p) {
+  const rel = loadConfig(p).people?.dir;
+  const ok = typeof rel === 'string' && rel.trim() && !path.isAbsolute(rel) && !rel.split(/[\\/]/).includes('..');
+  const base = ok ? rel.replace(/^\.\/|\/+$/g, '') : 'flowrail/people';
+  const dir = path.join(p.root, base);
+  const str = (v) => (typeof v === 'string' ? v.trim() : '');
+  return listFiles(dir, '.md').filter((f) => !/^(readme|index)\.md$/i.test(f)).map((f) => {
+    const { data, body } = parseFrontmatter(readText(path.join(dir, f)));
+    const links = asList(data.links).filter((l) => /^https?:\/\//i.test(l)).slice(0, 5);
+    const bio = body.replace(/^\s*#.*\n/, '').split(/\n\s*\n/).map((x) => x.trim()).find((x) => x && !/^[#>|`-]/.test(x)) || '';
+    return { name: str(data.name) || f.replace(/\.md$/, '').replace(/[-_]+/g, ' '), role: str(data.role), email: /^[^\s@]+@[^\s@]+$/.test(str(data.email)) ? str(data.email) : '', links, bio: bio.slice(0, 400), path: `${base}/${f}` };
+  }).sort((a, b) => a.name.localeCompare(b.name));
+}
+
 export function team(p) {
-  return { agents: agents(p), skills: skills(p), commands: commands(p) };
+  return { people: people(p), agents: agents(p), skills: skills(p), commands: commands(p) };
 }

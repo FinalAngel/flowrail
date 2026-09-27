@@ -32,6 +32,7 @@ import * as routines from './core/routines.js';
 import * as artifacts from './core/artifacts.js';
 import * as runs from './core/runs.js';
 import * as apps from './core/apps.js';
+import * as actions from './core/actions.js';
 import { team } from './core/team.js';
 import { build as buildGraph } from './core/graph.js';
 import { overview, search, drift } from './core/overview.js';
@@ -275,9 +276,15 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
       let appList = [];
       let appsError = null;
       try { appList = await apps.list(p); } catch (e) { appsError = e.message; }
-      return { runs: runs.list(p), headless: runs.HEADLESS, apps: appList, appsError };
+      let actionList = [];
+      let actionsError = null;
+      try { actionList = actions.list(p); } catch (e) { actionsError = e.message; }
+      return { runs: runs.list(p), headless: runs.HEADLESS, apps: appList, appsError, actions: actionList, actionsError };
     },
     // Apps are started and stopped by id; the list itself lives in flowrail/config.json only.
+    'GET /api/actions': () => actions.list(p),
+    // Run an action by id with its inputs; actions themselves live in flowrail/config.json only.
+    'POST /api/actions': (b) => actions.run(p, need(b.id, 'id'), b.inputs || {}),
     'POST /api/apps': (b) => {
       if (b._action === 'start') return apps.start(p, need(b.id, 'id'));
       if (b._action === 'stop') return apps.stop(p, need(b.id, 'id'));
