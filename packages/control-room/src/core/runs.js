@@ -103,17 +103,20 @@ export function start(p, spec, meta = {}) {
   return { id, record, done };
 }
 
-/** Run records: a plugin's store (`stores.runs`: list(limit) and get(id)) when one is set, else .flowrail/runs/. */
+/**
+ * Run records, newest first: the room's own (.flowrail/runs/: actions and runs started here) plus a
+ * plugin's store (`stores.runs`: list(limit) and get(id)) when one is set.
+ */
 export function list(p, limit = 50) {
-  if (p.stores?.runs) return p.stores.runs.list(limit);
-  return listFiles(p.runs, '.json').reverse().slice(0, limit).map((f) => readJson(path.join(p.runs, f), null)).filter((r) => r && r.id);
+  const own = listFiles(p.runs, '.json').reverse().slice(0, limit).map((f) => readJson(path.join(p.runs, f), null)).filter((r) => r && r.id);
+  if (!p.stores?.runs) return own;
+  const at = (r) => String(r.startedAt || '');
+  return [...own, ...p.stores.runs.list(limit)].sort((a, b) => at(b).localeCompare(at(a))).slice(0, limit);
 }
 
 export function get(p, id) {
-  if (p.stores?.runs) return p.stores.runs.get(id);
-  if (!/^[\w-]{1,64}$/.test(id)) return null;
-  const r = readJson(path.join(p.runs, `${id}.json`), null);
-  if (!r) return null;
+  const r = /^[\w-]{1,64}$/.test(id) ? readJson(path.join(p.runs, `${id}.json`), null) : null;
+  if (!r) return p.stores?.runs ? p.stores.runs.get(id) : null;
   let log = '';
   try { log = fs.readFileSync(path.join(p.runs, `${id}.log`), 'utf8'); } catch { /* no output yet */ }
   return { ...r, log };

@@ -68,5 +68,13 @@ test('routine and run stores: listed and run here, scheduled elsewhere', async (
     assert.equal((await r('POST', '/api/routines', { _action: 'install' })).status, 405);
     assert.equal((await r('GET', '/api/runs/r1')).json.log, 'done');
     assert.equal((await r('GET', '/api/runs')).json[0].id, 'r1');
+    // A run the room starts itself (an action) is listed beside the store's, newest first.
+    fs.mkdirSync(p.runs, { recursive: true });
+    fs.writeFileSync(path.join(p.runs, 'own1.json'), JSON.stringify({ id: 'own1', title: 'Action', status: 'ok', startedAt: '2026-02-01T00:00:00Z' }));
+    fs.writeFileSync(path.join(p.runs, 'own1.log'), 'mine');
+    assert.deepEqual((await r('GET', '/api/runs')).json.map((x) => x.id), ['own1', 'r1']);
+    assert.equal((await r('GET', '/api/runs/own1')).json.log, 'mine');
+    assert.equal((await r('GET', '/api/runs/r1')).json.log, 'done');
+    fs.rmSync(path.join(p.runs, 'own1.json')); fs.rmSync(path.join(p.runs, 'own1.log'));
   } finally { await s2.close(); }
 });

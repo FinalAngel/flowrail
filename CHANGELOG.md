@@ -6,6 +6,7 @@ All notable changes to flowrail are recorded here. The format follows [Keep a Ch
 
 ### Fixed
 
+- With a runs store (`stores: { runs }`), the runs the room starts itself (actions) were hidden from the Runs page; they are listed beside the store's now, newest first.
 - The audit finds transcripts in another `~/.claude-*` folder when the dashboard runs without `CLAUDE_CONFIG_DIR` and `~/.claude` has none for the project.
 - The header lines up with the content's side gutter; commands inside alerts are on the page colour, not grey; Context rows stay two lines; the Docs editor fills the height of the screen.
 - The pages use the full width of the window; only prose keeps a reading width.
