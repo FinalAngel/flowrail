@@ -6,7 +6,8 @@
   "exports": {
     "./server": "./src/server.js",
     "./package.json": "./package.json",
-    "./comments": "./src/core/comments.js"
+    "./comments": "./src/core/comments.js",
+    "./reminders": "./src/core/reminders.js"
   },
   "bin": {
     "flowrail-room": "bin/flowrail-room.js"

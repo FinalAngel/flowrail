@@ -13,6 +13,7 @@ All notable changes to flowrail are recorded here. The format follows [Keep a Ch
 
 ### Added
 
+- Duties can count their due date in weekdays, fall on a fixed day (`dueOn`), show ahead of time (`lead`), name months in a locale, close on a looser task title (`match`) and carry a note and a document link.
 - The Board shows the selected sprint only (Todo, In progress, Review, and Done as a compact list); unscheduled tasks are on the Backlog page, and a task still moves there from its menu.
 - Records: a folder of Markdown files as a table and a board (`records` in `flowrail/config.json`), with a status bar, filters, due-date chips and ‹ › moves that rewrite only the status line of the file.
 - Reminders: frontmatter dates (`due`, `next_date`, or your own fields) and recurring duties from `config.json` show under "Needs you" and on Today when they come due; a duty closes when a Done task carries its name (`GET /api/reminders`).
