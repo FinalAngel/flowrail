@@ -7,7 +7,7 @@ import { areas as libraryAreas, areaOf as libraryAreaOf } from './library.js';
 import { listDocs } from './docs.js';
 import { readText } from 'flowrail/api';
 import { memoryFor } from './memory.js';
-import { load as loadRoutines } from './routines.js';
+import { list as listRoutines, routinesFor } from './routines.js';
 import { workflowsDir } from './workflows.js';
 import { loadLines } from 'flowrail/api';
 import { loadConfig } from 'flowrail/api';
@@ -71,9 +71,10 @@ export function build(p) {
   // Routines, red lines and artifacts first, then skills and agents, then documents: when the cap
   // is reached it drops documents, never the few things on the outer rings.
   const artDir = path.relative(p.root, p.artifacts).split(path.sep).join('/');
-  for (const r of loadRoutines(p)) if (add({ id: `routine:${r.id}`, kind: 'routine', label: r.title || r.id, path: 'flowrail/routines.json' })) link('hub', `routine:${r.id}`, 'module');
+  // `at` (the last run, the artifact's date) is the age the map writes under an outer-ring badge.
+  for (const r of listRoutines(p)) if (add({ id: `routine:${r.id}`, kind: 'routine', label: r.title || r.id, ...(routinesFor(p) ? {} : { path: 'flowrail/routines.json' }), ...(r.lastRun?.at ? { at: r.lastRun.at } : {}) })) link('hub', `routine:${r.id}`, 'module');
   for (const l of loadLines(p)) if (add({ id: `redline:${l.id}`, kind: 'redline', label: l.title || l.id, path: 'flowrail/red-lines.json' })) link('hub', `redline:${l.id}`, 'module');
-  for (const a of listArtifacts(p)) add({ id: `artifact:${a.name}`, kind: 'artifact', label: a.title, path: `${artDir}/${a.name}`, href: a.href });
+  for (const a of listArtifacts(p)) add({ id: `artifact:${a.name}`, kind: 'artifact', label: a.title, path: `${artDir}/${a.name}`, href: a.href, at: a.created });
   const rank = (rel) => (kindFor(rel, wfDir) === 'doc' ? 1 : 0);
   files.sort((a, b) => rank(a) - rank(b));
 

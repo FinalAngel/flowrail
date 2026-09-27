@@ -58,6 +58,7 @@ test('every node carries its ring; commands are skills; artifacts are on the map
   assert.equal(art.label, 'Weekly digest');
   assert.equal(art.ring, 'artifact');
   assert.equal(art.href, '/artifacts/digest.html');
+  assert.ok(!Number.isNaN(Date.parse(art.at)), 'an artifact carries its date for the age under its badge');
   assert.deepEqual(g.areas, []);
 });
 
@@ -83,4 +84,11 @@ test('at the node cap, documents give way: routines, artifacts and skills stay o
   assert.ok(art, 'the artifact survives the cap');
   assert.equal(art.path, 'reports/weekly.html', 'the artifact path follows artifactsDir');
   assert.ok(g.nodes.some((n) => n.kind === 'redline'), 'red lines survive the cap');
+});
+
+test('routines from a store are on the map with their last run', () => {
+  const p = workspace();
+  p.stores = { routines: { list: () => [{ id: 'lint', title: 'Lint', lastRun: { at: '2026-01-02T03:04:05Z', exit: 0 } }], runNow() {} } };
+  const r = build(p).nodes.find((n) => n.kind === 'routine');
+  assert.deepEqual([r.id, r.label, r.at, r.path], ['routine:lint', 'Lint', '2026-01-02T03:04:05Z', undefined]);
 });

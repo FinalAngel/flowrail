@@ -1,11 +1,14 @@
 // Rings: the repo drawn as concentric rings around CLAUDE.md. From the centre out, on one unit U:
 //   hub -1- skills and commands -1- area markers -1- documents (a band two units deep, one sector
 //   per area) -1- routines and red lines -1- artifacts
+// Spokes run from the centre to each area's marker and from the marker to its entries; the outer
+// rings draw each entry as a badge with its glyph and its age.
 // Every radius comes from U, so the rhythm holds at any size. Points glow from a cached sprite per
 // colour (no shadowBlur), links share one ink and take the area colour on hover, a folder with many
 // documents is one larger star carrying its count. The canvas paints no background and never takes
 // the wheel, so the page scrolls over it. Keyboard and screen readers get the same items as a list.
 import { h, clear, skeleton, errorBox, empty } from '../lib/dom.js';
+import { iconPath } from '../icons.js';
 
 const FOLD = 4;          // a folder with more documents than this in one area is drawn as one star
 const CORE = 0.3;        // where the sprite's solid core ends, as a share of its radius
@@ -128,6 +131,8 @@ export function rings(el, ctx) {
       const perRow = Math.max(1, Math.floor((TAU * r) / pitch));
       const rows = Math.max(1, Math.min(3, Math.ceil(list.length / perRow)));
       const per = Math.ceil(list.length / rows);
+      list.rows = rows;
+      list.gap = list.length ? (TAU * r) / per : 0;
       list.forEach((x, i) => {
         const row = Math.floor(i / per), k = i % per, n = Math.min(per, list.length - row * per);
         x.r = r + (outward ? row : row - (rows - 1) / 2) * pitch;
@@ -172,8 +177,17 @@ export function rings(el, ctx) {
     });
     const hub = items[0]; hub.a = 0; hub.r = 0;
     ring(items.filter((x) => x.ring === 'skill'), R.skill, -Math.PI / 2, true);
-    ring(items.filter((x) => x.ring === 'routine'), R.routine, -Math.PI / 2 + 0.2);
-    ring(items.filter((x) => x.ring === 'artifact'), R.artifact, -Math.PI / 2 + 0.1);
+    // The outer rings are badges: as large as their spacing allows, capped, with an age label
+    // under each while the ring is a single row.
+    for (const [key, phase] of [['routine', 0.2], ['artifact', 0.1]]) {
+      const list = items.filter((x) => x.ring === key);
+      ring(list, R[key], -Math.PI / 2 + phase);
+      const br = Math.max(3, Math.min(U * 0.28, list.gap * (list.rows > 1 ? 0.3 : 0.4)));
+      for (const x of list) { x.badge = br; x.aged = list.rows === 1 && br >= 7; }
+    }
+    // Area markers are hoverable too: hovering one lights its fan of spokes.
+    items.markers = sec.filter((s) => s.area >= 0).map((s) => ({ id: `area:${s.area}`, kind: 'area', ring: 'area', a: s.mid, r: R.area, area: s.area, label: areas[s.area]?.name || '', sector: s }));
+    for (const m of items.markers) byId.set(m.id, m);
     items.R = R;
     items.labelR = rl;
   }
@@ -210,8 +224,31 @@ export function rings(el, ctx) {
   const size = (x) => {
     const slot = (items.pitch || U / 3) * 0.48;
     if (x.kind === 'hub') return U * 0.34;
+    if (x.kind === 'area') return Math.min(U * 0.16, 5);
+    if (x.badge) return x.badge;
     if (x.kind === 'folder') return Math.min(slot, 2.5 + Math.sqrt(x.count) * 1.4);
     return Math.min(slot * 0.62, x.ring === 'band' ? 4.2 : 3.6);
+  };
+  const GLYPH = { routine: 'routines', redline: 'redlines', artifact: 'docs' };
+  const glyphs = new Map();
+  /** An outer-ring entry: a tinted disc, a ring in its colour and its glyph stroked on top. */
+  function badge(c, x, y, r, color, kind) {
+    c.fillStyle = colors.surface; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill();
+    c.fillStyle = color;
+    const a = c.globalAlpha; c.globalAlpha = a * 0.16; c.fill(); c.globalAlpha = a;
+    c.strokeStyle = color; c.lineWidth = Math.max(1, r / 7); c.stroke();
+    if (r < 6) return;
+    const name = GLYPH[kind] || 'docs';
+    if (!glyphs.has(name)) glyphs.set(name, iconPath(name));
+    const s = (r * 1.15) / 24;
+    c.save(); c.translate(x - 12 * s, y - 12 * s); c.scale(s, s);
+    c.lineWidth = 1.8; c.lineCap = 'round'; c.lineJoin = 'round'; c.strokeStyle = color; c.stroke(glyphs.get(name));
+    c.restore();
+  }
+  const age = (at) => {
+    const d = (Date.now() - Date.parse(at)) / 3600000;
+    if (!(d >= 0)) return '';
+    return d < 1 ? 'now' : d < 24 ? `${Math.floor(d)}h` : d < 24 * 14 ? `${Math.floor(d / 24)}d` : `${Math.floor(d / 168)}w`;
   };
   function point(c, x, y, r, color) {
     if (r * 2 / CORE > BIG) { c.fillStyle = color; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill(); return; }
@@ -243,8 +280,32 @@ export function rings(el, ctx) {
     c.beginPath(); c.arc(cx, cy, R.band1 * ease(t), 0, TAU); c.moveTo(cx + R.band0 * ease(t), cy); c.arc(cx, cy, R.band0 * ease(t), TAU, 0, true);
     c.fillStyle = colors.hairline; c.globalAlpha = 0.28; c.fill('evenodd');
     c.globalAlpha = 1;
-    // Links: one ink; the hovered node's links in its colour.
     const hot = hover && byId.get(hover);
+    // Spokes: centre to each area marker, marker to each of its entries. One faint ink, thinner the
+    // more entries a fan has; the hovered fan (its marker, or one of its entries) in the area colour.
+    const fanOf = hot ? (hot.kind === 'area' ? hot.area : hot.ring === 'band' ? hot.area : null) : null;
+    for (const m of items.markers) {
+      const [mx, my] = xy(m, ease(t));
+      const lit = fanOf === m.area;
+      c.strokeStyle = lit ? areaColor(m.area) : colors.text3;
+      c.lineWidth = lit ? 1.4 : 1;
+      c.globalAlpha = lit ? 0.8 : hot ? 0.08 : 0.3;
+      c.beginPath(); c.moveTo(cx, cy); c.lineTo(mx, my); c.stroke();
+      const fan = m.sector.items;
+      const base = Math.min(0.2, 1.6 / Math.sqrt(Math.max(1, fan.length)));
+      c.lineWidth = lit ? 1 : 0.8;
+      for (const e of fan) {
+        const x = byId.get(e.id);
+        if (!x) continue;
+        const one = hot && hot.id === x.id;
+        if (hot && !lit) continue;
+        c.globalAlpha = one ? 0.95 : lit ? Math.max(0.25, base * 3) : base;
+        const [px, py] = xy(x, k(x));
+        c.beginPath(); c.moveTo(mx, my); c.lineTo(px, py); c.stroke();
+      }
+    }
+    c.globalAlpha = 1;
+    // Links: one ink; the hovered node's links in its colour.
     c.lineWidth = 1;
     for (const l of links) {
       const a = byId.get(l.s), b = byId.get(l.t);
@@ -257,19 +318,28 @@ export function rings(el, ctx) {
     }
     c.globalAlpha = 1;
     // Area markers and their names along the arc.
-    for (const s of items.sectors) {
-      if (s.area < 0) continue;
-      const m = { a: s.mid, r: R.area };
+    for (const m of items.markers) {
       const [x, y] = xy(m, ease(t));
-      point(c, x, y, Math.min(U * 0.16, 5), areaColor(s.area));
-      if (t === 1) arcLabel(c, areas[s.area]?.name || '', s, items.labelR, areaColor(s.area));
+      c.globalAlpha = hot && fanOf !== m.area ? 0.4 : 1;
+      point(c, x, y, size(m), areaColor(m.area));
+      if (t === 1) arcLabel(c, m.label, m.sector, items.labelR, areaColor(m.area));
     }
+    c.globalAlpha = 1;
     const near = new Set();
     if (hot) { near.add(hover); near.add(items[0].id); for (const l of links) { if (l.s === hover) near.add(l.t); if (l.t === hover) near.add(l.s); } }
+    if (hot?.kind === 'area') for (const e of hot.sector.items) near.add(e.id);
     for (const x of items) {
       const [px, py] = xy(x, k(x));
       c.globalAlpha = hot && !near.has(x.id) ? 0.3 : 1;
       const r = size(x);
+      if (x.badge) {
+        badge(c, px, py, r, colorOf(x), x.kind);
+        if (x.aged && x.at && t === 1) {
+          const label = age(x.at);
+          if (label) { c.font = '500 9.5px Geist Mono, ui-monospace, monospace'; c.fillStyle = colors.text3; c.textAlign = 'center'; c.textBaseline = 'top'; c.fillText(label, px, py + r + 4); }
+        }
+        continue;
+      }
       point(c, px, py, r, x.kind === 'hub' ? colors.hub : colorOf(x));
       if (x.kind === 'folder' && r >= 6 && t === 1) {
         c.fillStyle = colors.surface;
@@ -323,6 +393,7 @@ export function rings(el, ctx) {
   /* ---------- interaction (after the map has settled) ---------- */
   const hrefFor = (x) => {
     if (x.kind === 'hub') return x.path ? '#/docs?path=' + encodeURIComponent(x.path) : null;
+    if (x.kind === 'area') return areas[x.area]?.router ? '#/docs?path=' + encodeURIComponent(areas[x.area].router) : null;
     if (x.kind === 'folder') return '#/knowledge?view=tree&path=' + encodeURIComponent(x.path);
     if (x.kind === 'memory') return '#/memory?q=' + encodeURIComponent(x.label);
     if (x.kind === 'routine') return '#/routines';
@@ -331,13 +402,14 @@ export function rings(el, ctx) {
     return x.path ? '#/docs?path=' + encodeURIComponent(x.path) : null;
   };
   const describe = (x) => {
+    if (x.kind === 'area') return `${x.label} · ${x.sector.docs.length} documents`;
     const where = x.ring === 'band' ? (x.area >= 0 ? areas[x.area]?.name : 'No area') : { hub: 'CLAUDE.md', skill: x.kind === 'agent' ? 'Agent' : 'Skill', routine: x.kind === 'redline' ? 'Red line' : 'Routine', artifact: 'Artifact' }[x.ring];
     return x.kind === 'folder' ? `${x.label} · ${x.count} documents · ${where}` : `${x.label} · ${where}`;
   };
   function hit(e) {
     const r = canvas.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top;
     let best = null, bd = Infinity;
-    for (const x of items) { const [px, py] = xy(x); const d = Math.hypot(px - mx, py - my); if (d < Math.max(size(x) + 5, 8) && d < bd) { bd = d; best = x; } }
+    for (const x of [...items, ...(items.markers || [])]) { const [px, py] = xy(x); const d = Math.hypot(px - mx, py - my); if (d < Math.max(size(x) + 5, 8) && d < bd) { bd = d; best = x; } }
     return best;
   }
   function setHover(x) {
