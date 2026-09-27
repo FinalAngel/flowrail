@@ -78,10 +78,18 @@ test('people: one profile file per person, from the configured folder', () => {
   const w = (rel, text) => { fs.mkdirSync(path.dirname(path.join(p.root, rel)), { recursive: true }); fs.writeFileSync(path.join(p.root, rel), text); };
   w('flowrail/people/ana.md', '---\nname: Ana Ruiz\nrole: Design lead\nemail: ana@example.com\nlinks: [https://ana.example, javascript:alert(1)]\n---\n# Ana\n\nOwns the design system.\n');
   w('flowrail/people/README.md', '# People');
-  assert.deepEqual(people(p), [{ name: 'Ana Ruiz', role: 'Design lead', email: 'ana@example.com', links: ['https://ana.example'], bio: 'Owns the design system.', path: 'flowrail/people/ana.md' }]);
+  assert.deepEqual(people(p), [{ name: 'Ana Ruiz', role: 'Design lead', email: 'ana@example.com', links: ['https://ana.example'], bio: 'Owns the design system.', facts: [], path: 'flowrail/people/ana.md' }]);
   w('team/bo.md', '---\nname: Bo\nemail: not-an-email\n---\n');
   setConfig(p, { people: { dir: 'team' } });
   assert.deepEqual(people(p).map((m) => [m.name, m.email, m.path]), [['Bo', '', 'team/bo.md']]);
   setConfig(p, { people: { dir: '../outside' } });
   assert.equal(people(p)[0].path, 'flowrail/people/ana.md', 'a folder outside the repo falls back to the default');
+});
+
+test('people: a title and a facts table stand in for missing frontmatter', () => {
+  const p = workspace();
+  fs.mkdirSync(path.join(p.root, 'team'), { recursive: true });
+  fs.writeFileSync(p.config, JSON.stringify({ ...JSON.parse(fs.readFileSync(p.config, 'utf8')), people: { dir: 'team' } }));
+  fs.writeFileSync(path.join(p.root, 'team', 'lea.md'), '---\ntitle: Lea Brandt\nupdated: 2026-01-01\n---\n\n# Lea Brandt\n\nHead of operations.\n\n| | |\n|---|---|\n| Role | COO |\n| Work email | lea@example.com |\n| Time zone | CET |\n\n## Focus\n');
+  assert.deepEqual(people(p), [{ name: 'Lea Brandt', role: 'COO', email: 'lea@example.com', links: [], bio: 'Head of operations.', facts: [{ label: 'Time zone', value: 'CET' }], path: 'team/lea.md' }]);
 });

@@ -805,6 +805,9 @@ table.probes .bad, table.probes tr.fail td:first-child { color: var(--danger); f
 .card.person .row { gap: 6px 12px; }
 .card.person a.link { display: inline-flex; align-items: center; gap: 4px; }
 .card.person .name { font-weight: 500; color: var(--text); }
+.person-facts { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 2px 12px; margin: 0; font-size: 12.5px; }
+.person-facts dt { color: var(--text-3); }
+.person-facts dd { margin: 0; color: var(--text-2); overflow-wrap: anywhere; }
 
 /* Artifacts: a sidecar's icon badge, kind and category above the title. */
 .art-top { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }

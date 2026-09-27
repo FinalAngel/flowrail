@@ -21,6 +21,7 @@ export function mount(el, ctx) {
     else root.append(h('div.team-grid.stagger', people.map((m) => h('article.card.person',
       h('div.row', h('a.name', { href: '#/docs?path=' + encodeURIComponent(m.path) }, m.name), m.role && h('span.meta', { style: 'margin-left:auto' }, m.role)),
       m.bio && h('p.muted', m.bio),
+      (m.facts || []).length > 0 && h('dl.person-facts', m.facts.flatMap((x) => [h('dt', x.label), h('dd', x.value)])),
       (m.email || m.links.length) ? h('div.row', m.email && h('a.link', { href: 'mailto:' + m.email }, m.email),
         m.links.map((l) => h('a.link', { href: l, target: '_blank', rel: 'noopener noreferrer' }, icon('external', 12), new URL(l).hostname))) : null))));
     root.append(h('h2.section-title', 'Agents'));

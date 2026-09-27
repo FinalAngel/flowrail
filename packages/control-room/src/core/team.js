@@ -54,9 +54,24 @@ export function commands(p) {
   });
 }
 
+/** The rows of the first two-column table in a Markdown body: [{ label, value }] ("| Role | CEO |"). */
+export function facts(body) {
+  const out = [];
+  for (const line of String(body).split('\n')) {
+    const m = /^\s*\|([^|]*)\|([^|]*)\|\s*$/.exec(line);
+    if (!m) { if (out.length) break; continue; }
+    const [label, value] = [m[1].trim(), m[2].trim()];
+    if (!label || /^:?-{2,}:?$/.test(label)) continue;
+    out.push({ label: label.slice(0, 40), value: value.slice(0, 120) });
+  }
+  return out.slice(0, 12);
+}
+
 /**
  * People: one Markdown profile per person in the folder config "people": { "dir" } names (inside the
- * repo), else flowrail/people/. Frontmatter name, role, email and links; the first paragraph is the bio.
+ * repo), else flowrail/people/. Frontmatter name (or title, or the first heading), role, email and
+ * links; the first paragraph is the bio. A two-column table in the body ("| Role | CEO |") adds
+ * facts, and supplies the role and email when the frontmatter does not.
  */
 export function people(p) {
   const rel = loadConfig(p).people?.dir;
@@ -68,7 +83,16 @@ export function people(p) {
     const { data, body } = parseFrontmatter(readText(path.join(dir, f)));
     const links = asList(data.links).filter((l) => /^https?:\/\//i.test(l)).slice(0, 5);
     const bio = body.replace(/^\s*#.*\n/, '').split(/\n\s*\n/).map((x) => x.trim()).find((x) => x && !/^[#>|`-]/.test(x)) || '';
-    return { name: str(data.name) || f.replace(/\.md$/, '').replace(/[-_]+/g, ' '), role: str(data.role), email: /^[^\s@]+@[^\s@]+$/.test(str(data.email)) ? str(data.email) : '', links, bio: bio.slice(0, 400), path: `${base}/${f}` };
+    const rows = facts(body);
+    const fact = (re) => rows.find((r) => re.test(r.label))?.value || '';
+    const role = str(data.role) || fact(/^role$/i);
+    const mail = str(data.email) || fact(/^(e-?mail|work e-?mail)$/i);
+    const heading = /^\s*#\s+(.+)$/m.exec(body)?.[1]?.trim();
+    return {
+      name: str(data.name) || str(data.title) || heading || f.replace(/\.md$/, '').replace(/[-_]+/g, ' '),
+      role, email: /^[^\s@]+@[^\s@]+$/.test(mail) ? mail : '', links, bio: bio.slice(0, 400),
+      facts: rows.filter((r) => !/^(role|e-?mail|work e-?mail)$/i.test(r.label)), path: `${base}/${f}`,
+    };
   }).sort((a, b) => a.name.localeCompare(b.name));
 }
 

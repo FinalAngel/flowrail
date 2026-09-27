@@ -195,7 +195,7 @@ These settings are file-only: the dashboard's settings API cannot change them.
 
 The Agents page lists the people first, then the subagents defined in `.claude/agents/`, the skills, and the slash commands. The subagent hooks record when each agent starts and stops, so you can see who is working.
 
-**People** are one Markdown file per person in `flowrail/people/` (or the folder `"people": { "dir": "team" }` names in `config.json`), with `name`, `role`, `email` and `links` in the frontmatter and a short bio as the first paragraph. The card links to the file in Docs.
+**People** are one Markdown file per person in `flowrail/people/` (or the folder `"people": { "dir": "team" }` names in `config.json`), with `name`, `role`, `email` and `links` in the frontmatter and a short bio as the first paragraph. A profile that keeps its facts in a two-column table instead (`| Role | COO |`, `| Work email | … |`, `| Time zone | CET |`) works too: `title` or the first heading names the person, the table supplies role and email, and its other rows show on the card. The card links to the file in Docs.
 
 ## Actions
 
