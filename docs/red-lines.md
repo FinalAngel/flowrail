@@ -88,7 +88,7 @@ Inside a flowrail workspace the hook never turns its own trouble into "allowed":
 - A red line's regex does not compile, or its builtin is unknown: that line asks on every call to its tools, and says why.
 - The hook input cannot be parsed, or the hook itself fails: ask.
 - A guard file or its manifest is missing, emptied, garbled or changed, or `node` is not on the PATH: the hook command exits 2 and Claude Code blocks the call (see [hooks.md](hooks.md#what-gets-installed)).
-- `red-lines.json` or `config.json` changed outside flowrail: every call asks, and a call the last accepted red lines block stays blocked.
+- `red-lines.json`, or the `port`, `actions` or `apps` of `config.json`, changed outside flowrail: every call asks, and a call the last accepted red lines block stays blocked.
 
 Red lines come from the project (`$CLAUDE_PROJECT_DIR`) and from every other `flowrail/` workspace between it and the call's folder: a nested workspace adds lines, never removes any. Outside any workspace, and with no vendored guard in the project, the hook has no opinion. The hook reads its input as a stream to the end, so a slow writer, as in `(sleep 0.5; echo '{…}') | flowrail hook pre-tool-use`, gets the same decision as a fast one.
 
@@ -185,7 +185,7 @@ The self-protection matcher. It backs the built-in floor `protect-flowrail` (sev
 
 Reading those files, `rm -rf node_modules` (the guard does not live there), `flowrail status`, `flowrail redlines test` and ordinary tasks are fine.
 
-**Drift detection.** On top of the matcher, the hook compares `flowrail/red-lines.json` and `flowrail/config.json` with the last version flowrail accepted, and asks on every call while they differ, whoever changed them; the last accepted red lines still apply meanwhile, so what they block stays blocked. See [hooks.md](hooks.md#pre-tool-use) and [tamper-model.md](tamper-model.md#the-backstop-drift-detection).
+**Drift detection.** On top of the matcher, the hook compares `flowrail/red-lines.json` and `flowrail/config.json` with the last version flowrail accepted, and asks on every call while they differ, whoever changed them (for `config.json`, only its `port`, `actions` and `apps` count; the rest is layout); the last accepted red lines still apply meanwhile, so what they block stays blocked. See [hooks.md](hooks.md#pre-tool-use) and [tamper-model.md](tamper-model.md#the-backstop-drift-detection).
 
 ### `mcp-actions`
 

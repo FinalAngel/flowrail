@@ -206,18 +206,40 @@ export function acceptChange(root, name, before, by = 'flowrail') {
 }
 
 /**
+ * The config.json keys that matter to safety: `port` (the guard's port red lines) and `actions`
+ * and `apps` (commands the dashboard runs). Every other key is layout.
+ */
+const GUARDED_CONFIG = ['port', 'actions', 'apps'];
+
+/** True when both config texts parse and agree on GUARDED_CONFIG. Unreadable either side: false. */
+function sameGuarded(acceptedText, buf) {
+  try {
+    const obj = (v) => (v && typeof v === 'object' ? v : {});
+    const pick = (v) => canon(GUARDED_CONFIG.map((k) => obj(v)[k] ?? null));
+    return pick(JSON.parse(acceptedText)) === pick(JSON.parse(buf.toString('utf8')));
+  } catch { return false; }
+}
+
+/**
  * The watched files that differ from their accepted snapshot, as 'flowrail/<name>'. The first time
  * a project is seen on this machine its files are accepted as they are (a fresh clone is not
- * drift); `firstUse: false` only reads.
+ * drift); `firstUse: false` only reads. A config.json change that leaves GUARDED_CONFIG alone is
+ * layout, not drift: the snapshot follows it.
  */
 export function rulesDrift(root, { firstUse = true } = {}) {
   const acc = readAccepted(root);
   const files = [];
   const fresh = [];
+  const layout = [];
   for (const name of WATCHED) {
-    const hash = contentHash(readBytes(watchedPath(root, name)));
+    const buf = readBytes(watchedPath(root, name));
     if (!acc[name]) fresh.push(name);
-    else if (acc[name].sha256 !== hash) files.push(`flowrail/${name}`);
+    else if (acc[name].sha256 === contentHash(buf)) continue;
+    else if (name === 'config.json' && sameGuarded(acc[name].text, buf)) layout.push(name);
+    else files.push(`flowrail/${name}`);
+  }
+  if (layout.length && firstUse) {
+    try { acceptRules(root, 'layout-only change', layout); } catch { /* read-only state */ }
   }
   if (fresh.length && firstUse) {
     try { acceptRules(root, 'first use on this machine', fresh); } catch { /* read-only state */ }

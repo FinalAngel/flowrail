@@ -98,6 +98,25 @@ test('drift: config.json too; doctor reports it; dashboard and CLI changes are a
   assert.equal(bash(root, 'fly deploy').decision, 'ask');
 });
 
+test('drift: a layout-only config.json edit is not drift; port, actions and apps are', () => {
+  const root = project();
+  const p = paths(root);
+  const cfg = () => JSON.parse(fs.readFileSync(p.config, 'utf8'));
+  const write = (v) => fs.writeFileSync(p.config, JSON.stringify(v, null, 2));
+  write({ ...cfg(), nav: { '': ['docs'] }, docsRoots: ['docs'] });
+  assert.equal(bash(root, 'ls').decision, 'allow', 'nav and docs roots are layout');
+  assert.equal(driftStatus(root).changed, false, 'the snapshot followed the layout edit');
+  for (const [key, value] of [['port', 9999], ['actions', [{ id: 'x', title: 'x', cmd: ['sh', '-c', 'x'] }]], ['apps', [{ id: 'a', cmd: ['sh'] }]]]) {
+    const before = cfg();
+    write({ ...before, [key]: value });
+    assert.match(bash(root, 'ls').reason, /flowrail\/config\.json changed outside flowrail/, key);
+    write(before);
+    assert.equal(bash(root, 'ls').decision, 'allow', `${key} restored`);
+  }
+  fs.writeFileSync(p.config, '{ not json');
+  assert.match(bash(root, 'ls').reason, /changed outside flowrail/, 'unreadable config is drift');
+});
+
 test('drift: an edit of red-lines.json the human approved in Claude Code is accepted, not drift', () => {
   const root = project();
   const rl = path.join(root, 'flowrail', 'red-lines.json');

@@ -249,7 +249,7 @@ Runs every red line against calls it must hold (positive probes) and calls it mu
 
 ### `flowrail redlines accept`
 
-When something other than flowrail changed `flowrail/red-lines.json` or `flowrail/config.json` (an archive, a patch, a stash pop, an editor), the guard asks on every tool call until you review it. Run this in your own terminal: it shows the diff against the last accepted version, warns if it removes a line, lowers a severity or changes a hook, and asks `[y/N]`. It refuses when `CLAUDECODE` is set (inside a Claude Code session) or when stdin is not a terminal, and the floor asks before an agent runs it. To undo the change instead, restore the file (`git checkout -- flowrail/red-lines.json`).
+When something other than flowrail changed `flowrail/red-lines.json`, or the `port`, `actions` or `apps` of `flowrail/config.json` (an archive, a patch, a stash pop, an editor), the guard asks on every tool call until you review it. Run this in your own terminal: it shows the diff against the last accepted version, warns if it removes a line, lowers a severity or changes a hook, and asks `[y/N]`. It refuses when `CLAUDECODE` is set (inside a Claude Code session) or when stdin is not a terminal, and the floor asks before an agent runs it. To undo the change instead, restore the file (`git checkout -- flowrail/red-lines.json`).
 
 ### `flowrail redlines test "<command>"`
 
