@@ -351,6 +351,9 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
     const meta = `<meta name="flowrail-token" content="${token}">`;
     let html;
     try { html = fs.readFileSync(path.join(UI_DIR, 'index.html'), 'utf8'); } catch { html = null; }
+    // Plugin stylesheets load with the page, after app.css, so the first paint already has them.
+    const styles = exts.flatMap((pl) => (pl.styles || []).map((s) => `<link rel="stylesheet" href="x/${pl.id}/${s}">`));
+    if (html && styles.length) html = html.replace(/<\/head>/i, (m) => `${styles.join('\n')}\n${m}`);
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Content-Security-Policy': APP_CSP });
     if (html) return res.end(/<head[^>]*>/i.test(html) ? html.replace(/<head[^>]*>/i, (m) => `${m}\n${meta}`) : meta + html);
     res.end('<!doctype html><meta charset="utf-8">' + meta + '<title>flowrail</title><body style="font:15px system-ui;padding:48px;max-width:640px;margin:auto"><h1>flowrail</h1><p>The API is running, but the dashboard files (ui/index.html) are missing from this install. Try <code>npx @finalangel/flowrail-os@latest</code>.</p></p>');

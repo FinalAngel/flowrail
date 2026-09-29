@@ -10,6 +10,7 @@ import { workspace, tmpdir } from './helpers.js';
 const p = workspace();
 const ui = tmpdir();
 fs.writeFileSync(path.join(ui, 'leads.js'), 'export function mount() {}');
+fs.writeFileSync(path.join(ui, 'theme.css'), ':root { --accent: #F55068; }');
 fs.writeFileSync(path.join(p.root, 'secret.txt'), 'no');
 const seen = [];
 const crm = {
@@ -20,6 +21,7 @@ const crm = {
     'GET leads': (_b, q) => ({ leads: [q.get('n')] }),
     'POST leads': (b, _q, ctx) => { seen.push([b, ctx.root]); return { ok: true }; },
   },
+  styles: ['theme.css'],
 };
 const s = await startServer({ root: p.root, port: 0, plugins: [crm] });
 after(() => s.close());
@@ -60,12 +62,24 @@ test('plugin files are served from its ui folder and nowhere else', async () => 
   for (const bad of ['/x/crm/../../secret.txt', '/x/crm/%2e%2e/secret.txt', '/x/nope/leads.js', '/x/crm/']) assert.equal((await req('GET', bad, { token: null })).status, 404, bad);
 });
 
+test('plugin stylesheets are in the page from the first paint, after app.css', async () => {
+  const html = (await req('GET', '/', { token: null })).data;
+  const link = html.indexOf('<link rel="stylesheet" href="x/crm/theme.css">');
+  assert.ok(link > html.indexOf('ui/app.css'), 'linked after app.css');
+  assert.ok(link < html.indexOf('</head>'));
+  const css = await req('GET', '/x/crm/theme.css', { token: null });
+  assert.equal(css.status, 200);
+  assert.match(css.headers['content-type'], /text\/css/);
+});
+
 test('a malformed plugin is refused before the server starts', async () => {
   assert.throws(() => validate({ id: 'Bad' }), /id must match/);
   assert.throws(() => validate({ id: 'a', routes: { 'DELETE x': () => {} } }), /route/);
   assert.throws(() => validate({ id: 'a', routes: { 'GET ../x': () => {} } }), /route/);
   assert.throws(() => validate({ id: 'a', ui: 'rel', pages: [] }), /absolute/);
   assert.throws(() => validate({ id: 'a', ui, pages: [{ id: 'x', title: 'X', path: '/x', module: '../x.js' }] }), /module/);
+  for (const bad of ['../x.css', 'x.js', 'a"><script>.css', '/abs.css']) assert.throws(() => validate({ id: 'a', ui, styles: [bad] }), /style/, bad);
+  assert.throws(() => validate({ id: 'a', styles: ['theme.css'] }), /style/, 'styles need ui');
   await assert.rejects(startServer({ root: p.root, port: 0, plugins: [crm, crm] }), /twice/);
 });
 

@@ -6,6 +6,7 @@
 //     ui: '/abs/path/to/ui',                      // static files, served at /x/<id>/<file>
 //     pages: [{ id: 'leads', title: 'Leads', path: '/leads', group: 'Now', icon: 'board', module: 'leads.js' }],
 //     routes: { 'GET leads': (body, query, ctx) => ..., 'POST leads': (body, query, ctx) => ... },
+//     styles: ['theme.css'],                      // stylesheets in `ui`, linked in every page's <head>
 //   }
 // A route answers at /api/x/<id>/<name> behind the same Host, Origin, token and X-Flowrail checks as
 // every built-in route. A page module lives in `ui` and exports mount(el, ctx) like the built-in pages.
@@ -25,6 +26,7 @@ const ROUTE = /^(GET|POST) ([a-z0-9][a-z0-9/_-]*)$/;
 const PAGE_PATH = /^\/[a-z0-9/_-]*$/;
 const ALIAS_TO = /^\/[a-z0-9/_-]*(\?[\w.=&%-]*)?$/;
 const FILE = /^[\w.-]+(\/[\w.-]+)*\.m?js$/;
+const STYLE = /^[\w-]+(\/[\w-]+)*(\.[\w-]+)*\.css$/;
 const PREFIX = /^\/[a-z0-9][a-z0-9-]*\/$/;
 const RESERVED = ['/api/', '/ui/', '/x/', '/artifacts/'];
 
@@ -36,6 +38,9 @@ export function validate(pl) {
   for (const pg of pl.pages || []) {
     if (!ID.test(pg.id) || typeof pg.title !== 'string' || !PAGE_PATH.test(pg.path || '')) throw new Error(`${where}: page needs id, title and a path like /leads`);
     if (!pl.ui || !FILE.test(pg.module || '') || pg.module.includes('..')) throw new Error(`${where}: page ${pg.id} needs ui and a module like leads.js`);
+  }
+  for (const s of pl.styles || []) {
+    if (!pl.ui || typeof s !== 'string' || !STYLE.test(s)) throw new Error(`${where}: style "${s}" needs ui and a path like theme.css`);
   }
   if (pl.handle !== undefined && typeof pl.handle !== 'function') throw new Error(`${where}: handle must be a function`);
   for (const pre of pl.prefixes || []) {

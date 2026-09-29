@@ -2,6 +2,12 @@
 
 All notable changes to flowrail are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/). Before 1.0, minor versions may change file formats and the HTTP API; any such change is listed here with what to do about it.
 
+## [0.3.3] 2026-09-29
+
+### Added
+
+- A plugin can list `styles: ['theme.css']`: stylesheets from its `ui` folder that every page links in its `<head>`, after `app.css`. A plugin's colors now apply from the first paint on every page, not only after one of its own pages has loaded.
+
 ## [0.3.2] 2026-09-29
 
 ### Changed
