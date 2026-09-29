@@ -112,9 +112,11 @@ export function mount(el, ctx) {
 
   function column(name, tasks) {
     const issues = issuesIn(name);
-    // Done reads like the pipeline's Lost column: a quiet list of what finished, not a stack of cards.
-    const body = name === 'Done'
-      ? h('ol.done-list', tasks.map((t) => h('li', h('button.done-item', { type: 'button', title: `${t.id} ${t.title}`, onclick: () => detail(t) }, h('span.id', t.id), h('span.t', t.title)))),
+    // Backlog and Done read like the pipeline's Lost column: a quiet list, not a stack of cards.
+    // Rows still drag, so a backlog task moves to Todo the same way a card does.
+    const body = name === 'Done' || name === 'Backlog'
+      ? h('ol.done-list', tasks.map((t) => h('li', h('button.done-item', { type: 'button', title: `${t.id} ${t.title}`, draggable: 'true', onclick: () => detail(t),
+          ondragstart: (e) => { e.dataTransfer.setData('text/plain', t.id); e.dataTransfer.effectAllowed = 'move'; } }, h('span.id', t.id), h('span.t', t.title)))),
         issues.map((i) => h('li', h('a.done-item', { href: i.url, target: '_blank', rel: 'noopener noreferrer', title: `#${i.number} ${i.title} (GitHub)` }, h('span.id', `#${i.number}`), h('span.t', i.title)))))
       : h('div.col-body', tasks.map(card), issues.map(issueCard));
     const col = h('section.col', { 'aria-label': `${name}, ${tasks.length} tasks`,
