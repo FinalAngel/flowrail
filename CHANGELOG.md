@@ -2,6 +2,16 @@
 
 All notable changes to flowrail are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/). Before 1.0, minor versions may change file formats and the HTTP API; any such change is listed here with what to do about it.
 
+## [0.3.1] 2026-09-29
+
+### Changed
+
+- The Board's Backlog column reads like Done: a quiet list of ids and titles, as narrow as Done, and its rows still drag to Todo.
+
+### Fixed
+
+- The secret-files red line held inline script code carrying a regex such as `.*?`, reading it as a glob that could reach `.env`. In code a wildcard is not a file pattern; a plain secret file name in a script is still held.
+
 ## [0.3.0] 2026-09-27
 
 ### Added
