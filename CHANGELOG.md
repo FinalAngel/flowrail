@@ -2,6 +2,12 @@
 
 All notable changes to flowrail are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/). Before 1.0, minor versions may change file formats and the HTTP API; any such change is listed here with what to do about it.
 
+## [0.3.2] 2026-09-29
+
+### Changed
+
+- Drift detection on `flowrail/config.json` looks only at the keys that matter to safety: `port`, `actions` and `apps`. An edit elsewhere in the file (the nav, docs roots, duties) no longer makes every tool call ask; the snapshot follows it. `red-lines.json` is still watched whole, and a `config.json` that does not parse is still drift.
+
 ## [0.3.1] 2026-09-29
 
 ### Changed

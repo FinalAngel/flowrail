@@ -1,6 +1,6 @@
 {
   "name": "flowrail",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Guardrails for Claude Code that hold. A PreToolUse hook parses every command before it runs, the agent cannot switch it off, and `flowrail audit` replays your past sessions to show what it would have caught. Zero deps, no cloud, MIT.",
   "type": "module",
   "bin": {
