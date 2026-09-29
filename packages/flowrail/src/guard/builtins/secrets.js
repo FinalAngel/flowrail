@@ -205,7 +205,8 @@ export function secretFiles(ctx) {
     if (cred) found.push(hold('ask', `printing a credential (${cred})`));
     const code = inlineCode(argv);
     if (code !== null) {
-      if (codeWords(code).some(isSecretName)) {
+      // No glob matching here: in code, .*? is a regex, not a shell glob that could reach .env.
+      if (codeWords(code).some((w) => !/[*?[]/.test(w) && isSecretName(w))) {
         found.push(hold('ask', 'a script touching a secret file'));
       }
       const env = scriptEnv(code);
