@@ -2,6 +2,12 @@
 
 All notable changes to flowrail are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/). Before 1.0, minor versions may change file formats and the HTTP API; any such change is listed here with what to do about it.
 
+## [0.4.1] 2026-10-02
+
+### Fixed
+
+- Skills: a skill or command name stays on one line; the description wraps instead.
+
 ## [0.4.0] 2026-10-02
 
 ### Added
