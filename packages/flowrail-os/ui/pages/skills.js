@@ -18,7 +18,8 @@ export function mount(el, ctx) {
   const table = (list) => h('div.table-wrap', h('table.tbl',
     h('thead', h('tr', h('th', 'Name'), h('th', 'Kind'), h('th', 'What it is for'))),
     h('tbody', list.map((s) => h('tr',
-      h('td.mono', s.path ? h('a', { href: '#/docs?path=' + encodeURIComponent(s.path) }, s.name) : s.name),
+      // The whole command on one line: the description column wraps instead.
+      h('td.mono', { style: 'white-space:nowrap' }, s.path ? h('a', { href: '#/docs?path=' + encodeURIComponent(s.path) }, s.name) : s.name),
       h('td', h('span.chip', s.kind)),
       h('td.muted', s.description || 'No description.'))))));
 
