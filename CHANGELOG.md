@@ -2,6 +2,21 @@
 
 All notable changes to flowrail are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/). Before 1.0, minor versions may change file formats and the HTTP API; any such change is listed here with what to do about it.
 
+## [0.4.0] 2026-10-02
+
+### Added
+
+- A Skills page (Automation, `/skills`, `GET /api/skills`): every skill and slash command Claude Code can use in the repo, from the project's `.claude/`, your own config folder (`$CLAUDE_CONFIG_DIR` or `~/.claude`) and each enabled plugin, with what each is for. Filter by source, kind or text; a project skill opens in Docs.
+- `"shared": true` in `flowrail/config.json` keeps comments and the activity journal in `flowrail/`, committed, so a team working in one repo sees the same comments and history. Comments become one file each (`flowrail/comments/<id>.json`); the journal is `flowrail/activity/YYYY-MM.jsonl` (add `flowrail/activity/*.jsonl merge=union` to `.gitattributes`). Without the flag nothing moves; the old per-machine files are always still read.
+- Comments are signed by their person as well as their machine: an ed25519 key in the state folder, whose public half goes into `keys` in `config.json` (`{ "email": "base64" }`). `npx @finalangel/flowrail-os key` prints that line. A comment verifies when either signature checks out, so a teammate's comment is an instruction on your machine too once their key is in `keys`.
+- Identity: every comment, task note, resolution and journal line names the person (git's `user.email`, named from the people folder) instead of "you". `GET /api/me`.
+- The journal records task moves, record moves and comments added or resolved, each with `who`, `by` (human or agent) and, for an agent, its Claude Code session.
+- SessionStart lists shared comments, says who wrote one that is not yours, and tells the agent to answer such a comment only from files tracked in git.
+
+### Changed
+
+- `keys` joins `port`, `actions` and `apps` as guarded config: a key added without the human accepting it is drift. Run `npx flowrail upgrade` to vendor the new guard.
+
 ## [0.3.3] 2026-09-29
 
 ### Added
