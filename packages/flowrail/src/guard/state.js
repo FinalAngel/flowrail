@@ -209,7 +209,7 @@ export function acceptChange(root, name, before, by = 'flowrail') {
  * The config.json keys that matter to safety: `port` (the guard's port red lines) and `actions`
  * and `apps` (commands the dashboard runs). Every other key is layout.
  */
-const GUARDED_CONFIG = ['port', 'actions', 'apps'];
+const GUARDED_CONFIG = ['port', 'actions', 'apps', 'keys'];
 
 /** True when both config texts parse and agree on GUARDED_CONFIG. Unreadable either side: false. */
 function sameGuarded(acceptedText, buf) {
@@ -314,4 +314,56 @@ export function commentVerified(c) {
   if (!key) return false;
   const want = crypto.createHmac('sha256', key).update(commentPayload(c)).digest('hex');
   return crypto.timingSafeEqual(Buffer.from(want), Buffer.from(c.sig));
+}
+
+// ---------- person signatures (shared comments) ----------
+// A comment that travels through git is signed by its person, not by a machine: an ed25519 key in
+// <stateDir>/signing-key.pem (0600, outside the repo, where the tamper floor keeps agents out),
+// whose public half the human pastes into "keys" in flowrail/config.json ({ email: base64 spki }).
+// "keys" is guarded config, so a key an agent slips in is drift until the human accepts it.
+
+/** This machine's person key; created on first use unless create is false (then null). */
+export function signingKey({ create = true } = {}) {
+  const file = path.join(stateDir(), 'signing-key.pem');
+  try {
+    return crypto.createPrivateKey(fs.readFileSync(file));
+  } catch (e) {
+    if (e.code !== 'ENOENT' || !create) return null;
+  }
+  fs.mkdirSync(path.dirname(file), { recursive: true, mode: 0o700 });
+  const { privateKey } = crypto.generateKeyPairSync('ed25519');
+  try {
+    const pem = privateKey.export({ type: 'pkcs8', format: 'pem' });
+    fs.writeFileSync(file, pem, { mode: 0o600, flag: 'wx' });
+  } catch {
+    return crypto.createPrivateKey(fs.readFileSync(file));
+  }
+  return privateKey;
+}
+
+/** The public half of signingKey(), base64 SPKI: the value for "keys" in flowrail/config.json. */
+export function signingPublicKey() {
+  const pub = crypto.createPublicKey(signingKey());
+  return pub.export({ type: 'spki', format: 'der' }).toString('base64');
+}
+
+const personPayload = (c) => JSON.stringify([c.path, c.id, c.quote || '', c.body || '',
+  c.created || '', String(c.email || '').toLowerCase()]);
+
+/** A base64 ed25519 signature over the comment and its author's email. */
+export function signAsPerson(c) {
+  return crypto.sign(null, Buffer.from(personPayload(c)), signingKey()).toString('base64');
+}
+
+/** True when c.signature checks out against the key registered for c.email in `keys`. */
+export function personVerified(c, keys) {
+  const email = String(c?.email || '').toLowerCase();
+  const pub = keys && typeof keys === 'object' ? keys[email] : null;
+  if (typeof pub !== 'string' || typeof c.signature !== 'string') return false;
+  try {
+    const der = Buffer.from(pub, 'base64');
+    const key = crypto.createPublicKey({ key: der, format: 'der', type: 'spki' });
+    const sig = Buffer.from(c.signature, 'base64');
+    return crypto.verify(null, Buffer.from(personPayload(c)), key, sig);
+  } catch { return false; }
 }

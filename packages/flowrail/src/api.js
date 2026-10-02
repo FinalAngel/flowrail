@@ -21,7 +21,10 @@ export {
   planInit, planInit as planGuardSetup, withBlock, BLOCK_START, BLOCK_END, apply as applyPlan,
   freshEpoch,
 } from './core/init.js';
-export { stateDir, signComment, commentVerified, journalPath } from './guard/state.js';
+export {
+  stateDir, signComment, commentVerified, journalPath, signingKey, signingPublicKey, signAsPerson,
+  personVerified,
+} from './guard/state.js';
 export { run as doctor } from './core/doctor.js';
 export {
   addDays, appendLine, exists, listFiles, localDate, mondayOf, moveToTrash, nowIso, pad, parseDate,

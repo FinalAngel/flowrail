@@ -34,6 +34,7 @@ export function guardPaths(root) {
     redlines: path.join(state, 'red-lines.json'),
     board: path.join(state, 'board.json'),
     comments: path.join(local, 'comments'),
+    sharedComments: path.join(state, 'comments'),
     agents: path.join(local, 'agents'),
     redlinesLog: path.join(local, 'redlines.log'),
   };
