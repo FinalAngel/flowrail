@@ -35,6 +35,7 @@ import * as runs from './core/runs.js';
 import * as apps from './core/apps.js';
 import * as actions from './core/actions.js';
 import { team } from './core/team.js';
+import { catalog as skillCatalog } from './core/skills.js';
 import { build as buildGraph } from './core/graph.js';
 import { overview, search, drift } from './core/overview.js';
 import { today, parseSince } from './core/today.js';
@@ -263,6 +264,7 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
     },
 
     'GET /api/team': () => team(p),
+    'GET /api/skills': () => skillCatalog(p),
     'GET /api/artifacts': () => artifacts.list(p),
     'POST /api/artifacts': (b) => {
       if (b._action === 'trash') return artifacts.trash(p, need(b.name, 'name'));
