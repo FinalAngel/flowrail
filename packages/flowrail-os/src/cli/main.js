@@ -22,6 +22,7 @@ Usage: npx @finalangel/flowrail-os <command>   (installed: flowrail-os <command>
   recall "<question>"     find memories and doc sections, no model call  --json
   routines                install | uninstall | status | run <id>
   board export            the current sprint as one standalone HTML file  --out file.html  --backlog
+  key                     your comment-signing key, as the line for "keys" in flowrail/config.json
 
 Guard commands (redlines, check, audit, doctor, hooks, upgrade, uninstall) belong to the guard: npx flowrail --help
 They work here too.
@@ -41,6 +42,7 @@ const COMMANDS = {
   recall: ['./work.js', 'recall'],
   routines: ['./routines.js', 'routines'],
   board: ['./board.js', 'board_'],
+  key: ['./work.js', 'key'],
 };
 
 export async function main(argv) {

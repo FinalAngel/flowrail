@@ -3,7 +3,7 @@
 // field. Reads and writes go through the Docs gate (safePath, docsRoots); a move rewrites one line.
 import fs from 'node:fs';
 import path from 'node:path';
-import { appendLine, nowIso } from 'flowrail/api';
+import { record } from './journal.js';
 import { parseFrontmatter } from './frontmatter.js';
 import { readDoc, writeDoc } from './docs.js';
 
@@ -114,6 +114,6 @@ export function move(p, col, rel, status, mtime) {
   const text = m[1] + block + m[3] + doc.text.slice(m[0].length);
   const r = writeDoc(p.root, rel, text, doc.mtime);
   cache.delete(`${p.root}\0${col.id}`);
-  try { appendLine(p.activityLog, { at: nowIso(), kind: 'record', collection: col.id, path: rel, from: String(from), to: status, by: 'human' }); } catch { /* best effort */ }
+  record(p, { kind: 'record', collection: col.id, path: rel, from: String(from), to: status, by: 'human' });
   return { path: rel, status, mtime: r.mtime };
 }

@@ -13,7 +13,7 @@ npx @finalangel/flowrail-os        # the dashboard on http://127.0.0.1:4747
 ```
 
 - **Red lines**: each rule in plain English with its held count, a Try it box, the Verify table and an audit of your recent sessions. It warns when the rules were changed outside flowrail.
-- **Comments as instructions**: select a passage in any Markdown file and comment on it; the next Claude Code session receives the open comments through the `SessionStart` hook. Comments are signed; one written into the folder by anything else is shown as unverified.
+- **Comments as instructions**: select a passage in any Markdown file and comment on it; the next Claude Code session receives the open comments through the `SessionStart` hook. Comments are signed; one written into the folder by anything else is shown as unverified. With `"shared": true` in `flowrail/config.json` comments and the activity journal live in `flowrail/` and travel through git, each signed by its person (`npx @finalangel/flowrail-os key` prints the line for `keys`), so a team shares them.
 - **Board and memory**: sprints in `flowrail/board.json` (`npx @finalangel/flowrail-os task "…"`) with your assigned GitHub issues shown read-only when `config.json` names a repo, one fact per file in `flowrail/memory/` (`npx @finalangel/flowrail-os recall "…"`, no model call).
 - **Today and routines**: what happened in the repo since midnight, and scheduled report-only runs on launchd or cron.
 

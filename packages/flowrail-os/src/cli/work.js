@@ -9,6 +9,8 @@ import * as memory from '../core/memory.js';
 import * as routines from '../core/routines.js';
 import { loadLines, stats, stateCounts, stateSummary, hooksStatus, verifyJournal } from 'flowrail/api';
 import { today as todayFeed } from '../core/today.js';
+import { me } from '../core/identity.js';
+import { signingPublicKey } from 'flowrail/api';
 
 const GUARD = 'npx flowrail', CLI = 'npx @finalangel/flowrail-os';
 /**
@@ -172,4 +174,14 @@ export function recall(pos, flags) {
     if (h.snippet && h.snippet !== h.title) out(`   ${h.snippet}`);
     out(`   ${c.cyan(h.path)}`);
   });
+}
+
+/** This machine's person key (made on first use) as the "keys" entry a human pastes into config.json. */
+export function key(_pos, flags) {
+  const p = workspace();
+  const { email } = me(p);
+  if (!email) throw new Error('git has no user.email here: set it first (git config user.email you@company.com)');
+  const entry = { [email]: signingPublicKey() };
+  if (flags.json) return json(entry);
+  out(`Add this to "keys" in flowrail/config.json, by hand, then accept it in a terminal (npx flowrail redlines accept):\n\n  ${JSON.stringify(entry).slice(1, -1)}\n\nWith "shared": true your comments then verify on every machine that pulls the repo.`);
 }

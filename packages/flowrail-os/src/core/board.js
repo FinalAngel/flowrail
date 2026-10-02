@@ -1,6 +1,7 @@
 // Sprint board in flowrail/board.json. A task's `sprint` is the start date of its sprint; "" is the backlog.
 // Unfinished tasks from ended sprints roll into the current one on read, one priority higher.
-import { readJson, writeJson, nowIso, parseDate, localDate, addDays, mondayOf, trashJson, appendLine, loadConfig } from 'flowrail/api';
+import { readJson, writeJson, nowIso, parseDate, localDate, addDays, mondayOf, trashJson, loadConfig } from 'flowrail/api';
+import { record } from './journal.js';
 
 // A sprint's tasks start in Backlog (not started) and move to Todo when someone picks one up.
 export const STATUSES = ['Backlog', 'Todo', 'In Progress', 'Review', 'Done'];
@@ -156,7 +157,7 @@ function find(board, id) {
   return t;
 }
 
-/** by: 'agent' or 'human'; a status change is recorded in .flowrail/activity.log for the Today feed. */
+/** by: 'agent' or 'human'; a status change goes into the activity journal (journal.js) for the Today feed. */
 export function update(p, config, id, fields, by = 'human') {
   const board = load(p);
   const t = find(board, id);
@@ -164,7 +165,7 @@ export function update(p, config, id, fields, by = 'human') {
   Object.assign(t, clean(fields, config), { updated: nowIso() });
   save(p, board);
   if (t.status !== from) {
-    try { appendLine(p.activityLog, { at: t.updated, kind: 'task', id: t.id, title: t.title, from, to: t.status, by: by === 'agent' ? 'agent' : 'human' }); } catch { /* best effort */ }
+    record(p, { at: t.updated, kind: 'task', id: t.id, title: t.title, from, to: t.status, by });
   }
   return t;
 }

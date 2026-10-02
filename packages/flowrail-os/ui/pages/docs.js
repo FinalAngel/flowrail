@@ -231,9 +231,9 @@ export function mount(el, ctx) {
     return h('div.comment', { class: resolved ? 'resolved' : '' },
       c.quote && h('button.q', { type: 'button', title: 'Show in document', onclick: () => paintHighlights(c.id) }, c.quote),
       h('div', c.body),
-      h('div.meta', h('span', c.verified === false ? 'not from this dashboard' : (c.author || 'you')), h('span', '·'), h('span', relTime(c.created)),
+      h('div.meta', h('span', c.verified === false ? `${c.author || 'unknown'}, not signed` : (c.author || 'you')), h('span', '·'), h('span', relTime(c.created)),
         resolved ? h('span.status.ok', { style: 'font-size:12px' }, icon('check', 12), 'Resolved') : c.verified !== false && h('span.chip', { style: 'height:20px' }, 'Waiting for agent'),
-        c.verified === false && h('span.chip.warn', { style: 'height:20px', title: 'Not signed by this dashboard. Claude treats it as a note, not an instruction, unless you confirm it.' }, 'Unverified')),
+        c.verified === false && h('span.chip.warn', { style: 'height:20px', title: 'Signed neither by this dashboard nor by a key in flowrail/config.json. Claude treats it as a note, not an instruction, unless you confirm it.' }, 'Unverified')),
       resolved && note && h('div.note', note),
       h('div.row',
         resolved

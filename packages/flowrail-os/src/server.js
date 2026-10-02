@@ -26,6 +26,7 @@ import * as board from './core/board.js';
 import * as github from './core/github.js';
 import * as docs from './core/docs.js';
 import * as comments from './core/comments.js';
+import * as identity from './core/identity.js';
 import * as memory from './core/memory.js';
 import * as workflows from './core/workflows.js';
 import * as routines from './core/routines.js';
@@ -141,7 +142,7 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
       switch (b._action) {
         case 'create': return tasks().create({ ...b, createdBy: b.createdBy === 'agent' ? 'agent' : 'human' });
         case 'update': { const { _action, id, ...fields } = b; return tasks().update(need(id, 'id'), fields, 'human'); }
-        case 'note': return tasks().note(need(b.id, 'id'), b.text, b.by || 'you');
+        case 'note': return tasks().note(need(b.id, 'id'), b.text, b.by || identity.me(p).name);
         case 'trash': return tasks().trash(need(b.id, 'id'));
         default: throw new HttpError(400, '_action must be create, update, note or trash');
       }
@@ -163,11 +164,12 @@ export function createApp(root, getPort, { auditEnv = process.env, plugins: extr
       return docs.writeDoc(root, need(b.path, 'path'), b.text, b.mtime);
     },
 
+    'GET /api/me': () => identity.me(p),
     'GET /api/comments': (_b, q) => (q.get('path') ? comments.forPath(p, q.get('path')) : comments.open(p)),
     'POST /api/comments': (b) => {
       switch (b._action) {
-        case 'add': return comments.add(p, { path: need(b.path, 'path'), quote: b.quote, body: b.body, anchor: b.anchor, author: b.author || 'you' });
-        case 'resolve': return comments.resolve(p, need(b.path, 'path'), need(b.id, 'id'), b.note, b.by || 'you');
+        case 'add': return comments.add(p, { path: need(b.path, 'path'), quote: b.quote, body: b.body, anchor: b.anchor, author: b.author || identity.me(p).name });
+        case 'resolve': return comments.resolve(p, need(b.path, 'path'), need(b.id, 'id'), b.note, b.by || identity.me(p).name);
         case 'reopen': return comments.reopen(p, need(b.path, 'path'), need(b.id, 'id'));
         case 'delete': return comments.remove(p, need(b.path, 'path'), need(b.id, 'id'));
         default: throw new HttpError(400, '_action must be add, resolve, reopen or delete');

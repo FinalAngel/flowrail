@@ -9,6 +9,7 @@ import * as board from './board.js';
 import { reminders } from './reminders.js';
 import { loadConfig } from 'flowrail/api';
 import * as comments from './comments.js';
+import * as journal from './journal.js';
 import * as artifacts from './artifacts.js';
 import * as memory from './memory.js';
 import { holds, changes, changeText } from 'flowrail/api';
@@ -78,7 +79,7 @@ export function today(p, now = new Date(), opts = {}) {
     counts.tasksCreated++;
     items.push({ kind: 'task', title: `Filed ${t.id} ${t.title}`, at: t.created, href: `#/board?task=${t.id}`, by: who(t.createdBy) });
   }
-  for (const e of readJsonl(p.activityLog)) {
+  for (const e of journal.entries(p, since)) {
     if (e.kind !== 'task' || !after(e.at)) continue;
     counts.tasksMoved++;
     items.push({ kind: 'task', title: `Moved ${e.id} to ${e.to}`, detail: e.title, at: e.at, href: `#/board?task=${e.id}`, by: who(e.by) });
