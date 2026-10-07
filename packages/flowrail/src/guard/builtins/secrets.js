@@ -11,9 +11,9 @@ const SAMPLE_SECRETS = ['.env', '.env.local', '.envrc', 'prod.env', 'id_rsa', 'i
   'server.pem', 'tls.key', 'cert.p12', 'service-account.json', 'kubeconfig', '.npmrc', '.netrc',
   'credentials'];
 
-/** A glob like .e* or *.pem that would match a secret file. Plain * and *.* do not count. */
+/** A glob like .e* or *.pem that would match a secret file. Plain *, ** and *.* do not count. */
 function globHitsSecret(n) {
-  if (!/[*?[]/.test(n) || n === '*' || n === '*.*') return false;
+  if (!/[*?[]/.test(n) || /^\*+(\.\*)?$/.test(n)) return false;
   try {
     const rx = nameGlob(n);
     const dot = n.startsWith('.');
