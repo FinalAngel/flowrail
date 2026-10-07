@@ -1,6 +1,6 @@
 {
   "name": "@finalangel/flowrail-os",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "A local dashboard for flowrail: red lines, audit, comments your agent acts on, and an optional board. Zero third-party deps, no cloud, MIT.",
   "type": "module",
   "exports": {
@@ -18,7 +18,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "flowrail": "0.4.1"
+    "flowrail": "0.4.2"
   },
   "files": [
     "bin",

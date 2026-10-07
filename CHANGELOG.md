@@ -2,6 +2,12 @@
 
 All notable changes to flowrail are recorded here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow [Semantic Versioning](https://semver.org/). Before 1.0, minor versions may change file formats and the HTTP API; any such change is listed here with what to do about it.
 
+## [0.4.2] 2026-10-07
+
+### Fixed
+
+- The secrets red line no longer asks on an argument ending in `**`, such as `rg --glob '!**/node_modules/**'` or `ls src/**`: a name of stars alone is as broad as `*`. Globs that can match a secret file (`.e*`, `*.pem`) are still held. Run `npx flowrail upgrade` to vendor the new guard.
+
 ## [0.4.1] 2026-10-02
 
 ### Fixed
